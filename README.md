@@ -1,5 +1,7 @@
 # klogg-longline
 
+2026-10-18 后续修复：首版合并后的 CI 暴露了 Windows 文件监控取消时的释放后写入；独立复现、修补与回归边界见 [IOCP 生命周期修复](docs/windows-iocp-fix.md)。下列 2026-10-17 性能数据仍归属历史源码。
+
 基于 [klogg](https://github.com/variar/klogg) 的大文件与超长行可靠性改进：64 位索引边界修复、完整字面搜索、按字节控制的搜索批次，以及异步有界预览。
 
 保留 C++17、Qt Widgets、CMake/Ninja 和 oneTBB。源码位于 `upstream/klogg`，以固定上游提交的源码快照导入，未导入上游 Git 历史。

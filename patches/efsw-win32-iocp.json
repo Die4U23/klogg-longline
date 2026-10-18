@@ -1,0 +1,33 @@
+{
+  "repository": "SpartanJ/efsw",
+  "version": "1.4.1",
+  "commit": "62f785c56b7a34f035193d4cb831921347b586b8",
+  "patch_sha256": "a3f4ef157dfdcff26a6be5858246ac38426a1568eb04aa05153a50a4d1b678d1",
+  "changed_files": [
+    {
+      "path": "src/efsw/FileWatcherWin32.cpp",
+      "overlay_path": "upstream/klogg/3rdparty/efsw-win32/efsw/FileWatcherWin32.cpp",
+      "before_sha256": "79fecd4c9e97476abbcce55ca008bedbd0fae084199911cd8c2d093304c4ac34",
+      "after_sha256": "6fb160a1a20afcde8699916dec06d0af772ed4cbf8f29f6a9a50701f6d84d4ac"
+    },
+    {
+      "path": "src/efsw/FileWatcherWin32.hpp",
+      "overlay_path": "upstream/klogg/3rdparty/efsw-win32/efsw/FileWatcherWin32.hpp",
+      "before_sha256": "0acd0f7f62bd06f9b5a5c09af563e8a4ef749e9be467c234a8a7eb1568f26a19",
+      "after_sha256": "d5246370090ff20121af709e13e7705832605d21a5a618a6895913f4c1e29865"
+    },
+    {
+      "path": "src/efsw/WatcherWin32.cpp",
+      "overlay_path": "upstream/klogg/3rdparty/efsw-win32/efsw/WatcherWin32.cpp",
+      "before_sha256": "b82cfeda318fa1c805837b2c2e854f23d5670f9e6aafaff3df5723234e9398e6",
+      "after_sha256": "d16525f34b4fd92d06df432357a9f60c90f8f810c3fac9af07cbea65168c53b4"
+    },
+    {
+      "path": "src/efsw/WatcherWin32.hpp",
+      "overlay_path": "upstream/klogg/3rdparty/efsw-win32/efsw/WatcherWin32.hpp",
+      "before_sha256": "54bf2434ba4197ed010ea98e0768cfb2e7dea327683b84ace7b208f2c10fd141",
+      "after_sha256": "477d32aaf70ed7d0921e423ac750968454a08ccb07f616882eb3c6024832e560"
+    }
+  ],
+  "patch_purpose": "LF-normalized review diff; overlay files and hashes specify exact source bytes"
+}
