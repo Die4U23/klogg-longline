@@ -77,12 +77,17 @@ $testDocument = ($testList -join "`n") | ConvertFrom-Json
 $actualTests = @($testDocument.tests | ForEach-Object { $_.name } | Sort-Object)
 $expectedTests = @(
     'klogg_crawler_tests', 'klogg_itests', 'klogg_literal_tests',
-    'klogg_preview_tests', 'klogg_smoke', 'klogg_tests'
+    'klogg_preview_tests', 'klogg_smoke', 'klogg_tests', 'klogg_efsw_lifecycle_tests'
 ) | Sort-Object
 if (($actualTests -join "`n") -ne ($expectedTests -join "`n")) {
-    throw "要求六项原生测试（$($expectedTests -join ', ')），实际为（$($actualTests -join ', ')）；日志：$testListPath"
+    throw "要求七项原生测试（$($expectedTests -join ', ')），实际为（$($actualTests -join ', ')）；日志：$testListPath"
 }
 
 Invoke-LoggedCommand -Name 'native-ctest' -Executable $ctest -Arguments @(
     '--test-dir', $buildRoot, '--output-on-failure', '--timeout', '120'
+)
+# 曾在整套集成测试的对象回收阶段崩溃。任一轮失败即失败，不重试掩盖。
+Invoke-LoggedCommand -Name 'native-integration-repeat' -Executable $ctest -Arguments @(
+    '--test-dir', $buildRoot, '--output-on-failure', '--timeout', '120',
+    '-R', '^klogg_itests$', '--repeat', 'until-fail:10'
 )

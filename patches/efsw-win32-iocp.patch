@@ -1,0 +1,266 @@
+--- a/src/efsw/FileWatcherWin32.cpp
++++ b/src/efsw/FileWatcherWin32.cpp
+@@ -16,18 +16,21 @@
+ }
+ 
+ FileWatcherWin32::~FileWatcherWin32() {
+-	mInitOK = false;
+-
++	{
++		Lock lock( mWatchesLock );
++		mStopping = true;
++		removeAllWatches();
++	}
+ 	if ( mIOCP && mIOCP != INVALID_HANDLE_VALUE ) {
+ 		PostQueuedCompletionStatus( mIOCP, 0, reinterpret_cast<ULONG_PTR>( this ), NULL );
+-	}
+-
+-	efSAFE_DELETE( mThread );
+-
+-	removeAllWatches();
+-
+-	if ( mIOCP )
++		if ( mThread ) {
++			efSAFE_DELETE( mThread ); // joins only after all cancellation packets are drained
++		} else {
++			run(); // addWatch() submits I/O even when watch() was never called
++		}
+ 		CloseHandle( mIOCP );
++	}
++	mInitOK = false;
+ }
+ 
+ WatchID FileWatcherWin32::addWatch( const std::string& directory, FileWatchListener* watcher,
+@@ -45,6 +48,9 @@
+ 	FileSystem::dirAddSlashAtEnd( dir );
+ 
+ 	Lock lock( mWatchesLock );
++
++	if ( mStopping )
++		return Errors::Log::createLastError( Errors::WatcherFailed, dir );
+ 
+ 	if ( pathInWatches( dir ) ) {
+ 		return Errors::Log::createLastError( Errors::FileRepeated, dir );
+@@ -106,13 +112,22 @@
+ 
+ void FileWatcherWin32::removeWatch( WatcherStructWin32* watch ) {
+ 	Lock lock( mWatchesLock );
+-
+-	DestroyWatch( watch );
+ 	mWatches.erase( watch );
++	watch->Watch->StopNow = true;
++	if ( watch->Pending || watch->Dispatching ) {
++		// A queued completion still owns OVERLAPPED, even if CancelIoEx reports
++		// ERROR_NOT_FOUND. Retaining the address also prevents stale-packet ABA.
++		mRetiredWatches.insert( watch );
++		if ( watch->Pending )
++			CancelIoEx( watch->Watch->DirHandle, &watch->Overlapped );
++	} else {
++		DestroyWatch( watch );
++	}
+ }
+ 
+ void FileWatcherWin32::watch() {
+-	if ( NULL == mThread ) {
++	Lock lock( mWatchesLock );
++	if ( !mStopping && NULL == mThread ) {
+ 		mThread = new Thread( &FileWatcherWin32::run, this );
+ 		mThread->launch();
+ 	}
+@@ -120,40 +135,56 @@
+ 
+ void FileWatcherWin32::removeAllWatches() {
+ 	Lock lock( mWatchesLock );
+-
+-	Watches::iterator iter = mWatches.begin();
+-
+-	for ( ; iter != mWatches.end(); ++iter ) {
+-		DestroyWatch( ( *iter ) );
+-	}
+-
+-	mWatches.clear();
++	while ( !mWatches.empty() )
++		removeWatch( *mWatches.begin() );
+ }
+ 
+ void FileWatcherWin32::run() {
+-	do {
+-		if ( mInitOK && !mWatches.empty() ) {
+-			DWORD numOfBytes = 0;
+-			OVERLAPPED* ov = NULL;
+-			ULONG_PTR compKey = 0;
+-			BOOL res = FALSE;
+-
+-			while ( ( res = GetQueuedCompletionStatus( mIOCP, &numOfBytes, &compKey, &ov,
+-													   INFINITE ) ) != FALSE ) {
+-				if ( compKey != 0 && compKey == reinterpret_cast<ULONG_PTR>( this ) ) {
+-					break;
+-				} else {
+-					Lock lock( mWatchesLock );
+-					if (mWatches.find( (WatcherStructWin32*)ov ) != mWatches.end())
+-						WatchCallback( numOfBytes, ov );
+-				}
+-			}
+-		} else {
+-			System::sleep( 10 );
+-		}
+-	} while ( mInitOK );
+-
+-	removeAllWatches();
++	for ( ;; ) {
++		{
++			Lock lock( mWatchesLock );
++			if ( mStopping && mWatches.empty() && mRetiredWatches.empty() )
++				return;
++		}
++		DWORD numOfBytes = 0;
++		OVERLAPPED* ov = NULL;
++		ULONG_PTR compKey = 0;
++		const BOOL success = GetQueuedCompletionStatus( mIOCP, &numOfBytes, &compKey,
++													 &ov, INFINITE );
++		if ( !ov )
++			continue; // shutdown wake-up, not an I/O completion
++
++		dispatchCompletion( numOfBytes, ov, success != FALSE );
++	}
++}
++
++void FileWatcherWin32::dispatchCompletion( DWORD numOfBytes, OVERLAPPED* ov, bool success ) {
++	Lock lock( mWatchesLock );
++	auto* watch = reinterpret_cast<WatcherStructWin32*>( ov );
++	if ( mRetiredWatches.erase( watch ) ) {
++		// FALSE with a non-null OVERLAPPED is a terminal failure packet too.
++		watch->Pending = false;
++		DestroyWatch( watch );
++		return;
++	}
++	if ( mWatches.find( watch ) == mWatches.end() )
++		return;
++
++	watch->Pending = false;
++	watch->Dispatching = true;
++	if ( success ) {
++		WatchCallback( numOfBytes, ov );
++	} else {
++		watch->Watch->StopNow = true;
++	}
++	watch->Dispatching = false;
++	// A listener may remove its own watch. Keep it alive until the callback
++	// unwinds; StopNow prevents it from submitting another read.
++	if ( watch->Watch->StopNow ) {
++		mWatches.erase( watch );
++		mRetiredWatches.erase( watch );
++		DestroyWatch( watch );
++	}
+ }
+ 
+ void FileWatcherWin32::handleAction( Watcher* watch, const std::string& filename,
+--- a/src/efsw/FileWatcherWin32.hpp
++++ b/src/efsw/FileWatcherWin32.hpp
+@@ -47,6 +47,8 @@
+   protected:
+ 	HANDLE mIOCP;
+ 	Watches mWatches;
++	Watches mRetiredWatches;
++	bool mStopping = false;
+ 
+ 	/// The last watchid
+ 	WatchID mLastWatchID;
+@@ -59,6 +61,7 @@
+ 	void removeAllWatches();
+ 
+ 	void removeWatch( WatcherStructWin32* watch );
++	void dispatchCompletion( DWORD numOfBytes, OVERLAPPED* ov, bool success );
+ 
+   private:
+ 	void run();
+--- a/src/efsw/WatcherWin32.cpp
++++ b/src/efsw/WatcherWin32.cpp
+@@ -84,10 +84,10 @@
+ 			pWatch->LastModifiedEvent.file = fifile;
+ 		}
+ 
+-		if ( !skip ) {
++		if ( !skip && !pWatch->StopNow ) {
+ 			pWatch->Watch->handleAction( pWatch, nfile, pNotify->Action );
+ 		}
+-	} while ( pNotify->NextEntryOffset != 0 );
++	} while ( pNotify->NextEntryOffset != 0 && !pWatch->StopNow );
+ }
+ 
+ void WatchCallbackEx( WatcherWin32* pWatch ) {
+@@ -145,10 +145,10 @@
+ 			}
+ 		}
+ 
+-		if ( !skip ) {
++		if ( !skip && !pWatch->StopNow ) {
+ 			pWatch->Watch->handleAction( pWatch, nfile, pNotify->Action );
+ 		}
+-	} while ( pNotify->NextEntryOffset != 0 );
++	} while ( pNotify->NextEntryOffset != 0 && !pWatch->StopNow );
+ }
+ 
+ /// Unpacks events and passes them to a user defined callback.
+@@ -163,9 +163,9 @@
+ 	if ( dwNumberOfBytesTransfered == 0 ) {
+ 		if ( nullptr != pWatch && !pWatch->StopNow ) {
+ 			RefreshWatch( tWatch );
+-		} else {
+-			return;
+-		}
++		}
++		// Overflow has no records to parse. Never submit the same OVERLAPPED twice.
++		return;
+ 	}
+ 
+ 	// Fork watch depending on the Windows API supported
+@@ -182,6 +182,8 @@
+ 
+ /// Refreshes the directory monitoring.
+ RefreshResult RefreshWatch( WatcherStructWin32* pWatch ) {
++	if ( pWatch->Pending || pWatch->Watch->StopNow )
++		return RefreshResult::Failed;
+ 	initReadDirectoryChangesEx();
+ 
+ 	bool bRet = false;
+@@ -214,6 +216,7 @@
+ 		Errors::Log::createLastError( Errors::WatcherFailed, error );
+ 	}
+ 
++	pWatch->Pending = bRet;
+ 	return ret;
+ }
+ 
+@@ -222,7 +225,8 @@
+ 	if ( pWatch ) {
+ 		WatcherWin32* tWatch = pWatch->Watch;
+ 		tWatch->StopNow = true;
+-		CancelIoEx( pWatch->Watch->DirHandle, &pWatch->Overlapped );
++		// The owner has already consumed the terminal IOCP packet. CancelIoEx
++		// alone does not permit freeing OVERLAPPED or the notification buffer.
+ 		CloseHandle( pWatch->Watch->DirHandle );
+ 		efSAFE_DELETE_ARRAY( pWatch->Watch->DirName );
+ 		efSAFE_DELETE( pWatch->Watch );
+@@ -253,7 +257,7 @@
+ 	}
+ 
+ 	CloseHandle( pWatch->DirHandle );
+-	efSAFE_DELETE( pWatch->Watch );
++	efSAFE_DELETE( pWatch );
+ 	efSAFE_DELETE( tWatch );
+ 	return NULL;
+ }
+--- a/src/efsw/WatcherWin32.hpp
++++ b/src/efsw/WatcherWin32.hpp
+@@ -28,6 +28,10 @@
+ struct WatcherStructWin32 {
+ 	OVERLAPPED Overlapped;
+ 	WatcherWin32* Watch;
++	// Protected by FileWatcherWin32::mWatchesLock. Storage must survive until
++	// the single outstanding completion packet has been removed from the IOCP.
++	bool Pending = false;
++	bool Dispatching = false;
+ };
+ 
+ struct sLastModifiedEvent {

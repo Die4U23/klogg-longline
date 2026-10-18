@@ -10,6 +10,15 @@ if(WIN32)
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/logdata/include/longlinesearch.h")
   target_compile_definitions(klogg_reliability_probe PRIVATE KLOGG_LONG_LINE_CANDIDATE=1)
+  if(WIN32)
+    add_executable(klogg_efsw_lifecycle_tests "${CMAKE_CURRENT_LIST_DIR}/efsw_lifecycle_tests.cpp")
+    target_link_libraries(klogg_efsw_lifecycle_tests PRIVATE Catch2 efsw)
+    target_include_directories(klogg_efsw_lifecycle_tests BEFORE PRIVATE
+      "${CMAKE_SOURCE_DIR}/3rdparty/efsw-win32" "${efsw_SOURCE_DIR}/src")
+    set_target_properties(klogg_efsw_lifecycle_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
+      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/reliability-probe")
+    add_test(NAME klogg_efsw_lifecycle_tests COMMAND klogg_efsw_lifecycle_tests)
+  endif()
   if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/literal_tests.cpp")
     add_executable(klogg_literal_tests "${CMAKE_CURRENT_LIST_DIR}/literal_tests.cpp")
     target_link_libraries(klogg_literal_tests PRIVATE Catch2 klogg_logdata klogg_logging

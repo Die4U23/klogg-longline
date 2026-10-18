@@ -284,6 +284,7 @@ cpmaddpackage(
 )
 if(efsw_ADDED)
   target_compile_definitions(efsw PRIVATE EFSW_FSEVENTS_NOT_SUPPORTED)
+  include("${CMAKE_CURRENT_LIST_DIR}/efsw-win32/overlay.cmake")
 endif()
 
 if(WIN32)

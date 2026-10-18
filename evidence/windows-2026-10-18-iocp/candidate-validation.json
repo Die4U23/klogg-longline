@@ -1,0 +1,79 @@
+{
+  "scope": "Windows x64 MSVC 19.44 Qt 6.7.3 Qt backend; local clean rebuild",
+  "ctest_targets": 7,
+  "iocp_test_cases": 8,
+  "iocp_assertions": 216,
+  "iocp_repetitions": 100,
+  "integration_repetitions": 20,
+  "python_tests": 39,
+  "runs": [
+    {
+      "name": "ctest-all",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "E:\\codex\\klogg\\.local\\build-candidate",
+        "--output-on-failure",
+        "--timeout",
+        "120"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 16.437
+    },
+    {
+      "name": "iocp-repeat",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "E:\\codex\\klogg\\.local\\build-candidate",
+        "-R",
+        "^klogg_efsw_lifecycle_tests$",
+        "--repeat",
+        "until-fail:100",
+        "--output-on-failure",
+        "--timeout",
+        "30"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 4.797
+    },
+    {
+      "name": "integration-repeat",
+      "command": [
+        "ctest",
+        "--test-dir",
+        "E:\\codex\\klogg\\.local\\build-candidate",
+        "-R",
+        "^klogg_itests$",
+        "--repeat",
+        "until-fail:20",
+        "--output-on-failure",
+        "--timeout",
+        "120"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 254.438
+    }
+  ],
+  "binary_sha256": {
+    ".local/build-candidate/output/klogg_itests.exe": "ff199df75aaf84dc60c4e15e49c378e3d8fb41b431e771fd2a28446e034f7c09",
+    ".local/build-candidate/reliability-probe/klogg_efsw_lifecycle_tests.exe": "fd967cfbae40ba31915c041896323a0ff0690b772b3b23972b586ea459c44efa",
+    ".local/build-candidate/output/efsw.lib": "84878bea7bff779b46d522d5a3c8ea6dc4b134b7ff5c0bd18ce8f5697a515b02"
+  },
+  "source_sha256": {
+    "upstream/klogg/3rdparty/efsw-win32/LICENSE": "e5e2219b5885a7fa7c02a26aa8405e2f802d5af86e0485e30429b62c7fc8c9ce",
+    "upstream/klogg/3rdparty/efsw-win32/overlay.cmake": "946d0db9ce163eb356fb739ac9e99e75be615f94218e88ca3404ba0bb8df2369",
+    "upstream/klogg/3rdparty/efsw-win32/README.md": "c3c655781edc96663713f9088b8cbd344ead332acddc9d8a53415263d7ee02cf",
+    "upstream/klogg/3rdparty/efsw-win32/efsw/FileWatcherWin32.cpp": "6fb160a1a20afcde8699916dec06d0af772ed4cbf8f29f6a9a50701f6d84d4ac",
+    "upstream/klogg/3rdparty/efsw-win32/efsw/FileWatcherWin32.hpp": "d5246370090ff20121af709e13e7705832605d21a5a618a6895913f4c1e29865",
+    "upstream/klogg/3rdparty/efsw-win32/efsw/WatcherWin32.cpp": "d16525f34b4fd92d06df432357a9f60c90f8f810c3fac9af07cbea65168c53b4",
+    "upstream/klogg/3rdparty/efsw-win32/efsw/WatcherWin32.hpp": "477d32aaf70ed7d0921e423ac750968454a08ccb07f616882eb3c6024832e560",
+    "tests/native/efsw_lifecycle_tests.cpp": "59e60589aba35ec148f433b6f65eebaf4de3f4c9acd4ac9dbd0b734c81271c88",
+    "upstream/klogg/3rdparty/CMakeLists.txt": "84a72beab04f04c5226da13cbaa073ab8d7a4d3e512268f52249cdf61f288ad8"
+  },
+  "limits": [
+    "Not a fresh 5 GiB performance measurement",
+    "Not Linux/macOS native coverage",
+    "Raw logs and dumps retained in .local/ci-followup"
+  ]
+}

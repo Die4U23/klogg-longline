@@ -104,10 +104,10 @@ $env:QT_QPA_PLATFORM = 'offscreen'
 ctest --test-dir $build --output-on-failure
 ```
 
-当前 candidate CTest 注册 6 项：`klogg_smoke`、`klogg_tests`、`klogg_itests`、`klogg_literal_tests`、`klogg_preview_tests` 和 `klogg_crawler_tests`。若只重跑 unit、integration 与 native regressions，可用：
+当前 Windows candidate CTest 注册 7 项：`klogg_smoke`、`klogg_tests`、`klogg_itests`、`klogg_literal_tests`、`klogg_preview_tests`、`klogg_crawler_tests` 和 `klogg_efsw_lifecycle_tests`。最后一项覆盖 IOCP 取消回收，只在 Windows 注册。若只重跑 unit、integration 与 native regressions，可用：
 
 ```powershell
-ctest --test-dir $build -R 'klogg_tests|klogg_itests|klogg_literal_tests|klogg_preview_tests|klogg_crawler_tests' --output-on-failure
+ctest --test-dir $build -R 'klogg_tests|klogg_itests|klogg_literal_tests|klogg_preview_tests|klogg_crawler_tests|klogg_efsw_lifecycle_tests' --output-on-failure
 ```
 
 baseline 不包含 candidate-only native tests。失败时保留完整 CTest 输出和构建日志，不要只记录最后一行。

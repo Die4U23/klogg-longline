@@ -1,0 +1,44 @@
+{
+  "kind": "原始 efsw 1.4.1 取消释放后写入的独立诊断；exit 1 表示已观察到写入",
+  "dependency_commit": "62f785c56b7a34f035193d4cb831921347b586b8",
+  "retained_allocation_bytes": 40,
+  "probe_executable_sha256": "17d7ba534c9ffc18c739e74c53f2a5ef938cf8bfd7da2ce4d1bf6c0eae2de5ba",
+  "original_library_sha256": "15af25e1880dc8d0d14150b1f8fcf61cc41017eb4b5db21eb31c97152aa5f6a6",
+  "runs": [
+    {
+      "round": 1,
+      "exit_code": 1,
+      "elapsed_ms": 13.943,
+      "stdout": "PROVEN iteration=0 address=00000266180A83C0 bytes=40 status_at_delete=0x103 status_after_delete=0xc0000120 completion_ok=0",
+      "stderr": ""
+    },
+    {
+      "round": 2,
+      "exit_code": 1,
+      "elapsed_ms": 8.493,
+      "stdout": "PROVEN iteration=0 address=00000268F43F6EF0 bytes=40 status_at_delete=0x103 status_after_delete=0xc0000120 completion_ok=0",
+      "stderr": ""
+    },
+    {
+      "round": 3,
+      "exit_code": 1,
+      "elapsed_ms": 8.077,
+      "stdout": "PROVEN iteration=0 address=000001C9E49D5E50 bytes=40 status_at_delete=0x103 status_after_delete=0xc0000120 completion_ok=0",
+      "stderr": ""
+    },
+    {
+      "round": 4,
+      "exit_code": 1,
+      "elapsed_ms": 8.096,
+      "stdout": "PROVEN iteration=0 address=0000022ABF4D8760 bytes=40 status_at_delete=0x103 status_after_delete=0xc0000120 completion_ok=0",
+      "stderr": ""
+    },
+    {
+      "round": 5,
+      "exit_code": 1,
+      "elapsed_ms": 10.009,
+      "stdout": "PROVEN iteration=0 address=000001C87AEB70E0 bytes=40 status_at_delete=0x103 status_after_delete=0xc0000120 completion_ok=0",
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "executable": "E:\\codex\\klogg\\.local\\build-candidate\\output\\klogg_itests.exe",
+  "sha256": "8e2b3ca1e64a9b9846b83824e7f51af5eccc7d739b866e444243c84cd322d61e",
+  "qt_bin": "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+  "build_output": "E:\\codex\\klogg\\.local\\build-candidate\\output",
+  "qpa_platform": "offscreen",
+  "max_rounds": 20,
+  "timeout_seconds": 120,
+  "rounds": [
+    {
+      "round": 1,
+      "duration_ms": 12156,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 2,
+      "duration_ms": 12406,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 3,
+      "duration_ms": 12375,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 4,
+      "duration_ms": 12125,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 5,
+      "duration_ms": 12344,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 6,
+      "duration_ms": 12313,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 7,
+      "duration_ms": 12125,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 8,
+      "duration_ms": 12266,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 0,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    },
+    {
+      "round": 9,
+      "duration_ms": 9844,
+      "timeout_seconds": 120,
+      "timed_out": false,
+      "exit_code": 3221225477,
+      "stdout": "stdout.txt",
+      "stderr": "stderr.txt"
+    }
+  ],
+  "stop_reason": "nonzero_exit"
+}
