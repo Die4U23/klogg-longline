@@ -1,0 +1,1 @@
+{"evidence_kind":"diagnostic_actual_klogg_code","mode":"file-index","qt_version":"6.7.3","settings":"portable beside diagnostic executable","status":"probe_started","timeout_ms":120000}

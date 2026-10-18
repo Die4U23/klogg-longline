@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Klogg log viewer</title>
+    <license file="COPYING"/>
+    <welcome file="description.txt"/>
+    
+    <pkg-ref id="com.github.variar.klogg"/>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.github.variar.klogg"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.github.variar.klogg" visible="false">
+        <pkg-ref id="com.github.variar.klogg"/>
+    </choice>
+    <pkg-ref id="com.github.variar.klogg" version="%klogg_version%" onConclusion="none">%klogg_pkg%</pkg-ref>
+</installer-gui-script>

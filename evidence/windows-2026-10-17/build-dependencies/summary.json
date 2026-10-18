@@ -1,0 +1,9 @@
+{
+  "dependency_summary": "src/ui/CMakeFiles/klogg_ui.dir/src/filteredview.cpp.obj: #deps 360, deps mtime 8139143944396165 (VALID)",
+  "abstract_header_tracked": true,
+  "header_touch_rebuilds_derived_object": true,
+  "header_content_unchanged": true,
+  "method": "temporarily touch header; Ninja dry run only; restore original timestamp",
+  "prefix_strategy": "capture cl output bytes without ANSI transcoding",
+  "diagnostic_old_dependencies": 0
+}

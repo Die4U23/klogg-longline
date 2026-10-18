@@ -1,0 +1,52 @@
+{
+  "arguments": [],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-baseline\\output\\klogg_itests.exe"
+  ],
+  "compiler": "MSVC 19.44.35211; baseline snapshot",
+  "elapsed_seconds": 11.859,
+  "ended_utc": "2026-10-17T03:44:24.175568+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output"
+    ],
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-baseline\\output\\klogg_itests.exe",
+  "executable_sha256": "35f9aae5f7de0b1c8718f5db74ab671e33a94d7c1875db352985b051c6ee826d",
+  "executable_size_bytes": 12612096,
+  "exit_code": 0,
+  "input": null,
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 51380224,
+    "private_bytes": 35667968,
+    "rss_bytes": 50753536,
+    "vms_bytes": 35667968
+  },
+  "qpa": "offscreen",
+  "resource_limit": {
+    "exceeded": false,
+    "max_private_mib": null,
+    "measured_private_bytes_at_termination": null,
+    "runner_terminated_child": false,
+    "threshold_bytes": null,
+    "unavailable": false
+  },
+  "runner_exit_code": 0,
+  "runner_status": "completed",
+  "sample_count": 474,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-17T03:44:12.315973+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 180.0
+}

@@ -1,0 +1,72 @@
+{
+  "arguments": [
+    "search",
+    "E:\\codex\\klogg\\.local\\fixtures\\full\\utf8.log",
+    "\u96ea\u82b1\u2744\ufe0f",
+    "--timeout-ms",
+    "180000"
+  ],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+    "search",
+    "E:\\codex\\klogg\\.local\\fixtures\\full\\utf8.log",
+    "\u96ea\u82b1\u2744\ufe0f",
+    "--timeout-ms",
+    "180000"
+  ],
+  "compiler": null,
+  "elapsed_seconds": 0.187,
+  "ended_utc": "2026-10-17T04:35:14.497325+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe"
+    ],
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+  "executable_sha256": "ec3aed3f7532d093799f8ece58500a24f90a0a5e9797ffef8c4e7b8aebccd8e3",
+  "executable_size_bytes": 8687104,
+  "exit_code": 0,
+  "input": {
+    "changed": false,
+    "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\utf8.log",
+    "sha256_after": "d9a54101796a97c850ac7ee1bad6e86ab3b31fe6040a4fd0a5a6283647148fba",
+    "sha256_before": "d9a54101796a97c850ac7ee1bad6e86ab3b31fe6040a4fd0a5a6283647148fba",
+    "size_bytes_after": 70,
+    "size_bytes_before": 70
+  },
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 29134848,
+    "private_bytes": 18583552,
+    "rss_bytes": 24899584,
+    "vms_bytes": 18583552
+  },
+  "process_cleanup": null,
+  "qpa": "offscreen",
+  "resource_limit": {
+    "exceeded": false,
+    "max_private_mib": 512,
+    "measured_private_bytes_at_termination": 18583552,
+    "runner_terminated_child": false,
+    "threshold_bytes": 536870912,
+    "unavailable": false
+  },
+  "runner_exit_code": 0,
+  "runner_status": "completed",
+  "sample_count": 7,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-17T04:35:14.310977+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 180.0
+}

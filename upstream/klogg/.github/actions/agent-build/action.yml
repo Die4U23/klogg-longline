@@ -1,0 +1,23 @@
+name: "Configure and build"
+description: "Generate the build files and build the code"
+runs:
+  using: "composite"
+  steps:
+
+    - name: Prepare compiler env
+      shell: sh
+      run: |
+        echo "CC=${{ matrix.config.cc }}" >> $GITHUB_ENV
+        echo "CXX=${{ matrix.config.cxx }}" >> $GITHUB_ENV
+
+    - name: configure
+      shell: sh
+      run: |
+        mkdir $KLOGG_BUILD_ROOT
+        cd $KLOGG_BUILD_ROOT
+        cmake $KLOGG_CMAKE_OPTS -DCPM_SOURCE_CACHE=$KLOGG_WORKSPACE/cpm_cache -DKLOGG_OVERRIDE_MALLOC=OFF $KLOGG_WORKSPACE
+
+    - name: build
+      shell: sh
+      run: |
+        cmake --build $KLOGG_BUILD_ROOT -t ci_build

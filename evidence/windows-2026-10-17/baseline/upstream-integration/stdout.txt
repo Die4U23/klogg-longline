@@ -1,0 +1,731 @@
+2026-10-17T12:33:12 info [6320] [PersistentInfo::PersistentInfo@84] Portable config path "E:\\codex\\klogg\\.local\\build-baseline\\output\\klogg.conf"
+2026-10-17T12:33:12 info [6320] [PersistentInfo::UpdateSettings@145] App settings version1
+2026-10-17T12:33:12 info [6320] [PersistentInfo::UpdateSettings@169] Session settings version2
+2026-10-17T12:33:12 warning [6320] [HighlighterSetCollection::retrieveFromStorage@622] Got 0 quick highlighters
+2026-10-17T12:33:12 info [6320] [HighlighterSetCollection::retrieveFromStorage@643] Loaded 0 highlighter sets
+2026-10-17T12:33:12 info [11936] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs", "200", "0")
+2026-10-17T12:33:12 info [11936] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:12 info [6172] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs", "199", "2")
+2026-10-17T12:33:12 info [6172] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:12 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca5afc40
+2026-10-17T12:33:12 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs" keep closed false
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 736
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:12 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:12 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs", encoding -1
+2026-10-17T12:33:12 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:12 info [18656] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:12 info [18656] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs"
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs"
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@629] File size 33541
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:12 info [18656] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:12 info [18656] [IndexOperation::readFileInBlocks@547] Sending block 0 size 33541
+2026-10-17T12:33:12 info [30920] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:12 info [18656] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:12 warning [18656] [IndexOperation::doIndex@685] Non LF terminated file, adding a fake end of line
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@718] Indexing done, took 10.801 ms, io 0.156 ms
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@721] Indexed lines 400
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@722] Max line 83
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@723] Indexing perf 2.9615 MiB/s
+2026-10-17T12:33:12 info [18656] [IndexOperation::doIndex@728] Memory usage "23.76 MiB"
+2026-10-17T12:33:12 info [18656] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:12 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:12 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs"true, found 400 lines.
+2026-10-17T12:33:12 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:12 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:12 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:12 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:12 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:12 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca5afc40 for "E:/codex/klogg/.local/build-baseline/output/testdecode_MBbgjs"
+2026-10-17T12:33:12 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:12 info [17924] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", "200", "0")
+2026-10-17T12:33:12 info [17924] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:12 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6210c0
+2026-10-17T12:33:12 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs" keep closed false
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 736
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:12 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:12 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:12 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", encoding -1
+2026-10-17T12:33:12 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:12 info [7892] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:12 info [7892] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@629] File size 16800
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:12 info [7892] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:12 info [7892] [IndexOperation::readFileInBlocks@547] Sending block 0 size 16800
+2026-10-17T12:33:12 info [20840] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:12 info [7892] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@718] Indexing done, took 15.924 ms, io 0.166 ms
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@719] Index size "0.56 "
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@721] Indexed lines 200
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@722] Max line 83
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@723] Indexing perf 1.00614 MiB/s
+2026-10-17T12:33:12 info [7892] [IndexOperation::doIndex@728] Memory usage "25.77 MiB"
+2026-10-17T12:33:12 info [7892] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:12 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:12 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"true, found 200 lines.
+2026-10-17T12:33:12 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:12 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:12 info [22608] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", "200", "2")
+2026-10-17T12:33:12 info [22608] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@157] signalFileChanged "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", indexed file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@165] current indexed fileSize=16800
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@166] current indexed hash=11111379459736068884
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@167] info file_->size()=33625
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@169] attached_file_->size()=33625
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@170] attached_file_id_ index 844424931810196
+2026-10-17T12:33:12 info [6320] [LogData::fileChangedOnDisk@171] currentFileId index 844424931810196
+2026-10-17T12:33:12 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0
+2026-10-17T12:33:12 info [6320] [CheckDataChangesOperation::doStart@69] Checking file changes
+2026-10-17T12:33:12 info [6320] [LogDataWorker::checkFileChanges@258] Check file changes requested
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 4
+2026-10-17T12:33:12 info [12968] [CheckFileChangesOperation::run@827] CheckFileChangesOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [12968] [CheckFileChangesOperation::doCheckFileChanges@908] indexed xxhash 11111379459736068884
+2026-10-17T12:33:12 info [12968] [CheckFileChangesOperation::doCheckFileChanges@909] current xxhash 11111379459736068884
+2026-10-17T12:33:12 info [12968] [CheckFileChangesOperation::doCheckFileChanges@919] New data on disk
+2026-10-17T12:33:12 info [6320] [LogDataWorker::onCheckFileFinished@310] checking file finished in worker thread
+2026-10-17T12:33:12 info [6320] [LogData::checkFileChangesFinished@229] File "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs" status 1
+2026-10-17T12:33:12 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 3, now executing 4
+2026-10-17T12:33:12 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 4, next operation 3
+2026-10-17T12:33:12 info [6320] [PartialReindexOperation::doStart@63] Reindexing (partial)
+2026-10-17T12:33:12 info [6320] [LogDataWorker::indexAdditionalLines@237] PartialIndex requested
+2026-10-17T12:33:12 info [22408] [LogDataWorker::indexAdditionalLines::::operator()@242] PartialIndex thread started
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 3
+2026-10-17T12:33:12 info [22408] [PartialIndexOperation::run@791] PartialIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [22408] [PartialIndexOperation::run@796] PartialIndexOperation: Starting the count at 16800 ...
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@629] File size 33625
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@644] Initial encoding "ISO-8859-1"
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:12 info [22408] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:12 info [22408] [IndexOperation::readFileInBlocks@547] Sending block 16800 size 16825
+2026-10-17T12:33:12 info [22408] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:12 warning [22408] [IndexOperation::doIndex@685] Non LF terminated file, adding a fake end of line
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@718] Indexing done, took 14.507 ms, io 0.076 ms
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@721] Indexed lines 401
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@722] Max line 83
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@723] Indexing perf 2.21047 MiB/s
+2026-10-17T12:33:12 info [22408] [IndexOperation::doIndex@728] Memory usage "20.71 MiB"
+2026-10-17T12:33:12 info [22408] [PartialIndexOperation::run@802] PartialIndexOperation: ... finished counting.
+2026-10-17T12:33:12 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:12 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"true, found 401 lines.
+2026-10-17T12:33:12 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:12 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 3, next operation 0
+2026-10-17T12:33:12 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:12 info [5168] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", "20", "1")
+2026-10-17T12:33:12 info [5168] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@157] signalFileChanged "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", indexed file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@165] current indexed fileSize=33625
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@166] current indexed hash=3877393750327784493
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@167] info file_->size()=35323
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@169] attached_file_->size()=35323
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@170] attached_file_id_ index 844424931810196
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@171] currentFileId index 844424931810196
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0
+2026-10-17T12:33:13 info [6320] [CheckDataChangesOperation::doStart@69] Checking file changes
+2026-10-17T12:33:13 info [6320] [LogDataWorker::checkFileChanges@258] Check file changes requested
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 4
+2026-10-17T12:33:13 info [21204] [CheckFileChangesOperation::run@827] CheckFileChangesOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [21204] [CheckFileChangesOperation::doCheckFileChanges@908] indexed xxhash 3877393750327784493
+2026-10-17T12:33:13 info [21204] [CheckFileChangesOperation::doCheckFileChanges@909] current xxhash 3877393750327784493
+2026-10-17T12:33:13 info [21204] [CheckFileChangesOperation::doCheckFileChanges@919] New data on disk
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onCheckFileFinished@310] checking file finished in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::checkFileChangesFinished@229] File "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs" status 1
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 3, now executing 4
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 4, next operation 3
+2026-10-17T12:33:13 info [6320] [PartialReindexOperation::doStart@63] Reindexing (partial)
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAdditionalLines@237] PartialIndex requested
+2026-10-17T12:33:13 info [15484] [LogDataWorker::indexAdditionalLines::::operator()@242] PartialIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 3
+2026-10-17T12:33:13 info [15484] [PartialIndexOperation::run@791] PartialIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [15484] [PartialIndexOperation::run@796] PartialIndexOperation: Starting the count at 33625 ...
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@629] File size 35323
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@644] Initial encoding "ISO-8859-1"
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [15484] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [15484] [IndexOperation::readFileInBlocks@547] Sending block 33625 size 1698
+2026-10-17T12:33:13 info [15484] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@718] Indexing done, took 15.597 ms, io 0.046 ms
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@721] Indexed lines 421
+2026-10-17T12:33:13 info [22420] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", "0", "8")
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@722] Max line 83
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@723] Indexing perf 2.15982 MiB/s
+2026-10-17T12:33:13 info [15484] [IndexOperation::doIndex@728] Memory usage "25.79 MiB"
+2026-10-17T12:33:13 info [15484] [PartialIndexOperation::run@802] PartialIndexOperation: ... finished counting.
+2026-10-17T12:33:13 info [22420] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"true, found 421 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 3, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@157] signalFileChanged "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs", indexed file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@165] current indexed fileSize=35323
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@166] current indexed hash=8044867932965034744
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@167] info file_->size()=0
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@169] attached_file_->size()=0
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@170] attached_file_id_ index 844424931810196
+2026-10-17T12:33:13 info [6320] [LogData::fileChangedOnDisk@171] currentFileId index 844424931810196
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0
+2026-10-17T12:33:13 info [6320] [CheckDataChangesOperation::doStart@69] Checking file changes
+2026-10-17T12:33:13 info [6320] [LogDataWorker::checkFileChanges@258] Check file changes requested
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 4
+2026-10-17T12:33:13 info [15892] [CheckFileChangesOperation::run@827] CheckFileChangesOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [15892] [CheckFileChangesOperation::doCheckFileChanges@850] File truncated
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onCheckFileFinished@310] checking file finished in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::checkFileChangesFinished@229] File "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs" status 2
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 2, now executing 4
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 4, next operation 2
+2026-10-17T12:33:13 info [6320] [FullReindexOperation::doStart@57] Reindexing (full)
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [2448] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 2
+2026-10-17T12:33:13 info [2448] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@629] File size 0
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [2448] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [2448] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@718] Indexing done, took 0.94 ms, io 0 ms
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@719] Index size "0.00 "
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@721] Indexed lines 0
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@722] Max line 0
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@723] Indexing perf 0 MiB/s
+2026-10-17T12:33:13 info [2448] [IndexOperation::doIndex@728] Memory usage "19.83 MiB"
+2026-10-17T12:33:13 info [2448] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"true, found 0 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 2, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6210c0 for "E:/codex/klogg/.local/build-baseline/output/testdecode_uBOmYs"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [33788] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/logdata_test_small_OXlKHu", "500", "0")
+2026-10-17T12:33:13 info [33788] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [15348] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj", "50000", "0")
+2026-10-17T12:33:13 info [15348] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca622590
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1700
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [15504] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [15504] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj"
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj"
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@629] File size 4200000
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [15504] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [15504] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@718] Indexing done, took 4.356 ms, io 0 ms
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@719] Index size "0.00 "
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@721] Indexed lines 0
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@722] Max line 0
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@723] Indexing perf 919.521 MiB/s
+2026-10-17T12:33:13 info [15504] [IndexOperation::doIndex@728] Memory usage "19.90 MiB"
+2026-10-17T12:33:13 info [15504] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = true
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@303] indexing interrupted in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj"false, found 0 lines.
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca622590 for "E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jBIMcj"
+2026-10-17T12:33:13 warning [6320] [EfswFileWatcher::removeFile@193] The file is not watched
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [33260] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu", "500", "0")
+2026-10-17T12:33:13 info [33260] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [31220] [`anonymous-namespace'::WriteFileThread::run@68] Executing write helper "E:/codex/klogg/.local/build-baseline/output\\file_write_helper" QList("E:/codex/klogg/.local/build-baseline/output/logdata_test_big_jnLAtd", "50000", "0")
+2026-10-17T12:33:13 info [31220] [`anonymous-namespace'::WriteFileThread::run@73] Write helper result 0, exit status QProcess::NormalExit
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6218a0
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1444
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [8656] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [8656] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu"
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu"
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@629] File size 42000
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [8656] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [8656] [IndexOperation::readFileInBlocks@547] Sending block 0 size 42000
+2026-10-17T12:33:13 info [11084] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:13 info [8656] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@718] Indexing done, took 12.057 ms, io 0.089 ms
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@722] Max line 83
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@723] Indexing perf 3.32208 MiB/s
+2026-10-17T12:33:13 info [8656] [IndexOperation::doIndex@728] Memory usage "26.51 MiB"
+2026-10-17T12:33:13 info [8656] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu"true, found 500 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6218a0 for "E:/codex/klogg/.local/build-baseline/output/logdata_test_small_FlOZeu"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [LogDataLoader::LogDataLoader@88] Test run 1
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca621db0
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1152
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [23092] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [23092] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc"
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc"
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [23092] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [23092] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:13 info [6432] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:13 info [23092] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@718] Indexing done, took 9.91 ms, io 0.066 ms
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@723] Indexing perf 4.13804 MiB/s
+2026-10-17T12:33:13 info [23092] [IndexOperation::doIndex@728] Memory usage "26.02 MiB"
+2026-10-17T12:33:13 info [23092] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc"true, found 500 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 critical [6320] [LogFilteredData::addMark@251] LogFilteredData::addMark trying to create a mark outside of the file.
+2026-10-17T12:33:13 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca621db0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_MQNIKc"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [LogDataLoader::LogDataLoader@88] Test run 2
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6228f0
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1164
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [33488] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [33488] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY"
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY"
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [33488] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [33488] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:13 info [27924] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:13 info [33488] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@718] Indexing done, took 11.487 ms, io 0.113 ms
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@723] Indexing perf 3.56995 MiB/s
+2026-10-17T12:33:13 info [33488] [IndexOperation::doIndex@728] Memory usage "26.03 MiB"
+2026-10-17T12:33:13 info [33488] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY"true, found 500 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6228f0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_TQMstY"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [LogDataLoader::LogDataLoader@88] Test run 3
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca622110
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1164
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [29272] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [29272] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm"
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm"
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [29272] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [29272] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:13 info [29900] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:13 info [29272] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@718] Indexing done, took 10.454 ms, io 0.061 ms
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@723] Indexing perf 3.92271 MiB/s
+2026-10-17T12:33:13 info [29272] [IndexOperation::doIndex@728] Memory usage "25.96 MiB"
+2026-10-17T12:33:13 info [29272] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm"true, found 500 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca622110 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_kRZyvm"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [LogDataLoader::LogDataLoader@88] Test run 4
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6219c0
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1164
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [28280] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [28280] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD"
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD"
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [28280] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [28280] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:13 info [28828] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:13 info [28280] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@718] Indexing done, took 10.442 ms, io 0.065 ms
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@723] Indexing perf 3.92722 MiB/s
+2026-10-17T12:33:13 info [28280] [IndexOperation::doIndex@728] Memory usage "25.97 MiB"
+2026-10-17T12:33:13 info [28280] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:13 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:13 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD"true, found 500 lines.
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:13 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:13 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:13 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:13 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6219c0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_BautiD"
+2026-10-17T12:33:13 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:13 info [6320] [LogDataLoader::LogDataLoader@88] Test run 5
+2026-10-17T12:33:13 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca621390
+2026-10-17T12:33:13 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey" keep closed false
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1164
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:13 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:13 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:13 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey", encoding -1
+2026-10-17T12:33:13 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:13 info [19644] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:13 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:13 info [19644] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey"
+2026-10-17T12:33:13 info [19644] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey"
+2026-10-17T12:33:13 info [19644] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:13 info [19644] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:13 info [19644] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:13 info [19644] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:13 info [19644] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:13 info [33632] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [19644] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@718] Indexing done, took 11.307 ms, io 0.069 ms
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@723] Indexing perf 3.62678 MiB/s
+2026-10-17T12:33:14 info [19644] [IndexOperation::doIndex@728] Memory usage "25.96 MiB"
+2026-10-17T12:33:14 info [19644] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca621390 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_PiVzey"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 6
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca621030
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1164
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [3436] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [3436] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr"
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr"
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [3436] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [3436] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [11808] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [3436] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@718] Indexing done, took 12.337 ms, io 0.072 ms
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@723] Indexing perf 3.32398 MiB/s
+2026-10-17T12:33:14 info [3436] [IndexOperation::doIndex@728] Memory usage "26.04 MiB"
+2026-10-17T12:33:14 info [3436] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca621030 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_puWSDr"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 7
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6221a0
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 964
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [28784] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [28784] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj"
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj"
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [28784] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [28784] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [16444] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [28784] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@718] Indexing done, took 10.437 ms, io 0.061 ms
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@723] Indexing perf 3.9291 MiB/s
+2026-10-17T12:33:14 info [28784] [IndexOperation::doIndex@728] Memory usage "26.04 MiB"
+2026-10-17T12:33:14 info [28784] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6221a0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_dIrBFj"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 8
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6211e0
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 836
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [19276] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [19276] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP"
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP"
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [19276] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [19276] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [26024] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [19276] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@718] Indexing done, took 10.76 ms, io 0.065 ms
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@723] Indexing perf 3.81115 MiB/s
+2026-10-17T12:33:14 info [19276] [IndexOperation::doIndex@728] Memory usage "26.04 MiB"
+2026-10-17T12:33:14 info [19276] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6211e0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_TmsDrP"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 9
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca6222c0
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1616
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [18744] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [18744] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS"
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS"
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [18744] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [18744] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [3372] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [18744] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@718] Indexing done, took 10.287 ms, io 0.064 ms
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@723] Indexing perf 3.98639 MiB/s
+2026-10-17T12:33:14 info [18744] [IndexOperation::doIndex@728] Memory usage "26.06 MiB"
+2026-10-17T12:33:14 info [18744] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca6222c0 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_jSNahS"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 10
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca622110
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1616
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [4144] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [4144] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR"
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR"
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [4144] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [4144] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [5332] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [4144] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@718] Indexing done, took 11.06 ms, io 0.091 ms
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@723] Indexing perf 3.70778 MiB/s
+2026-10-17T12:33:14 info [4144] [IndexOperation::doIndex@728] Memory usage "26.01 MiB"
+2026-10-17T12:33:14 info [4144] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca622110 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_dHqEnR"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [LogDataLoader::LogDataLoader@88] Test run 11
+2026-10-17T12:33:14 info [6320] [FileHolder::FileHolder@68] created file holder 0x25eca622d70
+2026-10-17T12:33:14 info [6320] [FileHolder::open@108] open file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk" keep closed false
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@40] Got native file handle 1620
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@45] Got fd 3
+2026-10-17T12:33:14 info [6320] [`anonymous-namespace'::openFileByHandle@61] QFile opened
+2026-10-17T12:33:14 info [6320] [OperationQueue::enqueueOperation@124] Enqueue operation 1, now executing 0
+2026-10-17T12:33:14 info [6320] [AttachOperation::doStart@49] Attaching "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk", encoding -1
+2026-10-17T12:33:14 info [6320] [LogDataWorker::indexAll@215] FullIndex requested, forced encoding: "none"
+2026-10-17T12:33:14 info [21292] [LogDataWorker::indexAll::::operator()@221] FullIndex thread started
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@114] Started operation 1
+2026-10-17T12:33:14 info [21292] [FullIndexOperation::run@753] FullIndexOperation::run(), file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk"
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@611] Indexing file "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk"
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@629] File size 43000
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@644] Initial encoding "auto"
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@652] Prefetch buffer "5.00 MiB"
+2026-10-17T12:33:14 info [21292] [IndexOperation::readFileInBlocks@516] Starting IO thread
+2026-10-17T12:33:14 info [21292] [IndexOperation::readFileInBlocks@547] Sending block 0 size 43000
+2026-10-17T12:33:14 info [4840] [IndexOperation::guessEncoding@489] Encoding guess "ISO-8859-1"
+2026-10-17T12:33:14 info [21292] [IndexOperation::readFileInBlocks@561] IO thread done
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@718] Indexing done, took 10.256 ms, io 0.061 ms
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@719] Index size "0.91 "
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@721] Indexed lines 500
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@722] Max line 97
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@723] Indexing perf 3.99844 MiB/s
+2026-10-17T12:33:14 info [21292] [IndexOperation::doIndex@728] Memory usage "26.09 MiB"
+2026-10-17T12:33:14 info [21292] [FullIndexOperation::run@765] FullIndexOperation: ... finished, interrupt = false
+2026-10-17T12:33:14 info [6320] [LogDataWorker::onIndexingFinished@299] finished indexing in worker thread
+2026-10-17T12:33:14 info [6320] [LogData::indexingFinished@203] indexingFinished for: "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk"true, found 500 lines.
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled
+2026-10-17T12:33:14 info [6320] [OperationQueue::finishOperationAndStartNext@137] Finished operation 1, next operation 0
+2026-10-17T12:33:14 info [6320] [OperationQueue::tryStartPendingOperation::::operator()@116] no operation to start
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::interrupt@247] Search interruption requested
+2026-10-17T12:33:14 info [6320] [LogFilteredData::runSearch@107] Search cache key: "this is line [0-9]{5}9"_0_500
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::search@210] Search requested
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@278] Searching from line 0 to 500
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@293] Using 1 matching threads
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@465] Searching done, overall duration 1.053 ms
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@466] Line reading took 0.109 ms
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@467] Results combining took 0.011 ms
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@470] Matching took 0.505 ms
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@475] Searching perf 500000 lines/s
+2026-10-17T12:33:14 info [26264] [SearchOperation::doSearch@480] Searching io perf 41.008 MiB/s
+2026-10-17T12:33:14 info [6320] [LogFilteredData::updateSearchResultsCache@368] LogFilteredData: caching results for key "this is line [0-9]{5}9"_0_500
+2026-10-17T12:33:14 info [6320] [LogFilteredData::updateSearchResultsCache@378] LogFilteredData: cache size 50
+2026-10-17T12:33:14 info [6320] [LogFilteredData::handleSearchProgressed@425] Matches size "0.13 ", marks size "0.01 ", union size "0.13 "
+2026-10-17T12:33:14 info [6320] [LogFilteredDataWorker::~LogFilteredDataWorker@186] LogFilteredDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [LogDataWorker::interrupt@292] Load interrupt requested
+2026-10-17T12:33:14 info [6320] [LogDataWorker::~LogDataWorker@196] LogDataWorker shutdown
+2026-10-17T12:33:14 info [6320] [OperationQueue::shutdown@98] Operation queue shutdown
+2026-10-17T12:33:14 info [6320] [FileHolder::~FileHolder@73] destroy file holder 0x25eca622d70 for "E:/codex/klogg/.local/build-baseline/output/filtered_test_BlHYjk"
+2026-10-17T12:33:14 info [6320] [FileWatcher::updateConfiguration@388] Polling files enabled

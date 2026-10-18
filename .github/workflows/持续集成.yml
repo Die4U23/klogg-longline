@@ -1,0 +1,120 @@
+name: 持续集成
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: '1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-native:
+    name: Windows 2022 原生编译与六项 CTest
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - name: 检出仓库源码
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 配置 Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: 安装固定版本构建工具
+        shell: pwsh
+        run: |
+          python -m pip install --disable-pip-version-check cmake==3.29.2 aqtinstall==3.3.0 -r tools/ci_requirements.txt
+          if ($LASTEXITCODE -ne 0) { throw "Python 构建工具安装失败：$LASTEXITCODE" }
+          $ninjaRoot = Join-Path $PWD '.local/tools/ninja'
+          New-Item -ItemType Directory -Force -Path $ninjaRoot | Out-Null
+          $ninjaArchive = Join-Path $ninjaRoot 'ninja-win.zip'
+          Invoke-WebRequest 'https://github.com/ninja-build/ninja/releases/download/v1.12.0/ninja-win.zip' -OutFile $ninjaArchive
+          if ((Get-FileHash $ninjaArchive -Algorithm SHA256).Hash -ne '51D99BE9CEEA8835EDF536D52D47FA4C316AA332E57F71A08DF5BD059DA11417') { throw 'Ninja 官方发布包哈希不匹配' }
+          Expand-Archive -LiteralPath $ninjaArchive -DestinationPath $ninjaRoot
+          $env:PATH = "$ninjaRoot;$env:PATH"
+          $ninjaRoot | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          $cmakeVersion = (& cmake --version | Select-Object -First 1)
+          if ($cmakeVersion -notmatch '3\.29\.2') { throw "需要 CMake 3.29.2，实际为：$cmakeVersion" }
+          $ninjaVersion = (& ninja --version).Trim()
+          if ($ninjaVersion -notmatch '^1\.12\.0($|\.)') { throw "需要 Ninja 1.12.0，实际为：$ninjaVersion" }
+          python --version
+          cmake --version
+          ninja --version
+
+      - name: 缓存固定版本 Qt
+        id: qt-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: .local/Qt
+          key: windows-qt-6.7.3-msvc2019_64-qt5compat-v1
+
+      - name: 安装 Qt 6.7.3 MSVC x64
+        if: steps.qt-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path .local/Qt | Out-Null
+          python -m aqt install-qt windows desktop 6.7.3 win64_msvc2019_64 --outputdir .local/Qt --modules qt5compat
+          if ($LASTEXITCODE -ne 0) { throw "Qt 6.7.3 安装失败：$LASTEXITCODE" }
+          if (-not (Test-Path .local/Qt/6.7.3/msvc2019_64/lib/cmake/Qt6/Qt6Config.cmake)) { throw '未找到 Qt6Config.cmake' }
+
+      - name: 获取固定第三方依赖并构建候选源码、运行测试
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./tools/ci_windows.ps1
+
+      - name: 上传 Windows 构建与测试日志
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Windows原生构建日志
+          path: |
+            .local/ci-logs/**
+            .local/logs/*.log
+            .local/build-candidate/Testing/Temporary/LastTest.log
+          if-no-files-found: warn
+          retention-days: 14
+
+  linux-python-tools:
+    name: Linux Python 工具测试（非原生验证）
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: 检出仓库源码
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: 配置 Python 3.12
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: 运行 Python 辅助工具单测（不编译 klogg）
+        shell: bash
+        run: |
+          mkdir -p .local/ci-logs
+          python -m pip install --disable-pip-version-check -r tools/ci_requirements.txt
+          python tools/verify_repository.py 2>&1 | tee .local/ci-logs/repository-integrity.log
+          python -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee .local/ci-logs/python-tests.log
+
+      - name: 上传 Linux Python 测试日志
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Linux工具测试日志
+          path: .local/ci-logs/**
+          if-no-files-found: warn
+          retention-days: 14

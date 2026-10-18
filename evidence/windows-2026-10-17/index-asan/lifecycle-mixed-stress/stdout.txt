@@ -1,0 +1,1 @@
+{"allocated_capacity_bytes":3004,"capacity_stable":true,"case":"lifecycle-mixed-stress","elapsed_ns":23803700,"iterations":1000,"matches_expected":true,"status":"measured"}

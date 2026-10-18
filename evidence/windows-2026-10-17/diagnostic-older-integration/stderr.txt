@@ -1,0 +1,121 @@
+Stack trace (most recent call last):
+#31   Source "E:\codex\klogg\upstream\klogg\tests\ui\qtests_main.cpp", line 101, in main [00007FF7CE9F6387]
+         98:     TestRunner* runner = new TestRunner( argc, argv );
+         99: 
+        100:     runner->process();
+      > 101:     return runner->result();
+        102: }
+#30   Source "E:\codex\klogg\upstream\klogg\tests\ui\qtests_main.cpp", line 54, in TestRunner::process [00007FF7CE9E20CA]
+         51:   public Q_SLOTS:
+         52:     void process()
+         53:     {
+      >  54:         result_ = Catch::Session().run( argc_, argv_ );
+         55:         Q_EMIT finished( result_ );
+         56:     }
+#29   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 13517, in Catch::Session::run [00007FF7CE9E6AC8]
+       13514:             static_cast<void>(std::getchar());
+       13515:         }
+       13516:         int exitCode = runInternal();
+      >13517:         if( ( m_configData.waitForKeypress & WaitForKeypress::BeforeExit ) != 0 ) {
+       13518:             Catch::cout() << "...waiting for enter/ return before exiting, with code: " << exitCode << std::endl;
+       13519:             static_cast<void>(std::getchar());
+       13520:         }
+#28   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 13562, in Catch::Session::runInternal [00007FF7CE9E6F94]
+       13559:             TestGroup tests { m_config };
+       13560:             auto const totals = tests.execute();
+       13561: 
+      >13562:             if( m_config->warnAboutNoTests() && totals.error == -1 )
+       13563:                 return 2;
+       13564: 
+       13565:             // Note that on unices only the lower 8 bits are usually used, clamping
+#27   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 13354, in Catch::`anonymous namespace'::TestGroup::execute [00007FF7CE9CA5D4]
+       13351:                 m_context.testGroupStarting(m_config->name(), 1, 1);
+       13352:                 for (auto const& testCase : m_tests) {
+       13353:                     if (!m_context.aborting())
+      >13354:                         totals += m_context.runTest(*testCase);
+       13355:                     else
+       13356:                         m_context.reporter().skipTest(*testCase);
+       13357:                 }
+#26   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 12762, in Catch::RunContext::runTest [00007FF7CE9E733D]
+       12759:             m_trackerContext.startCycle();
+       12760:             m_testCaseTracker = &SectionTracker::acquire(m_trackerContext, TestCaseTracking::NameAndLocation(testInfo.name, testInfo.lineInfo));
+       12761:             runCurrentTest(redirectedCout, redirectedCerr);
+      >12762:         } while (!m_testCaseTracker->isSuccessfullyCompleted() && !aborting());
+       12763: 
+       12764:         Totals deltaTotals = m_totals.delta(prevTotals);
+       12765:         if (testInfo.expectedToFail() && deltaTotals.testCases.passed > 0) {
+#25   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 13002, in Catch::RunContext::runCurrentTest [00007FF7CE9E6CD1]
+       12999:                 timer.start();
+       13000:                 invokeActiveTestCase();
+       13001:             }
+      >13002:             duration = timer.getElapsedSeconds();
+       13003:         } CATCH_CATCH_ANON (TestFailureException&) {
+       13004:             // This just means the test was aborted due to failure
+       13005:         } CATCH_CATCH_ALL {
+#24   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 13027, in Catch::RunContext::invokeActiveTestCase [00007FF7CE9D06FE]
+       13025:     void RunContext::invokeActiveTestCase() {
+       13026:         FatalConditionHandlerGuard _(&m_fatalConditionhandler);
+      >13027:         m_activeTestCase->invoke();
+       13028:     }
+       13029: 
+       13030:     void RunContext::handleUnfinishedSections() {
+#23   Source "E:\codex\klogg\upstream\klogg\tests\ui\logfiltereddata_test.cpp", line 238, in C_A_T_C_H_T_E_S_T_24 [00007FF7CEA0DA84]
+        235:             SafeQSignalSpy searchProgressSpy{ filtered_data.get(),
+        236:                                               &LogFilteredData::searchProgressed };
+        237: 
+      > 238:             runSearch( filtered_data.get(), "this is line [0-9]{5}9", searchProgressSpy );
+        239: 
+        240:             THEN( "Matched lines are in data" )
+        241:             {
+#22   Source "E:\codex\klogg\upstream\klogg\tests\ui\logfiltereddata_test.cpp", line 66, in `anonymous namespace'::runSearch [00007FF7CEA1730B]
+         64:     int progress = 0;
+         65:     do {
+      >  66:         REQUIRE( searchProgressSpy.wait() );
+         67:         QList<QVariant> progressArgs = searchProgressSpy.last();
+         68:         progress = progressArgs.at( 1 ).toInt();
+         69:     } while ( progress < 100 );
+#21   Source "E:\codex\klogg\.local\dependencies\Catch2\single_include\catch2\catch.hpp", line 8254, in Catch::AssertionHandler::complete [00007FF7CE9C33DB]
+       8251:         }
+       8252:         if (m_reaction.shouldThrow) {
+       8253: #if !defined(CATCH_CONFIG_DISABLE_EXCEPTIONS)
+      >8254:             throw Catch::TestFailureException();
+       8255: #else
+       8256:             CATCH_ERROR( "Test failure requires aborting test!" );
+       8257: #endif
+#20   Object "", at 00007FFEC43255A9, in CxxThrowException
+#19   Object "", at 00007FFEE73741CA, in RaiseException
+#18   Object "", at 00007FFEE9DEF88D, in RtlRaiseException
+#17   Object "", at 00007FFEE9EABD25, in RtlWow64GetCurrentMachine
+#16   Object "", at 00007FFEE9F454FF, in _chkstk
+#15   Source "D:\a\_work\1\s\src\vctools\crt\vcstartup\src\gs\amd64\gshandlereh4.cpp", line 86, in __GSHandlerCheck_EH4 [00007FF7CF0C8758]
+#14   Object "", at 00007FFED01B43F5, in _CxxFrameHandler4
+试图访问无效的地址。
+
+#13   Object "", at 00007FFED01B21F6, in  ?? 
+试图访问无效的地址。
+
+#12   Object "", at 00007FFED01B21A5, in  ?? 
+试图访问无效的地址。
+
+#11   Object "", at 00007FFED01B18F3, in  ?? 
+试图访问无效的地址。
+
+#10   Object "", at 00007FFED01B401C, in  ?? 
+#9    Object "", at 00007FFEE9DF3680, in RtlUnwindEx
+#8    Object "", at 00007FFEE9F4557F, in _chkstk
+#7    Source "D:\a\_work\1\s\src\vctools\crt\vcstartup\src\gs\amd64\gshandlereh4.cpp", line 86, in __GSHandlerCheck_EH4 [00007FF7CF0C8758]
+#6    Object "", at 00007FFED01B43F5, in _CxxFrameHandler4
+试图访问无效的地址。
+
+#5    Object "", at 00007FFED01B21F6, in  ?? 
+试图访问无效的地址。
+
+#4    Object "", at 00007FFED01B20CD, in  ?? 
+试图访问无效的地址。
+
+#3    Object "", at 00007FFED01B3CFF, in  ?? 
+试图访问无效的地址。
+
+#2    Object "", at 00007FFED01B2C2C, in  ?? 
+#1    Object "", at 00007FFED01B45CA, in _CxxFrameHandler4
+#0    Object "", at 00007FFE28070786, in QObject::~QObject

@@ -1,0 +1,61 @@
+{
+  "arguments": [
+    "file-index",
+    "E:\\codex\\klogg\\.local\\fixtures\\full\\compressed_span_5gib.log",
+    "127",
+    "10"
+  ],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+    "file-index",
+    "E:\\codex\\klogg\\.local\\fixtures\\full\\compressed_span_5gib.log",
+    "127",
+    "10"
+  ],
+  "compiler": "MSVC 19.44.35211; baseline snapshot",
+  "elapsed_seconds": 23.625,
+  "ended_utc": "2026-10-17T03:43:49.390834+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe",
+      "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe"
+    ],
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+  "executable_sha256": "68a3fe498c6df416cce0ec769e547258ffa5c3230f1ca014c758920dbcb18152",
+  "executable_size_bytes": 8686080,
+  "exit_code": 3221226505,
+  "input": {
+    "changed": false,
+    "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\compressed_span_5gib.log",
+    "sha256_after": "8d86b95b1ca98ef5832330f7bab9dc0c950ec5167d5c56d16582176fbf686a0f",
+    "sha256_before": "8d86b95b1ca98ef5832330f7bab9dc0c950ec5167d5c56d16582176fbf686a0f",
+    "size_bytes_after": 5368709120,
+    "size_bytes_before": 5368709120
+  },
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 45617152,
+    "private_bytes": 29036544,
+    "rss_bytes": 45617152,
+    "vms_bytes": 29036544
+  },
+  "qpa": "offscreen",
+  "runner_exit_code": 1,
+  "runner_status": "runner_error",
+  "sample_count": 950,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-17T03:43:25.770736+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 90.0
+}

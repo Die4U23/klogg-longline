@@ -1,0 +1,122 @@
+{
+  "baseline_commit": "25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+  "patch_sha256": "230326e917871ffacd170fd17f7acfabe6e7d0f4e6beced1f51e897ce8bf0016",
+  "git_apply_check": "passed",
+  "changed_files": [
+    {
+      "path": "src/logdata/CMakeLists.txt",
+      "before_sha256": "102759bf6238cea4f6d6bff7c0129527e23c002dc55b934f5357486babe5c26a",
+      "after_sha256": "2df248ddbdb7e8a03699300b9debacccd78edce18a9bb321923577004410caa5"
+    },
+    {
+      "path": "src/logdata/include/abstractlogdata.h",
+      "before_sha256": "214438f6157962bfc13b5cf7d13f73918b0532ffef20bcf33a22b2aa487e6b28",
+      "after_sha256": "85977c57b2576e856be15e3c594dbc71a9640b68c690567dc4a51ecaf037761f"
+    },
+    {
+      "path": "src/logdata/include/compressedlinestorage.h",
+      "before_sha256": "b6af017f4cf3f216e623a9231a2bc8b277479d2dff2e93416ee1dff69fe92b26",
+      "after_sha256": "ea9d5acd95bc8b245bbb60146e6523fcacf5beca324f4d3ec988009b5f957879"
+    },
+    {
+      "path": "src/logdata/include/linetypes.h",
+      "before_sha256": "fcba5412ef90ffa23d2dc7f5c59f525bb33775e4bd49713241bf0bfb672e8841",
+      "after_sha256": "1d50f2d925510c4350da3200fce09e2f0c420dbd8f9eb1db95812b308aa472ab"
+    },
+    {
+      "path": "src/logdata/include/logdata.h",
+      "before_sha256": "bcbc0666cf9e6a2ef1ed4a21fecb3d0ef82be416160004ad9b7ee70928c5c0f8",
+      "after_sha256": "a33438e70da2841f9dfefbfd14dfeabb85e8b1c4687711ab3d350a01a25e3cf6"
+    },
+    {
+      "path": "src/logdata/include/logfiltereddata.h",
+      "before_sha256": "de5182eb201eab502758ac051a8a316974a3ec735461082d4184fbdaae228cb9",
+      "after_sha256": "520ab588f543cd82cf87a8faf1b3b0beeba83bbc0244d5f1da3d6cf548eb1a60"
+    },
+    {
+      "path": "src/logdata/include/logfiltereddataworker.h",
+      "before_sha256": "d1dc68e83ce96d615f2c5aefe74af2511e77a1667d19ced0938a4ef4ca54408c",
+      "after_sha256": "ae0fe6f11416c6caaa2af3640d45704d63638e3820ba7fb6335479fd5d823c5d"
+    },
+    {
+      "path": "src/logdata/include/longlinesearch.h",
+      "before_sha256": null,
+      "after_sha256": "5df1d17f09eb2a710d01379668f001ea4fef15aa722a96ccb15113a78347c539"
+    },
+    {
+      "path": "src/logdata/src/compressedlinestorage.cpp",
+      "before_sha256": "c6dbfdca43e270b509572469beab09a6fcfb290dd8b9cfc2d9ee8f4858708345",
+      "after_sha256": "41cc8e816379e7f5c4158232e2c8398c5f6166aba0a4f370b12c9a3c9cfeeecc"
+    },
+    {
+      "path": "src/logdata/src/logdata.cpp",
+      "before_sha256": "1e0afa8ed3d31715eb2f0a40e5f823163b4a5996e6cd12ee5415383ee55e8a0b",
+      "after_sha256": "c6141bbed1b0ec6c4141e52152c4a6eedff1813123b10ed235d4a48423b7b673"
+    },
+    {
+      "path": "src/logdata/src/logfiltereddata.cpp",
+      "before_sha256": "33021f84d690f52c698d484f97b30cac321788637bc2b41ac1f103a5515bb9b5",
+      "after_sha256": "1e5d36812c996c453a796e3d81fae62ab02c49db3a388215f77a4a7800fa8fe4"
+    },
+    {
+      "path": "src/logdata/src/logfiltereddataworker.cpp",
+      "before_sha256": "3b4100388d8fff3d6656addd5a329d1d3668cac606ebfdbb3c630b4fdabbd210",
+      "after_sha256": "f24fa64b6031fb961bd12c4369d8dab878cb831f597cdafc93287d0ceff1118b"
+    },
+    {
+      "path": "src/logdata/src/longlinesearch.cpp",
+      "before_sha256": null,
+      "after_sha256": "d678f21588120ff737dcf7abd69e39fe323738b60a6160ec8b5d63dbab278feb"
+    },
+    {
+      "path": "src/ui/include/abstractlogview.h",
+      "before_sha256": "ab0ee165f36987fae19e01c4cd9c0d852f81d40bc1406ce1830c8a7ffa5571c0",
+      "after_sha256": "070adadffc7ff5722c851a21393294978cd80a68f95b58c03309036fec249abd"
+    },
+    {
+      "path": "src/ui/include/crawlerwidget.h",
+      "before_sha256": "589d6454242988726b02bfb3ba56134a973b1c2b5074ec47a68869e96cf6d3be",
+      "after_sha256": "b41ad75b967caa91cfcd6d724e367716d009f81662dc0fc3b75de018d48da50b"
+    },
+    {
+      "path": "src/ui/include/quickfind.h",
+      "before_sha256": "7378d5b9b9457e4b954b3a6249731918f278ae87098b2b5ffedc7239bd59b560",
+      "after_sha256": "170c4bb5bf4ce252cec5b4e13e39af7b0370a0c952806de8755150d8d108da0e"
+    },
+    {
+      "path": "src/ui/include/selection.h",
+      "before_sha256": "e0a08bb4fa7bd64cfcd45f83b0f21c1184bd2a8cba5611724bcea0820d32fc89",
+      "after_sha256": "c82483485c06710c564d9caa79382f743fbb4dd323edc6766896a42573f1f67a"
+    },
+    {
+      "path": "src/ui/include/wrappedstring.h",
+      "before_sha256": "dd7f4da27b2fabf96fdbe4a7982ca6decdce70cfa7eea922635c47e13981e395",
+      "after_sha256": "4d946de8cc79237cccaa4fc61141ee495623bfdd0132cfd7e4d3d0e9b8205c08"
+    },
+    {
+      "path": "src/ui/src/abstractlogview.cpp",
+      "before_sha256": "9b14bf67a6d88bd0d41ba132dc69f1b0ec158eaa5ce9ca03f050236417e8d1b4",
+      "after_sha256": "fced7103252e1c0f42ca92b16ccc943baefc8fe1a35f18a6138563edd088069e"
+    },
+    {
+      "path": "src/ui/src/crawlerwidget.cpp",
+      "before_sha256": "142e21d2ae0e424c06e3e865c7ceebc16a434fc4fcdd29e8cd263a4ff9cb8339",
+      "after_sha256": "113176748d065b85622b172d1440a2a0771c99a0c2443706f616afa7da29f374"
+    },
+    {
+      "path": "src/ui/src/quickfind.cpp",
+      "before_sha256": "d9e8e759bc26495b4900e5a7bb08a267357052e9e49eaffdae71382320040d77",
+      "after_sha256": "41b05240faa94fbf3dc7be0e1c5e2535d59273e1643926d72fa1115d06429b4c"
+    },
+    {
+      "path": "src/ui/src/selection.cpp",
+      "before_sha256": "d291c081ffc58d161ce834943fb6af88865750da22355377e90c24e0d6321002",
+      "after_sha256": "c0c6bc85ae574dcbb6bb105401a18cf9f637359060697f903d9668221d7b987d"
+    },
+    {
+      "path": "tests/unit/linepositionarray_test.cpp",
+      "before_sha256": "169275ca4cde649489ccd740e1d032cbed425a5ac52b77d7ab87496caf65176c",
+      "after_sha256": "48a6ac754cd7522b65785a06d3654f471416a86d171a26a87335873d944ed143"
+    }
+  ]
+}

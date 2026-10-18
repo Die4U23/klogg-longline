@@ -1,0 +1,3204 @@
+--- a/src/logdata/CMakeLists.txt
++++ b/src/logdata/CMakeLists.txt
+@@ -22,6 +22,7 @@
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/logdataworker.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/logfiltereddata.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/logfiltereddataworker.cpp
++  ${CMAKE_CURRENT_SOURCE_DIR}/src/longlinesearch.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/fileholder.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/filedigest.cpp
+   ${CMAKE_CURRENT_SOURCE_DIR}/src/readablesize.cpp
+--- a/src/logdata/include/abstractlogdata.h
++++ b/src/logdata/include/abstractlogdata.h
+@@ -52,6 +52,21 @@
+     Q_OBJECT
+ 
+   public:
++    static constexpr qint64 PreviewByteLimit = 16 * 1024;
++    struct LinePreview {
++        QString text;
++        qint64 absoluteLineBegin = 0;
++        qint64 byteBegin = 0, byteEnd = 0, totalBytes = 0;
++        bool truncated = false;
++        QString error;
++    };
++    qint64 lineByteSize( LineNumber line ) const { return doGetLineByteSize( line ); }
++    LinePreview linePreview( LineNumber line, qint64 relativeByteOffset = 0,
++                             qint64 maxBytes = PreviewByteLimit ) const
++    { return doGetLinePreview( line, relativeByteOffset, maxBytes ); }
++    // Resolve mutable filtered indices on the GUI thread before starting a task.
++    virtual const AbstractLogData* previewSource() const { return this; }
++    virtual LineNumber previewSourceLine( LineNumber viewLine ) const { return viewLine; }
+     // Returns the line passed as a QString
+     QString getLineString( LineNumber line ) const;
+     // Returns the line passed as a QString, with tabs expanded
+@@ -92,6 +107,9 @@
+     Q_DECLARE_FLAGS( LineType, LineTypeFlags )
+ 
+   protected:
++    virtual qint64 doGetLineByteSize( LineNumber line ) const = 0;
++    virtual LinePreview doGetLinePreview( LineNumber line, qint64 relativeByteOffset,
++                                        qint64 maxBytes ) const = 0;
+     // Internal function called to get a given line
+     virtual QString doGetLineString( LineNumber line ) const = 0;
+     // Internal function called to get a given line
+--- a/src/logdata/include/compressedlinestorage.h
++++ b/src/logdata/include/compressedlinestorage.h
+@@ -83,12 +83,14 @@
+     void uncompress_last_block();
+     struct BlockMetadata {
+         OffsetInFile firstLineOffset{};
+-        size_t packetStorageOffset{};
++        size_t storageOffset{};
+     };
+ 
+     klogg::vector<BlockMetadata> blocks_;
++    klogg::vector<uint8_t> wideBlockFlags_;
+     klogg::vector<uint8_t> packedLinesStorage_;
+     size_t packedLinesStorageUsedSize_ = 0;
++    klogg::vector<uint64_t> wideLinesStorage_;
+ 
+     klogg::vector<OffsetInFile> currentLinesBlock_;
+     klogg::vector<uint32_t> currentLinesBlockShifted_;
+--- a/src/logdata/include/linetypes.h
++++ b/src/logdata/include/linetypes.h
+@@ -309,18 +309,17 @@
+ inline QString untabify( QString&& line, LineColumn initialPosition = 0_lcol )
+ {
+     line.replace( QChar::Null, QChar::Space );
+-
+-    LineLength::UnderlyingType position = 0;
+-    position = type_safe::narrow_cast<LineLength::UnderlyingType>(
+-        line.indexOf( QChar::Tabulation, position ) );
+-    while ( position >= 0 ) {
+-        const auto spaces = TabStop - ( ( initialPosition.get() + position ) % TabStop );
+-        line.replace( position, 1, QString( spaces, QChar::Space ) );
+-        position = type_safe::narrow_cast<LineLength::UnderlyingType>(
+-            line.indexOf( QChar::Tabulation, position ) );
+-    }
+-
+-    return std::move( line );
++    if ( !line.contains( QChar::Tabulation ) ) return std::move( line );
++    QString expanded;
++    expanded.reserve( line.size() );
++    for ( const auto character : line ) {
++        if ( character == QChar::Tabulation ) {
++            const auto columnModulo = ( initialPosition.get() % TabStop + expanded.size() % TabStop ) % TabStop;
++            expanded.append( QString( TabStop - columnModulo, QChar::Space ) );
++        }
++        else expanded.append( character );
++    }
++    return expanded;
+ }
+ 
+ template <typename LineType>
+--- a/src/logdata/include/logdata.h
++++ b/src/logdata/include/logdata.h
+@@ -40,6 +40,8 @@
+ #define LOGDATA_H
+ 
+ #include <memory>
++#include <atomic>
++#include <optional>
+ 
+ #include <QDateTime>
+ #include <QFile>
+@@ -124,6 +126,30 @@
+ 
+     RawLines getLinesRaw( LineNumber first, LinesCount number ) const;
+ 
++    struct SourceSnapshot {
++        QString path;
++        FileId id;
++        qint64 size = 0;
++        QDateTime mtime;
++        quint64 generation = 0;
++    };
++    struct LineByteRange { OffsetInFile begin, end; };
++    struct SearchBatchPlan { LinesCount lines; qint64 rawBytes; };
++    enum class ReadStatus { Complete, Cancelled, SourceChanged, Failed, TooLarge };
++    struct ByteRead { ReadStatus status = ReadStatus::Failed; QByteArray bytes; };
++    static constexpr qint64 MaxByteRead = 4 * 1024 * 1024;
++    SourceSnapshot snapshot() const;
++    bool matchesSnapshot( const SourceSnapshot& expected ) const;
++    std::optional<LineByteRange> lineByteRange( LineNumber line, const SourceSnapshot& expected ) const;
++    // Plan a whole-line batch without allocating or reading its content. A zero
++    // line count reports that the first line exceeds maxRawBytes.
++    std::optional<SearchBatchPlan> planSearchBatch(
++        LineNumber first, LinesCount maxLines, qint64 maxRawBytes,
++        const SourceSnapshot& expected ) const;
++    ByteRead readBytes( const SourceSnapshot& expected, OffsetInFile begin, qint64 count,
++                        const std::atomic_bool* cancel = nullptr ) const;
++    bool hasPrefilter() const;
++
+   Q_SIGNALS:
+     // Sent during the 'attach' process to signal progress
+     // percent being the percentage of completion.
+@@ -144,6 +170,9 @@
+ 
+   private:
+     // Implementation of virtual functions
++    qint64 doGetLineByteSize( LineNumber line ) const override;
++    LinePreview doGetLinePreview( LineNumber line, qint64 relativeByteOffset,
++                                 qint64 maxBytes ) const override;
+     QString doGetLineString( LineNumber line ) const override;
+     QString doGetExpandedLineString( LineNumber line ) const override;
+     klogg::vector<QString> doGetLines( LineNumber first, LinesCount number ) const override;
+@@ -158,6 +187,7 @@
+     void doDetachReader() const override;
+ 
+     void reOpenFile() const;
++    void captureIndexSource();
+ 
+     klogg::vector<QString> getLinesFromFile( LineNumber first, LinesCount number,
+                                            QString ( *processLine )( QString&& ) ) const;
+@@ -180,9 +210,14 @@
+ 
+     // Codec to decode text
+     TextCodecHolder codec_;
++    mutable std::mutex codecMutex_;
+     MonitoredFileStatus fileChangedOnDisk_;
+ 
+     QString prefilterPattern_;
++    std::atomic<quint64> sourceGeneration_{ 0 };
++    mutable std::mutex snapshotMutex_;
++    SourceSnapshot indexedSnapshot_;
++    std::atomic_bool snapshotReady_{ false };
+ };
+ 
+ #endif
+--- a/src/logdata/include/logfiltereddata.h
++++ b/src/logdata/include/logfiltereddata.h
+@@ -96,11 +96,18 @@
+     // Returns the line 'index' in filterd log data that matches
+     // given original line number
+     LineNumber getLineIndexNumber( LineNumber lineNumber ) const;
++    const AbstractLogData* previewSource() const override;
++    LineNumber previewSourceLine( LineNumber viewLine ) const override;
+ 
+     // Returns the number of lines in the source log data
+     LinesCount getNbTotalLines() const;
+     // Returns the number of matches (independently of the visibility)
+     LinesCount getNbMatches() const;
++    SearchCompletion searchCompletion() const { return completion_; }
++    QString searchMessage() const { return completionMessage_; }
++    size_t peakSearchBufferBytes() const { return peakBufferBytes_; }
++    std::optional<OffsetInFile> firstMatchByte(LineNumber sourceLine) const;
++    QString searchError(const RegularExpressionPattern& pattern) const;
+     // Returns the number of marks (independently of the visibility)
+     LinesCount getNbMarks() const;
+ 
+@@ -144,10 +151,13 @@
+     void searchProgressedThrottled();
+ 
+   private Q_SLOTS:
+-    void handleSearchProgressed( LinesCount nbMatches, int progress, LineNumber initialLine );
++    void handleSearchProgressed( LinesCount nbMatches, int progress, LineNumber initialLine,
++                                quint64 generation );
+     void handleSearchProgressedThrottled();
+ 
+   private:
++    qint64 doGetLineByteSize(LineNumber line) const override;
++    LinePreview doGetLinePreview(LineNumber line, qint64 relativeByteOffset, qint64 maxBytes) const override;
+     // Implementation of virtual functions
+     QString doGetLineString( LineNumber line ) const override;
+     QString doGetExpandedLineString( LineNumber line ) const override;
+@@ -186,13 +196,19 @@
+     LineLength maxLengthMarks_;
+     // Number of lines of the LogData that has been searched for:
+     LinesCount nbLinesProcessed_;
++    quint64 generation_ = 0;
++    SearchCompletion completion_ = SearchCompletion::Running;
++    bool cacheRestored_ = false;
++    QString completionMessage_;
++    size_t peakBufferBytes_ = 0;
++    std::vector<LiteralHit> firstHits_;
+ 
+     Visibility visibility_;
+ 
+     LogFilteredDataWorker workerThread_;
+ 
+     Mutex searchProgressMutex_;
+-    std::tuple<LinesCount, int, LineNumber> searchProgress_;
++    std::tuple<LinesCount, int, LineNumber, quint64> searchProgress_;
+ 
+     KDToolBox::KDSignalThrottler searchProgressThrottler_;
+ 
+--- a/src/logdata/include/logfiltereddataworker.h
++++ b/src/logdata/include/logfiltereddataworker.h
+@@ -53,6 +53,7 @@
+ #include "linetypes.h"
+ #include "regularexpression.h"
+ #include "synchronization.h"
++#include "longlinesearch.h"
+ 
+ class LogData;
+ 
+@@ -89,6 +90,10 @@
+     SearchResultArray newMatches;
+     LineLength maxLength;
+     LinesCount processedLines;
++    SearchCompletion completion = SearchCompletion::Running;
++    QString message;
++    std::vector<LiteralHit> firstHits;
++    size_t peakBufferBytes = 0;
+ };
+ 
+ // This class is a mutex protected set of search result data.
+@@ -115,6 +120,8 @@
+ 
+     // Atomically clear the data.
+     void clear();
++    void finish(SearchCompletion completion, const QString& message = {},
++                std::vector<LiteralHit> hits = {}, size_t peakBufferBytes = 0);
+ 
+ private:
+     mutable SharedMutex dataMutex_;
+@@ -124,6 +131,10 @@
+     LineLength maxLength_{ 0 };
+     LinesCount nbLinesProcessed_{ 0 };
+     LinesCount nbMatches_{ 0 };
++    SearchCompletion completion_ = SearchCompletion::Running;
++    QString message_;
++    mutable std::vector<LiteralHit> firstHits_;
++    size_t peakBufferBytes_ = 0;
+ };
+ 
+ class SearchOperation : public QObject {
+@@ -131,14 +142,14 @@
+ public:
+     SearchOperation( const LogData& sourceLogData, AtomicFlag& interruptRequested,
+                      const RegularExpressionPattern& regExp, LineNumber startLine,
+-                     LineNumber endLine );
++                     LineNumber endLine, quint64 generation );
+ 
+     // Run the search operation, returns true if it has been done
+     // and false if it has been cancelled (results not copied)
+     virtual void run( SearchData& result ) = 0;
+ 
+ Q_SIGNALS:
+-    void searchProgressed( LinesCount nbMatches, int percent, LineNumber initialLine );
++    void searchProgressed( LinesCount nbMatches, int percent, LineNumber initialLine, quint64 generation );
+     void searchFinished();
+ 
+ protected:
+@@ -151,6 +162,7 @@
+     const LogData& sourceLogData_;
+     LineNumber startLine_;
+     LineNumber endLine_;
++    quint64 generation_;
+ };
+ 
+ class FullSearchOperation : public SearchOperation {
+@@ -158,8 +170,8 @@
+ public:
+     FullSearchOperation( const LogData& sourceLogData, AtomicFlag& interruptRequested,
+                          const RegularExpressionPattern& regExp, LineNumber startLine,
+-                         LineNumber endLine )
+-        : SearchOperation( sourceLogData, interruptRequested, regExp, startLine, endLine )
++                         LineNumber endLine, quint64 generation )
++        : SearchOperation( sourceLogData, interruptRequested, regExp, startLine, endLine, generation )
+     {
+     }
+ 
+@@ -171,8 +183,8 @@
+ public:
+     UpdateSearchOperation( const LogData& sourceLogData, AtomicFlag& interruptRequested,
+                            const RegularExpressionPattern& regExp, LineNumber startLine,
+-                           LineNumber endLine, LineNumber position )
+-        : SearchOperation( sourceLogData, interruptRequested, regExp, startLine, endLine )
++                           LineNumber endLine, LineNumber position, quint64 generation )
++        : SearchOperation( sourceLogData, interruptRequested, regExp, startLine, endLine, generation )
+         , initialPosition_( position )
+     {
+     }
+@@ -187,6 +199,7 @@
+     Q_OBJECT
+ 
+ public:
++    static constexpr size_t PipelineBudgetBytes = 128 * 1024 * 1024;
+     explicit LogFilteredDataWorker( const LogData& sourceLogData );
+     ~LogFilteredDataWorker() noexcept override;
+ 
+@@ -197,11 +210,12 @@
+     LogFilteredDataWorker& operator=( LogFilteredDataWorker&& ) = delete;
+ 
+     // Start the search with the passed regexp
+-    void search( const RegularExpressionPattern& regExp, LineNumber startLine, LineNumber endLine );
++    void search( const RegularExpressionPattern& regExp, LineNumber startLine, LineNumber endLine,
++                 quint64 generation );
+     // Continue the previous search starting at the passed position
+     // in the source file (line number)
+     void updateSearch( const RegularExpressionPattern& regExp, LineNumber startLine,
+-                       LineNumber endLine, LineNumber position );
++                       LineNumber endLine, LineNumber position, quint64 generation );
+ 
+     // Interrupts the search if one is in progress
+     void interrupt();
+@@ -212,7 +226,7 @@
+ Q_SIGNALS:
+     // Sent during the indexing process to signal progress
+     // percent being the percentage of completion.
+-    void searchProgressed( LinesCount nbMatches, int percent, LineNumber initialLine );
++    void searchProgressed( LinesCount nbMatches, int percent, LineNumber initialLine, quint64 generation );
+     // Sent when indexing is finished, signals the client
+     // to copy the new data back.
+     void searchFinished();
+--- /dev/null
++++ b/src/logdata/include/longlinesearch.h
+@@ -0,0 +1,41 @@
++// SPDX-License-Identifier: GPL-3.0-or-later
++#pragma once
++
++#include "atomicflag.h"
++#include "logdata.h"
++#include "regularexpressionpattern.h"
++#include <functional>
++#include <vector>
++
++enum class SearchCompletion { Running, Complete, Cancelled, Partial, Failed, SourceChanged };
++
++struct LiteralHit {
++    LineNumber line;
++    OffsetInFile byteOffset;
++};
++
++struct LiteralSearchOptions {
++    qint64 chunkBytes = 1024 * 1024;
++    size_t maxMatchingLines = 65536;
++    static constexpr qint64 MaxPatternBytes = 1024 * 1024;
++};
++
++struct LiteralSearchResult {
++    SearchCompletion completion = SearchCompletion::Failed;
++    QString message;
++    std::vector<LiteralHit> hits;
++    qint64 bytesProcessed = 0;
++    quint64 completedLines = 0;
++    size_t peakBufferBytes = 0;
++};
++
++// Every hit is the first occurrence on a source line. LF is a delimiter, CR is
++// content (the same raw-line semantics as the existing UTF-8 search path).
++LiteralSearchResult searchLiteralBytes(
++    const LogData& source, const LogData::SourceSnapshot& snapshot,
++    LineNumber firstLine, OffsetInFile begin, OffsetInFile end, const QByteArray& pattern,
++    const AtomicFlag& cancelled, const LiteralSearchOptions& options = {},
++    const std::function<void(qint64, size_t)>& progress = {});
++
++QString searchCompletionName(SearchCompletion completion);
++QString longLineSearchError(const LogData& source, const RegularExpressionPattern& pattern);
+--- a/src/logdata/src/compressedlinestorage.cpp
++++ b/src/logdata/src/compressedlinestorage.cpp
+@@ -41,8 +41,14 @@
+ 
+ void CompressedLinePositionStorage::move_from( CompressedLinePositionStorage&& orig ) noexcept
+ {
++    if ( this == &orig ) {
++        return;
++    }
+     blocks_ = std::move( orig.blocks_ );
++    wideBlockFlags_ = std::move( orig.wideBlockFlags_ );
+     packedLinesStorage_ = std::move( orig.packedLinesStorage_ );
++    packedLinesStorageUsedSize_ = orig.packedLinesStorageUsedSize_;
++    wideLinesStorage_ = std::move( orig.wideLinesStorage_ );
+     currentLinesBlock_ = std::move( orig.currentLinesBlock_ );
+     currentLinesBlockShifted_ = std::move( orig.currentLinesBlockShifted_ );
+ 
+@@ -52,6 +58,13 @@
+ 
+     orig.nbLines_ = 0_lcount;
+     orig.lastPos_ = 0_offset;
++    orig.packedLinesStorageUsedSize_ = 0;
++    orig.blocks_.clear();
++    orig.wideBlockFlags_.clear();
++    orig.packedLinesStorage_.clear();
++    orig.wideLinesStorage_.clear();
++    orig.currentLinesBlock_.clear();
++    orig.currentLinesBlockShifted_.clear();
+ }
+ 
+ CompressedLinePositionStorage::CompressedLinePositionStorage()
+@@ -79,8 +92,11 @@
+     assert( ( pos > lastPos_ ) || ( pos == 0_offset ) );
+ 
+     currentLinesBlock_.push_back( pos );
++    const auto delta = pos.get() - currentLinesBlock_.front().get();
+     currentLinesBlockShifted_.push_back(
+-        type_safe::narrow_cast<uint32_t>( pos.get() - currentLinesBlock_.front().get() ) );
++        delta > std::numeric_limits<uint32_t>::max()
++            ? 0u
++            : type_safe::narrow_cast<uint32_t>( delta ) );
+ 
+     if ( currentLinesBlock_.size() == SimdIndexBlockSize ) {
+         compress_current_block();
+@@ -95,15 +111,28 @@
+     BlockMetadata& block = blocks_.emplace_back();
+     block.firstLineOffset = currentLinesBlock_.front();
+ 
+-    const size_t packedLinesSize = streamvbyte_max_compressedbytes( SimdIndexBlockSize );
+-    packedLinesStorage_.resize( packedLinesStorageUsedSize_ + packedLinesSize );
+-    block.packetStorageOffset = packedLinesStorageUsedSize_;
+-
+-    const size_t packedBytes
+-        = streamvbyte_delta_encode( currentLinesBlockShifted_.data(), SimdIndexBlockSize,
+-                                    packedLinesStorage_.data() + block.packetStorageOffset, 0 );
+-
+-    packedLinesStorageUsedSize_ += packedBytes;
++    const auto blockSpan = static_cast<uint64_t>( currentLinesBlock_.back().get()
++                                                  - currentLinesBlock_.front().get() );
++    const bool usesWideStorage = blockSpan > std::numeric_limits<uint32_t>::max();
++    wideBlockFlags_.push_back( usesWideStorage ? 1u : 0u );
++    if ( usesWideStorage ) {
++        block.storageOffset = wideLinesStorage_.size();
++        for ( const auto pos : currentLinesBlock_ ) {
++            wideLinesStorage_.push_back( static_cast<uint64_t>( pos.get()
++                                                                - block.firstLineOffset.get() ) );
++        }
++    }
++    else {
++        const size_t packedLinesSize = streamvbyte_max_compressedbytes( SimdIndexBlockSize );
++        packedLinesStorage_.resize( packedLinesStorageUsedSize_ + packedLinesSize );
++        block.storageOffset = packedLinesStorageUsedSize_;
++
++        const size_t packedBytes
++            = streamvbyte_delta_encode( currentLinesBlockShifted_.data(), SimdIndexBlockSize,
++                                        packedLinesStorage_.data() + block.storageOffset, 0 );
++
++        packedLinesStorageUsedSize_ += packedBytes;
++    }
+ 
+     currentLinesBlock_.clear();
+     currentLinesBlockShifted_.clear();
+@@ -125,8 +154,12 @@
+     }
+ 
+     const BlockMetadata& block = blocks_[ blockIndex ];
++    if ( wideBlockFlags_[ blockIndex ] ) {
++        const auto delta = wideLinesStorage_[ block.storageOffset + indexInBlock ];
++        return block.firstLineOffset + OffsetInFile( static_cast<int64_t>( delta ) );
++    }
+     std::array<uint32_t, SimdIndexBlockSize> unpackedBlock;
+-    streamvbyte_delta_decode( &packedLinesStorage_[ block.packetStorageOffset ],
++    streamvbyte_delta_decode( &packedLinesStorage_[ block.storageOffset ],
+                               unpackedBlock.data(), SimdIndexBlockSize, 0 );
+ 
+     return block.firstLineOffset + OffsetInFile( unpackedBlock[ indexInBlock ] );
+@@ -145,16 +178,32 @@
+     currentLinesBlock_.resize( SimdIndexBlockSize );
+     currentLinesBlockShifted_.resize( SimdIndexBlockSize );
+     const BlockMetadata& block = blocks_.back();
+-
+-    streamvbyte_delta_decode( &packedLinesStorage_[ block.packetStorageOffset ],
+-                              currentLinesBlockShifted_.data(), SimdIndexBlockSize, 0 );
+-
+-    std::transform( currentLinesBlockShifted_.begin(), currentLinesBlockShifted_.end(),
+-                    currentLinesBlock_.begin(), [ &block ]( uint32_t pos ) {
+-                        return OffsetInFile( pos ) + block.firstLineOffset;
+-                    } );
++    const bool usesWideStorage = wideBlockFlags_.back() != 0;
++
++    if ( usesWideStorage ) {
++        for ( size_t i = 0; i < SimdIndexBlockSize; ++i ) {
++            const auto delta = wideLinesStorage_[ block.storageOffset + i ];
++            currentLinesBlock_[ i ]
++                = block.firstLineOffset + OffsetInFile( static_cast<int64_t>( delta ) );
++            currentLinesBlockShifted_[ i ]
++                = delta <= std::numeric_limits<uint32_t>::max() ? static_cast<uint32_t>( delta ) : 0u;
++        }
++        wideLinesStorage_.resize( block.storageOffset );
++    }
++    else {
++        streamvbyte_delta_decode( &packedLinesStorage_[ block.storageOffset ],
++                                  currentLinesBlockShifted_.data(), SimdIndexBlockSize, 0 );
++
++        std::transform( currentLinesBlockShifted_.begin(), currentLinesBlockShifted_.end(),
++                        currentLinesBlock_.begin(), [ &block ]( uint32_t pos ) {
++                            return OffsetInFile( pos ) + block.firstLineOffset;
++                        } );
++        packedLinesStorageUsedSize_ = block.storageOffset;
++        packedLinesStorage_.resize( packedLinesStorageUsedSize_ + STREAMVBYTE_PADDING );
++    }
+ 
+     blocks_.pop_back();
++    wideBlockFlags_.pop_back();
+ }
+ 
+ void CompressedLinePositionStorage::pop_back()
+@@ -181,21 +230,30 @@
+ 
+ size_t CompressedLinePositionStorage::allocatedSize() const
+ {
+-    return packedLinesStorage_.size() + blocks_.size() * sizeof( BlockMetadata );
++    return packedLinesStorage_.capacity() + wideLinesStorage_.capacity() * sizeof( uint64_t )
++           + blocks_.capacity() * sizeof( BlockMetadata ) + wideBlockFlags_.capacity()
++           + currentLinesBlock_.capacity() * sizeof( OffsetInFile )
++           + currentLinesBlockShifted_.capacity() * sizeof( uint32_t );
+ }
+ 
+ klogg::vector<OffsetInFile> CompressedLinePositionStorage::range( LineNumber firstLine,
+                                                                   LinesCount count ) const
+ {
++    if ( count.get() == 0 ) {
++        return {};
++    }
++    if ( firstLine.get() >= nbLines_.get() || count.get() > nbLines_.get() - firstLine.get() ) {
++        throw std::out_of_range( "Line range not in storage" );
++    }
++
+     const size_t firstBlockIndex = firstLine.get() / SimdIndexBlockSize;
+     const size_t indexInFirstBlock = firstLine.get() % SimdIndexBlockSize;
+-
+-    const LineNumber lastLine = firstLine + count - 1_lcount;
+-    const size_t lastBlockIndex = lastLine.get() / SimdIndexBlockSize;
+-    const size_t indexInLastBlock = lastLine.get() % SimdIndexBlockSize;
++    const size_t lastLineIndex = static_cast<size_t>( firstLine.get() + count.get() - 1 );
++    const size_t lastBlockIndex = lastLineIndex / SimdIndexBlockSize;
++    const size_t indexInLastBlock = lastLineIndex % SimdIndexBlockSize;
+ 
+     klogg::vector<OffsetInFile> result;
+-    result.reserve( count.get() );
++    result.reserve( static_cast<size_t>( count.get() ) );
+ 
+     if ( firstBlockIndex == blocks_.size() ) {
+         std::copy( currentLinesBlock_.begin() + static_cast<int64_t>( indexInFirstBlock ),
+@@ -203,25 +261,34 @@
+                    std::back_inserter( result ) );
+     }
+     else {
+-        size_t lastBlockToUnpack = std::min( lastBlockIndex, blocks_.size() - 1 );
+-        for ( size_t blockIndex = firstBlockIndex; blockIndex <= lastBlockToUnpack; ++blockIndex ) {
++        for ( size_t blockIndex = firstBlockIndex;
++              blockIndex <= lastBlockIndex && blockIndex < blocks_.size(); ++blockIndex ) {
+             const BlockMetadata& block = blocks_[ blockIndex ];
+-            std::array<uint32_t, SimdIndexBlockSize> unpackedBlock;
+-            streamvbyte_delta_decode( &packedLinesStorage_[ block.packetStorageOffset ],
+-                                      unpackedBlock.data(), SimdIndexBlockSize, 0 );
++            const bool usesWideStorage = wideBlockFlags_[ blockIndex ] != 0;
+             const size_t copyFromIndex = blockIndex == firstBlockIndex ? indexInFirstBlock : 0u;
+-            const size_t copyToIndex
+-                = blockIndex == lastBlockIndex ? indexInLastBlock + 1 : unpackedBlock.size();
+-
+-            std::transform( unpackedBlock.begin() + copyFromIndex,
+-                            unpackedBlock.begin() + copyToIndex, std::back_inserter( result ),
+-                            [ &block ]( uint32_t pos ) {
+-                                return OffsetInFile( pos ) + block.firstLineOffset;
+-                            } );
++            const size_t copyToIndex = blockIndex == lastBlockIndex ? indexInLastBlock + 1
++                                                                    : SimdIndexBlockSize;
++            if ( usesWideStorage ) {
++                for ( size_t i = copyFromIndex; i < copyToIndex; ++i ) {
++                    const auto delta = wideLinesStorage_[ block.storageOffset + i ];
++                    result.push_back( block.firstLineOffset + OffsetInFile( static_cast<int64_t>( delta ) ) );
++                }
++            }
++            else {
++                std::array<uint32_t, SimdIndexBlockSize> unpackedBlock;
++                streamvbyte_delta_decode( &packedLinesStorage_[ block.storageOffset ],
++                                          unpackedBlock.data(), SimdIndexBlockSize, 0 );
++                std::transform( unpackedBlock.begin() + copyFromIndex,
++                                unpackedBlock.begin() + copyToIndex, std::back_inserter( result ),
++                                [ &block ]( uint32_t pos ) {
++                                    return OffsetInFile( pos ) + block.firstLineOffset;
++                                } );
++            }
+         }
+ 
+         if ( lastBlockIndex == blocks_.size() ) {
+-            std::copy( currentLinesBlock_.begin(),
++            const size_t copyFromIndex = firstBlockIndex == blocks_.size() ? indexInFirstBlock : 0u;
++            std::copy( currentLinesBlock_.begin() + static_cast<int64_t>( copyFromIndex ),
+                        currentLinesBlock_.begin() + static_cast<int64_t>( indexInLastBlock + 1 ),
+                        std::back_inserter( result ) );
+         }
+--- a/src/logdata/src/logdata.cpp
++++ b/src/logdata/src/logdata.cpp
+@@ -41,6 +41,7 @@
+ #include <algorithm>
+ #include <limits>
+ #include <numeric>
++#include <stdexcept>
+ #include <qregularexpression.h>
+ #include <qtextcodec.h>
+ #include <string_view>
+@@ -103,6 +104,24 @@
+ {
+     IndexingData::MutateAccessor scopedAccessor{ indexing_data_.get() };
+     prefilterPattern_ = prefilterPattern;
++    ++sourceGeneration_;
++    const std::lock_guard<std::mutex> lock( snapshotMutex_ );
++    indexedSnapshot_.generation = sourceGeneration_.load();
++}
++
++bool LogData::hasPrefilter() const
++{
++    IndexingData::ConstAccessor access{ indexing_data_.get() };
++    return !prefilterPattern_.isEmpty();
++}
++
++void LogData::captureIndexSource()
++{
++    snapshotReady_.store( false );
++    const QFileInfo info( indexingFileName_ );
++    const std::lock_guard<std::mutex> lock( snapshotMutex_ );
++    indexedSnapshot_ = { info.absoluteFilePath(), FileId::getFileId( info.absoluteFilePath() ),
++                         info.size(), info.lastModified(), sourceGeneration_.load() };
+ }
+ 
+ void LogData::attachFile( const QString& fileName )
+@@ -114,7 +133,9 @@
+         throw CantReattachErr();
+     }
+ 
++    ++sourceGeneration_;
+     indexingFileName_ = fileName;
++    captureIndexSource();
+     attached_file_.reset( new FileHolder( keepFileClosed_ ) );
+     attached_file_->open( indexingFileName_ );
+ 
+@@ -144,6 +165,8 @@
+ 
+ void LogData::reload( QTextCodec* forcedEncoding )
+ {
++    ++sourceGeneration_;
++    captureIndexSource();
+     operationQueue_.interrupt();
+ 
+     // Re-open the file, useful in case the file has been moved
+@@ -154,6 +177,8 @@
+ 
+ void LogData::fileChangedOnDisk( const QString& filename )
+ {
++    ++sourceGeneration_;
++    captureIndexSource();
+     LOG_INFO << "signalFileChanged " << filename << ", indexed file " << indexingFileName_;
+ 
+     QFileInfo info( indexingFileName_ );
+@@ -214,6 +239,14 @@
+             lastModifiedDate_ = fileInfo.lastModified();
+     }
+ 
++    if ( status == LoadingStatus::Successful ) {
++        const auto expected = snapshot();
++        const QFileInfo info( expected.path );
++        snapshotReady_.store( sourceGeneration_.load() == expected.generation
++                              && info.size() == expected.size && info.lastModified() == expected.mtime
++                              && !( FileId::getFileId( expected.path ) != expected.id )
++                              && getFileSize() == expected.size );
++    }
+     fileChangedOnDisk_ = MonitoredFileStatus::Unchanged;
+ 
+     LOG_DEBUG << "Sending indexingFinished.";
+@@ -240,6 +273,7 @@
+             break;
+         case MonitoredFileStatus::Unchanged:
+             fileChangedOnDisk_ = MonitoredFileStatus::Unchanged;
++            snapshotReady_.store( getFileSize() == snapshot().size );
+             break;
+         }
+     }
+@@ -274,13 +308,24 @@
+         return 0_length; /* exception? */
+     }
+ 
++    if ( doGetLineByteSize( line ) > PreviewByteLimit ) return LineLength{ PreviewByteLimit * TabStop };
+     return LineLength{ doGetExpandedLineString( line ).size() };
+ }
+ 
+ void LogData::doSetDisplayEncoding( const char* encoding )
+ {
+     LOG_DEBUG << "AbstractLogData::setDisplayEncoding: " << encoding;
+-    codec_.setCodec( QTextCodec::codecForName( encoding ) );
++    const auto newCodec = QTextCodec::codecForName( encoding );
++    if ( !newCodec ) return;
++    bool changed = false;
++    { const std::lock_guard<std::mutex> lock( codecMutex_ );
++      changed = codec_.mibEnum() != newCodec->mibEnum();
++      if ( changed ) codec_.setCodec( newCodec ); }
++    if ( changed ) {
++        ++sourceGeneration_;
++        const std::lock_guard<std::mutex> lock( snapshotMutex_ );
++        indexedSnapshot_.generation = sourceGeneration_.load();
++    }
+     auto needReload = false;
+     auto useGuessedCodec = false;
+ 
+@@ -292,21 +337,22 @@
+             currentIndexCodec = scopedAccessor.getEncodingGuess();
+         }
+ 
+-        if ( currentIndexCodec && codec_.mibEnum() != currentIndexCodec->mibEnum() ) {
+-            if ( codec_.encodingParameters() != EncodingParameters( currentIndexCodec ) ) {
++        if ( currentIndexCodec && newCodec->mibEnum() != currentIndexCodec->mibEnum() ) {
++            if ( EncodingParameters( newCodec ) != EncodingParameters( currentIndexCodec ) ) {
+                 needReload = true;
+-                useGuessedCodec = codec_.mibEnum() == scopedAccessor.getEncodingGuess()->mibEnum();
++                useGuessedCodec = newCodec->mibEnum() == scopedAccessor.getEncodingGuess()->mibEnum();
+             }
+         }
+     }
+ 
+     if ( needReload ) {
+-        reload( useGuessedCodec ? nullptr : codec_.codec() );
++        reload( useGuessedCodec ? nullptr : newCodec );
+     }
+ }
+ 
+ QTextCodec* LogData::doGetDisplayEncoding() const
+ {
++    const std::lock_guard<std::mutex> lock( codecMutex_ );
+     return codec_.codec();
+ }
+ 
+@@ -350,10 +396,12 @@
+ {
+     RawLines rawLines;
+     rawLines.startLine = firstLine;
++    if ( number.get() == 0 ) return rawLines;
+ 
+     try {
+         IndexingData::ConstAccessor scopedAccessor{ indexing_data_.get() };
+-        if ( (firstLine + number).get() > scopedAccessor.getNbLines().get() ) {
++        if ( firstLine.get() > scopedAccessor.getNbLines().get()
++             || number.get() > scopedAccessor.getNbLines().get() - firstLine.get() ) {
+             LOG_WARNING << "Lines out of bound asked for";
+             return {}; /* exception? */
+         }
+@@ -376,32 +424,194 @@
+             = scopedAccessor.getEndOfLineOffsets( firstLine, number );
+ 
+         const auto lastByte = endOfLines.back().get();
++        if ( firstByte < 0 || lastByte < firstByte || firstByte > scopedAccessor.getIndexedSize() )
++            throw std::runtime_error( "Invalid indexed byte range" );
+ 
+         std::transform(
+             endOfLines.begin(), endOfLines.end(), std::back_inserter( rawLines.endOfLines ),
+             [ firstByte ]( const OffsetInFile& offset ) { return offset.get() - firstByte; } );
+ 
+-        const auto bytesToRead = lastByte - firstByte;
++        // The index may carry a synthetic final LF beyond physical EOF.
++        const auto bytesToRead = std::min( lastByte, scopedAccessor.getIndexedSize() ) - firstByte;
+         LOG_DEBUG << "will try to read:" << bytesToRead << " bytes";
+         rawLines.buffer.resize( static_cast<std::size_t>( bytesToRead ) );
+ 
+-        fileHolder.getFile()->seek( firstByte );
++        if ( !fileHolder.getFile()->seek( firstByte ) ) throw std::runtime_error( "File seek failed" );
+         const auto bytesRead = fileHolder.getFile()->read( rawLines.buffer.data(), bytesToRead );
+ 
+         if ( bytesRead != bytesToRead ) {
+             LOG_DEBUG << "failed to read " << bytesToRead << " bytes, got " << bytesRead;
++            throw std::runtime_error( "Source changed or file read failed" );
+         }
+ 
+         LOG_DEBUG << "done reading lines:" << rawLines.buffer.size();
+-        rawLines.textDecoder = codec_.makeDecoder();
++        { const std::lock_guard<std::mutex> lock( codecMutex_ ); rawLines.textDecoder = codec_.makeDecoder(); }
+         return rawLines;
+ 
+     } catch ( const std::bad_alloc& ) {
+         LOG_ERROR << "not enough memory";
+-        rawLines.endOfLines.clear();
+-        rawLines.buffer.clear();
+-        return rawLines;
+-    }
++        throw;
++    }
++}
++
++LogData::SourceSnapshot LogData::snapshot() const
++{
++    const std::lock_guard<std::mutex> lock( snapshotMutex_ );
++    return indexedSnapshot_;
++}
++
++bool LogData::matchesSnapshot( const SourceSnapshot& expected ) const
++{
++    if ( !snapshotReady_.load() || sourceGeneration_.load() != expected.generation ) return false;
++    const auto indexed = snapshot();
++    if ( indexed.path != expected.path || indexed.id != expected.id || indexed.size != expected.size
++         || indexed.mtime != expected.mtime || getFileSize() != expected.size ) return false;
++    const QFileInfo info( expected.path );
++    return info.isFile() && info.size() == expected.size && info.lastModified() == expected.mtime
++           && !( FileId::getFileId( expected.path ) != expected.id );
++}
++
++std::optional<LogData::LineByteRange>
++LogData::lineByteRange( LineNumber line, const SourceSnapshot& expected ) const
++{
++    if ( !matchesSnapshot( expected ) ) return std::nullopt;
++    IndexingData::ConstAccessor access{ indexing_data_.get() };
++    if ( line >= access.getNbLines() ) return std::nullopt;
++    const auto begin = line == 0_lnum ? int64_t{ 0 }
++                                     : access.getEndOfLineOffset( line - 1_lcount ).get();
++    const auto end = std::min( access.getEndOfLineOffset( line ).get(), expected.size );
++    if ( begin < 0 || end < begin || end > expected.size ) return std::nullopt;
++    return LineByteRange{ OffsetInFile( begin ), OffsetInFile( end ) };
++}
++
++std::optional<LogData::SearchBatchPlan> LogData::planSearchBatch(
++    LineNumber first, LinesCount maxLines, qint64 maxRawBytes,
++    const SourceSnapshot& expected ) const
++{
++    if ( maxLines.get() == 0 || maxRawBytes <= 0 || maxRawBytes > MaxByteRead
++         || !matchesSnapshot( expected ) ) return std::nullopt;
++    IndexingData::ConstAccessor access{ indexing_data_.get() };
++    if ( first >= access.getNbLines() || access.getIndexedSize() != expected.size )
++        return std::nullopt;
++    const auto begin = first == 0_lnum ? qint64{ 0 }
++        : access.getEndOfLineOffset( first - 1_lcount ).get();
++    if ( begin < 0 || begin > expected.size ) return std::nullopt;
++    const auto bytesFor = [&]( LinesCount::UnderlyingType count ) {
++        const auto last = first + LinesCount( count - 1 );
++        return std::min( access.getEndOfLineOffset( last ).get(), expected.size ) - begin;
++    };
++    const auto available = access.getNbLines().get() - first.get();
++    auto count = std::min( maxLines.get(), available );
++    auto bytes = bytesFor( count );
++    if ( bytes < 0 ) return std::nullopt;
++    if ( bytes > maxRawBytes ) {
++        auto low = LinesCount::UnderlyingType{ 0 };
++        auto high = count;
++        while ( low < high ) {
++            const auto middle = low + ( high - low + 1 ) / 2;
++            if ( bytesFor( middle ) <= maxRawBytes ) low = middle;
++            else high = middle - 1;
++        }
++        count = low;
++        bytes = count ? bytesFor( count ) : bytesFor( 1 );
++    }
++    return SearchBatchPlan{ LinesCount( count ), bytes };
++}
++
++LogData::ByteRead LogData::readBytes( const SourceSnapshot& expected, OffsetInFile begin,
++                                    qint64 count, const std::atomic_bool* cancel ) const
++{
++    const auto cancelled = [ cancel ] { return cancel && cancel->load(); };
++    if ( cancelled() ) return { ReadStatus::Cancelled, {} };
++    if ( !matchesSnapshot( expected ) ) return { ReadStatus::SourceChanged, {} };
++    if ( count < 0 || count > MaxByteRead ) return { ReadStatus::TooLarge, {} };
++    if ( begin.get() < 0 || begin.get() > expected.size || count > expected.size - begin.get() )
++        return { ReadStatus::Failed, {} };
++    QFile file( expected.path );
++    if ( !file.open( QIODevice::ReadOnly ) || !file.seek( begin.get() ) )
++        return { ReadStatus::Failed, {} };
++    QByteArray bytes;
++    bytes.resize( static_cast<int>( count ) );
++    qint64 consumed = 0;
++    while ( consumed < count ) {
++        if ( cancelled() ) return { ReadStatus::Cancelled, {} };
++        const auto requested = std::min<qint64>( count - consumed, 64 * 1024 );
++        const auto read = file.read( bytes.data() + consumed, requested );
++        if ( read != requested ) return { ReadStatus::SourceChanged, {} };
++        consumed += read;
++    }
++    if ( cancelled() ) return { ReadStatus::Cancelled, {} };
++    if ( !matchesSnapshot( expected ) ) return { ReadStatus::SourceChanged, {} };
++    return { ReadStatus::Complete, std::move( bytes ) };
++}
++
++qint64 LogData::doGetLineByteSize( LineNumber line ) const
++{
++    IndexingData::ConstAccessor access{ indexing_data_.get() };
++    if ( line >= access.getNbLines() ) return -1;
++    const auto begin = line == 0_lnum ? int64_t{ 0 }
++                                     : access.getEndOfLineOffset( line - 1_lcount ).get();
++    return std::max<int64_t>( 0, std::min( access.getEndOfLineOffset( line ).get(),
++                                          access.getIndexedSize() ) - begin );
++}
++
++AbstractLogData::LinePreview LogData::doGetLinePreview( LineNumber line, qint64 offset,
++                                                       qint64 maxBytes ) const
++{
++    LinePreview result;
++    const auto expected = snapshot();
++    const auto range = lineByteRange( line, expected );
++    if ( !range ) { result.error = tr( "File changed or index unavailable" ); return result; }
++    result.absoluteLineBegin = range->begin.get();
++    result.totalBytes = range->end.get() - range->begin.get();
++    const auto limit = std::clamp<qint64>( maxBytes, 0, PreviewByteLimit );
++    offset = std::clamp<qint64>( offset, 0, result.totalBytes );
++    const bool whole = offset == 0 && result.totalBytes <= limit;
++    if ( whole ) {
++        // Preserve the established decoding/prefilter behavior for bounded ordinary lines.
++        result.text = doGetLineString( line );
++        result.byteEnd = result.totalBytes;
++        if ( !matchesSnapshot( expected ) ) { result.text.clear(); result.error = tr( "File changed" ); }
++        return result;
++    }
++    result.truncated = true;
++    int displayMib = 0;
++    { const std::lock_guard<std::mutex> lock( codecMutex_ ); displayMib = codec_.mibEnum(); }
++    if ( displayMib != 106 || hasPrefilter() ) {
++        result.error = tr( "Long-line preview supports UTF-8 without a prefilter only" );
++        return result;
++    }
++    auto read = readBytes( expected, OffsetInFile( range->begin.get() + offset ),
++                           std::min( limit, result.totalBytes - offset ) );
++    if ( read.status != ReadStatus::Complete ) { result.error = tr( "File changed or preview read failed" ); return result; }
++    auto& bytes = read.bytes;
++    // Align arbitrary byte anchors without inventing a Unicode/display column.
++    int skip = 0;
++    if ( offset > 0 ) {
++        while ( skip < bytes.size() && skip < 3
++                && ( static_cast<unsigned char>( bytes[ skip ] ) & 0xc0 ) == 0x80 ) ++skip;
++        bytes.remove( 0, skip );
++        offset += skip;
++    }
++    if ( offset + bytes.size() < result.totalBytes && !bytes.isEmpty() ) {
++        auto lead = bytes.size() - 1;
++        while ( lead > 0 && bytes.size() - lead < 4
++                && ( static_cast<unsigned char>( bytes[ lead ] ) & 0xc0 ) == 0x80 ) --lead;
++        const auto c = static_cast<unsigned char>( bytes[ lead ] );
++        const int required = c >= 0xf0 && c <= 0xf4 ? 4 : c >= 0xe0 && c <= 0xef ? 3
++                              : c >= 0xc2 && c <= 0xdf ? 2 : 1;
++        if ( bytes.size() - lead < required ) bytes.truncate( lead );
++    }
++    result.byteBegin = offset;
++    result.byteEnd = offset + bytes.size();
++    if ( result.byteEnd == result.totalBytes && bytes.endsWith( '\n' ) ) {
++        bytes.chop( 1 );
++        if ( bytes.endsWith( '\r' ) ) bytes.chop( 1 );
++    }
++    result.text = QString::fromUtf8( bytes );
++    if ( result.absoluteLineBegin == 0 && offset == 0 && result.text.startsWith( QChar( 0xfeff ) ) )
++        result.text.remove( 0, 1 );
++    return result;
+ }
+ 
+ klogg::vector<QString> LogData::getLinesFromFile( LineNumber firstLine, LinesCount number,
+@@ -567,13 +777,7 @@
+ 
+     } catch ( const std::exception& e ) {
+         LOG_ERROR << "failed to transform lines to utf8 " << e.what();
+-        const auto lastLineOffset = utf8Data_.size();
+-        // utf8Data_.append( "KLOGG WARNING: not enough memory, try decrease search buffer" );
+-        lines.reserve( this->endOfLines.size() - lines.size() );
+-        while ( lines.size() < this->endOfLines.size() ) {
+-            lines.emplace_back( utf8Data_.data() + lastLineOffset,
+-                                utf8Data_.size() - lastLineOffset );
+-        }
++        throw;
+     }
+ 
+     return lines;
+--- a/src/logdata/src/logfiltereddata.cpp
++++ b/src/logdata/src/logfiltereddata.cpp
+@@ -108,7 +108,7 @@
+              << endLine.get();
+ 
+     bool shouldRunSearch = true;
+-    if ( config.useSearchResultsCache() ) {
++    if ( config.useSearchResultsCache() && sourceLogData_->getMaxLength().get() < 1024 * 1024 ) {
+         const auto cachedResults = searchResultsCache_.find( currentSearchKey_ );
+         if ( cachedResults != std::end( searchResultsCache_ ) ) {
+             LOG_INFO << "Got result from cache";
+@@ -117,6 +117,8 @@
+             maxLength_ = cachedResults->second.maxLength;
+ 
+             marks_and_matches_ = matching_lines_ | marks_;
++            completion_ = SearchCompletion::Complete;
++            cacheRestored_ = true;
+ 
+             Q_EMIT searchProgressed( LinesCount( matching_lines_.cardinality() ), 100, startLine );
+         }
+@@ -124,19 +126,39 @@
+ 
+     if ( shouldRunSearch ) {
+         attachReader();
+-        workerThread_.search( currentRegExp_, startLine, endLine );
++        workerThread_.search( currentRegExp_, startLine, endLine, generation_ );
+     }
+ }
+ 
+ void LogFilteredData::updateSearch( LineNumber startLine, LineNumber endLine )
+ {
+     LOG_DEBUG << "Entering updateSearch";
++
++    if (cacheRestored_ || completion_ != SearchCompletion::Complete
++        || sourceLogData_->getMaxLength().get() >= 1024 * 1024) {
++        const auto pattern = currentRegExp_;
++        // Cached display results have no corresponding worker accumulator.
++        // FullSearchOperation must clear any results from another query before
++        // follow can add new matches. Bypass a cache entry for this exact range.
++        searchResultsCache_.erase(makeCacheKey(pattern, startLine, endLine));
++        runSearch(pattern, startLine, endLine);
++        return;
++    }
++    ++generation_;
++    // The last processed line may have grown, changing even a previous match
++    // (for example an end-anchored regex). Replace its result on follow.
++    if (nbLinesProcessed_.get() > 0) {
++        matching_lines_.remove(nbLinesProcessed_.get() - 1);
++        marks_and_matches_ = matching_lines_ | marks_;
++    }
++    completion_ = SearchCompletion::Running;
++    completionMessage_.clear();
+ 
+     currentSearchKey_ = {};
+ 
+     attachReader();
+     workerThread_.updateSearch( currentRegExp_, startLine, endLine,
+-                                LineNumber( nbLinesProcessed_.get() ) );
++                                LineNumber( nbLinesProcessed_.get() ), generation_ );
+ }
+ 
+ void LogFilteredData::interruptSearch()
+@@ -148,6 +170,7 @@
+ 
+ void LogFilteredData::clearSearch( bool dropCache )
+ {
++    ++generation_;
+     interruptSearch();
+ 
+     currentRegExp_ = {};
+@@ -155,6 +178,11 @@
+     marks_and_matches_ = marks_;
+     maxLength_ = 0_length;
+     nbLinesProcessed_ = 0_lcount;
++    completion_ = SearchCompletion::Running;
++    cacheRestored_ = false;
++    completionMessage_.clear();
++    firstHits_.clear();
++    peakBufferBytes_ = 0;
+ 
+     if ( dropCache ) {
+         searchResultsCache_.clear();
+@@ -169,6 +197,16 @@
+ LineNumber LogFilteredData::getLineIndexNumber( LineNumber lineNumber ) const
+ {
+     return findFilteredLine( lineNumber );
++}
++
++const AbstractLogData* LogFilteredData::previewSource() const
++{
++    return sourceLogData_;
++}
++
++LineNumber LogFilteredData::previewSourceLine( LineNumber viewLine ) const
++{
++    return findLogDataLine( viewLine );
+ }
+ 
+ // Scan the list for the 'lineNumber' passed
+@@ -395,26 +433,44 @@
+ // Q_SLOTS:
+ //
+ void LogFilteredData::handleSearchProgressed( LinesCount nbMatches, int progress,
+-                                              LineNumber initialLine )
+-{
++                                              LineNumber initialLine, quint64 generation )
++{
++    // Finishing an obsolete task still releases its own reader reference, but
++    // may never consume shared results belonging to a newer request.
++    if (generation != generation_) {
++        if (progress == 100) detachReader();
++        return;
++    }
+     assert( nbMatches >= 0_lcount );
+ 
+-    const auto searchResults = workerThread_.getSearchResults();
++    auto searchResults = workerThread_.getSearchResults();
+ 
+     matching_lines_ |= searchResults.newMatches;
+     marks_and_matches_ |= searchResults.newMatches;
++    nbMatches = LinesCount(matching_lines_.cardinality());
+ 
+     maxLength_ = searchResults.maxLength;
+     nbLinesProcessed_ = searchResults.processedLines;
+-
+-    if ( progress == 100
++    completion_ = searchResults.completion;
++    completionMessage_ = searchResults.message;
++    peakBufferBytes_ = searchResults.peakBufferBytes;
++    if (!searchResults.firstHits.empty()) firstHits_ = std::move(searchResults.firstHits);
++    if (completion_ == SearchCompletion::SourceChanged || completion_ == SearchCompletion::Failed) {
++        matching_lines_ = {};
++        marks_and_matches_ = marks_;
++        firstHits_.clear();
++        nbMatches = 0_lcount;
++    }
++
++    if ( progress == 100 && completion_ == SearchCompletion::Complete
++         && sourceLogData_->getMaxLength().get() < 1024 * 1024
+          && nbLinesProcessed_.get() == getExpectedSearchEnd( currentSearchKey_ ).get() ) {
+         updateSearchResultsCache();
+     }
+ 
+     {
+         ScopedLock lock( searchProgressMutex_ );
+-        searchProgress_ = std::make_tuple( nbMatches, progress, initialLine );
++        searchProgress_ = std::make_tuple( nbMatches, progress, initialLine, generation );
+     }
+ 
+     Q_EMIT searchProgressedThrottled();
+@@ -433,11 +489,37 @@
+     LinesCount nbMatches;
+     int progress;
+     LineNumber initialLine;
++    quint64 generation;
+     {
+         ScopedLock lock( searchProgressMutex_ );
+-        std::tie( nbMatches, progress, initialLine ) = searchProgress_;
+-    }
++        std::tie( nbMatches, progress, initialLine, generation ) = searchProgress_;
++    }
++    if (generation != generation_) return;
+     Q_EMIT searchProgressed( nbMatches, progress, initialLine );
++}
++
++std::optional<OffsetInFile> LogFilteredData::firstMatchByte(LineNumber sourceLine) const
++{
++    const auto found = std::lower_bound(firstHits_.begin(), firstHits_.end(), sourceLine,
++        [](const LiteralHit& hit, LineNumber line) { return hit.line < line; });
++    return found != firstHits_.end() && found->line == sourceLine
++               ? std::optional<OffsetInFile>(found->byteOffset) : std::nullopt;
++}
++
++QString LogFilteredData::searchError(const RegularExpressionPattern& pattern) const
++{
++    return longLineSearchError(*sourceLogData_, pattern);
++}
++
++qint64 LogFilteredData::doGetLineByteSize(LineNumber line) const
++{
++    return sourceLogData_->lineByteSize(findLogDataLine(line));
++}
++
++AbstractLogData::LinePreview LogFilteredData::doGetLinePreview(
++    LineNumber line, qint64 relativeByteOffset, qint64 maxBytes) const
++{
++    return sourceLogData_->linePreview(findLogDataLine(line), relativeByteOffset, maxBytes);
+ }
+ 
+ LineNumber LogFilteredData::findLogDataLine( LineNumber index ) const
+--- a/src/logdata/src/logfiltereddataworker.cpp
++++ b/src/logdata/src/logfiltereddataworker.cpp
+@@ -36,9 +36,13 @@
+  * along with klogg.  If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
++#include <algorithm>
+ #include <chrono>
+ #include <cmath>
++#include <condition_variable>
+ #include <exception>
++#include <mutex>
++#include <stdexcept>
+ #include <qsemaphore.h>
+ #include <utility>
+ 
+@@ -61,6 +65,49 @@
+ #include "synchronization.h"
+ 
+ namespace {
++// This covers active raw/decoded buffers, offsets, views and per-block results.
++// The existing line index, retained hit sets and regex-engine scratch are separate.
++struct SearchByteBudget {
++    bool acquire( size_t bytes, const AtomicFlag& cancelled, const AtomicFlag& stopped )
++    {
++        if ( bytes > LogFilteredDataWorker::PipelineBudgetBytes )
++            throw std::runtime_error( "Search block exceeds the active byte budget" );
++        std::unique_lock<std::mutex> lock( mutex );
++        while ( bytes > LogFilteredDataWorker::PipelineBudgetBytes - used ) {
++            if ( cancelled || stopped ) return false;
++            changed.wait_for( lock, std::chrono::milliseconds( 10 ) );
++        }
++        if ( cancelled || stopped ) return false;
++        used += bytes;
++        peak = std::max( peak, used );
++        return true;
++    }
++
++    void release( size_t bytes )
++    {
++        { std::lock_guard<std::mutex> lock( mutex ); used -= bytes; }
++        changed.notify_one();
++    }
++
++    std::mutex mutex;
++    std::condition_variable changed;
++    size_t used = 0, peak = 0;
++};
++
++struct SearchByteLease {
++    SearchByteLease() = default;
++    SearchByteLease( std::shared_ptr<SearchByteBudget> owner, size_t amount )
++        : budget( std::move( owner ) ), bytes( amount ) {}
++    SearchByteLease( const SearchByteLease& ) = delete;
++    SearchByteLease& operator=( const SearchByteLease& ) = delete;
++    SearchByteLease( SearchByteLease&& other ) noexcept
++        : budget( std::move( other.budget ) ), bytes( other.bytes ) {}
++    ~SearchByteLease() { if ( budget ) budget->release( bytes ); }
++
++    std::shared_ptr<SearchByteBudget> budget;
++    size_t bytes = 0;
++};
++
+ struct PartialSearchResults {
+     PartialSearchResults() = default;
+ 
+@@ -78,8 +125,9 @@
+ 
+ struct SearchBlockData {
+     SearchBlockData() = default;
+-    SearchBlockData( LineNumber start, LogData::RawLines blockLines )
+-        : chunkStart( start )
++    SearchBlockData( LineNumber start, LogData::RawLines blockLines, SearchByteLease lease )
++        : byteLease( std::move( lease ) )
++        , chunkStart( start )
+         , lines( std::move( blockLines ) )
+     {
+     }
+@@ -90,6 +138,8 @@
+     SearchBlockData& operator=( const SearchBlockData& ) = delete;
+     SearchBlockData& operator=( SearchBlockData&& ) = default;
+ 
++    // Declared first so its reservation is returned after all buffers/results.
++    SearchByteLease byteLease;
+     LineNumber chunkStart;
+     LogData::RawLines lines;
+ 
+@@ -127,7 +177,8 @@
+ SearchResults SearchData::takeCurrentResults() const
+ {
+     UniqueLock lock( dataMutex_ );
+-    return SearchResults{ std::exchange( newMatches_, {} ), maxLength_, nbLinesProcessed_ };
++    return SearchResults{ std::exchange( newMatches_, {} ), maxLength_, nbLinesProcessed_,
++                          completion_, message_, std::exchange(firstHits_, {}), peakBufferBytes_ };
+ }
+ 
+ void SearchData::addAll( LineLength length, const SearchResultArray& matches,
+@@ -169,6 +220,20 @@
+     nbMatches_ = LinesCount( 0 );
+     matches_ = {};
+     newMatches_ = {};
++    completion_ = SearchCompletion::Running;
++    message_.clear();
++    firstHits_.clear();
++    peakBufferBytes_ = 0;
++}
++
++void SearchData::finish(SearchCompletion completion, const QString& message,
++                        std::vector<LiteralHit> hits, size_t peakBufferBytes)
++{
++    UniqueLock lock(dataMutex_);
++    completion_ = completion;
++    message_ = message;
++    firstHits_ = std::move(hits);
++    peakBufferBytes_ = peakBufferBytes;
+ }
+ 
+ LogFilteredDataWorker::LogFilteredDataWorker( const LogData& sourceLogData )
+@@ -201,7 +266,7 @@
+ }
+ 
+ void LogFilteredDataWorker::search( const RegularExpressionPattern& regExp, LineNumber startLine,
+-                                    LineNumber endLine )
++                                    LineNumber endLine, quint64 generation )
+ {
+     ScopedLock locker( operationsMutex_ ); // to protect operationRequested_
+     operationsPool_.waitForDone();
+@@ -209,11 +274,10 @@
+ 
+     LOG_INFO << "Search requested";
+     QSemaphore operationStarted;
+-    operationsPool_.start( createRunnable( [ this, &operationStarted, regExp, startLine, endLine ] {
++    operationsPool_.start( createRunnable( [ this, &operationStarted, regExp, startLine, endLine, generation ] {
+         operationStarted.release();
+-        ScopedLock operationLock( operationsMutex_ );
+         auto operationRequested = std::make_unique<FullSearchOperation>(
+-            sourceLogData_, interruptRequested_, regExp, startLine, endLine );
++            sourceLogData_, interruptRequested_, regExp, startLine, endLine, generation );
+         connectSignalsAndRun( operationRequested.get() );
+     } ) );
+     operationStarted.acquire();
+@@ -221,7 +285,7 @@
+ 
+ void LogFilteredDataWorker::updateSearch( const RegularExpressionPattern& regExp,
+                                           LineNumber startLine, LineNumber endLine,
+-                                          LineNumber position )
++                                          LineNumber position, quint64 generation )
+ {
+     ScopedLock locker( operationsMutex_ ); // to protect operationRequested_
+     operationsPool_.waitForDone();
+@@ -231,11 +295,10 @@
+ 
+     QSemaphore operationStarted;
+     operationsPool_.start(
+-        createRunnable( [ this, &operationStarted, regExp, startLine, endLine, position ] {
++        createRunnable( [ this, &operationStarted, regExp, startLine, endLine, position, generation ] {
+             operationStarted.release();
+-            ScopedLock operationLock( operationsMutex_ );
+             auto operationRequested = std::make_unique<UpdateSearchOperation>(
+-                sourceLogData_, interruptRequested_, regExp, startLine, endLine, position );
++                sourceLogData_, interruptRequested_, regExp, startLine, endLine, position, generation );
+             connectSignalsAndRun( operationRequested.get() );
+         } ) );
+ 
+@@ -260,13 +323,14 @@
+ 
+ SearchOperation::SearchOperation( const LogData& sourceLogData, AtomicFlag& interruptRequested,
+                                   const RegularExpressionPattern& regExp, LineNumber startLine,
+-                                  LineNumber endLine )
++                                  LineNumber endLine, quint64 generation )
+ 
+     : interruptRequested_( interruptRequested )
+     , regexp_( regExp )
+     , sourceLogData_( sourceLogData )
+     , startLine_( startLine )
+     , endLine_( endLine )
++    , generation_( generation )
+ 
+ {
+ }
+@@ -274,6 +338,65 @@
+ void SearchOperation::doSearch( SearchData& searchData, LineNumber initialLine )
+ {
+     const auto nbSourceLines = sourceLogData_.getNbLine();
++    const auto sourceSnapshot = sourceLogData_.snapshot();
++    initialLine = qMax(initialLine, startLine_);
++    const auto selectedEnd = qMin(LineNumber(nbSourceLines.get()), endLine_);
++
++    // Preserve the existing engine for ordinary logs. A long logical line may
++    // not enter a line-count-batched reader or a non-cancellable regex call.
++    if (sourceLogData_.getMaxLength().get() >= 1024 * 1024) {
++        auto finish = [&](SearchCompletion completion, const QString& message) {
++            searchData.finish(completion, message);
++            Q_EMIT searchProgressed(searchData.getNbMatches(), 100, initialLine, generation_);
++            Q_EMIT searchFinished();
++        };
++        const auto compatibilityError = longLineSearchError(sourceLogData_, regexp_);
++        if (!compatibilityError.isEmpty()) {
++            finish(SearchCompletion::Failed, compatibilityError);
++            return;
++        }
++        if (initialLine >= selectedEnd) {
++            finish(SearchCompletion::Complete, {});
++            return;
++        }
++        const auto firstRange = sourceLogData_.lineByteRange(initialLine, sourceSnapshot);
++        const auto lastRange = sourceLogData_.lineByteRange(selectedEnd - 1_lcount, sourceSnapshot);
++        if (!firstRange || !lastRange) {
++            finish(SearchCompletion::SourceChanged, QStringLiteral("Source index is no longer current."));
++            return;
++        }
++        const auto bytesToSearch = lastRange->end.get() - firstRange->begin.get();
++        int reportedPercent = -1;
++        auto result = searchLiteralBytes(sourceLogData_, sourceSnapshot, initialLine,
++            firstRange->begin, lastRange->end, regexp_.pattern.toUtf8(), interruptRequested_, {},
++            [&](qint64 bytes, size_t count) {
++                const int percent = bytesToSearch ? static_cast<int>(100.0 * static_cast<double>(bytes)
++                                                          / static_cast<double>(bytesToSearch)) : 100;
++                if (percent != reportedPercent) {
++                    reportedPercent = percent;
++                    Q_EMIT searchProgressed(LinesCount(count), std::min(99, percent), initialLine, generation_);
++                }
++            });
++        if (!sourceLogData_.matchesSnapshot(sourceSnapshot)) {
++            result.completion = SearchCompletion::SourceChanged;
++            result.message = QStringLiteral("Source changed during search.");
++            result.hits.clear();
++        }
++        SearchResultArray matchingLines;
++        for (const auto& hit : result.hits) matchingLines.add(hit.line.get());
++        searchData.addAll(LineLength(AbstractLogData::PreviewByteLimit), matchingLines,
++            LinesCount(result.hits.size()), LinesCount(initialLine.get() + result.completedLines));
++        searchData.finish(result.completion, result.message, std::move(result.hits), result.peakBufferBytes);
++        Q_EMIT searchProgressed(searchData.getNbMatches(), 100, initialLine, generation_);
++        Q_EMIT searchFinished();
++        return;
++    }
++    if (initialLine >= selectedEnd) {
++        searchData.finish(SearchCompletion::Complete);
++        Q_EMIT searchProgressed(searchData.getNbMatches(), 100, initialLine, generation_);
++        Q_EMIT searchFinished();
++        return;
++    }
+ 
+     LOG_INFO << "Searching from line " << initialLine << " to " << nbSourceLines;
+ 
+@@ -299,12 +422,28 @@
+     }
+ 
+     const auto endLine = qMin( LineNumber( nbSourceLines.get() ), endLine_ );
+-    const auto nbLinesInChunk = LinesCount(
+-        static_cast<LinesCount::UnderlyingType>( config.searchReadBufferSizeLines() ) );
++    const auto nbLinesInChunk = LinesCount( static_cast<LinesCount::UnderlyingType>(
++        std::clamp( config.searchReadBufferSizeLines(), 1, 65536 ) ) );
++    const auto byteBudget = std::make_shared<SearchByteBudget>();
++    AtomicFlag pipelineStopped;
++    std::mutex nodeErrorMutex;
++    std::exception_ptr nodeError;
++    const auto recordNodeError = [&] {
++        {
++            std::lock_guard<std::mutex> lock( nodeErrorMutex );
++            if ( !nodeError ) nodeError = std::current_exception();
++        }
++        // Keep graph nodes draining rather than cancelling the graph: queued
++        // blocks own reservations needed by the producer to finish its wait.
++        pipelineStopped.set();
++        byteBudget->changed.notify_all();
++    };
++    const bool needsDecode = sourceLogData_.hasPrefilter()
++        || !EncodingParameters( sourceLogData_.getDisplayEncoding() ).isUtf8Compatible;
+ 
+     std::chrono::microseconds fileReadingDuration{ 0 };
+ 
+-    using BlockDataType = SearchBlockData*;
++    using BlockDataType = std::shared_ptr<SearchBlockData>;
+     auto blockPrefetcher
+         = tbb::flow::limiter_node<BlockDataType>( searchGraph, matchingThreadsCount * 3 );
+ 
+@@ -323,30 +462,28 @@
+         regexMatchers.emplace_back(
+             regularExpression.createMatcher(), microseconds{ 0 },
+             RegexMatcherNode(
+-                searchGraph, 1, [ &regexMatchers, index, this ]( const BlockDataType& blockData ) {
+-                    if ( interruptRequested_ ) {
+-                        LOG_INFO << "Matcher " << index << " interrupted";
+-                        auto results = std::make_shared<PartialSearchResults>();
+-                        blockData->searchResults.chunkStart = blockData->chunkStart;
+-                        blockData->searchResults.processedLines
+-                            = LinesCount{ blockData->lines.endOfLines.size() };
+-                        return blockData;
++                searchGraph, 1, [ &regexMatchers, &pipelineStopped, &recordNodeError,
++                                  index, this ]( const BlockDataType& blockData ) {
++                    try {
++                        if ( interruptRequested_ || pipelineStopped ) return blockData;
++
++                        const auto& matcher = std::get<PatternMatcherPtr>( regexMatchers.at( index ) );
++                        const auto matchStartTime = high_resolution_clock::now();
++
++                        blockData->searchResults
++                            = filterLines( *matcher, blockData->lines, blockData->chunkStart );
++
++                        const auto matchEndTime = high_resolution_clock::now();
++
++                        microseconds& matchDuration
++                            = std::get<microseconds>( regexMatchers.at( index ) );
++                        matchDuration += duration_cast<microseconds>( matchEndTime - matchStartTime );
++                        LOG_DEBUG << "Searcher " << index << " block " << blockData->chunkStart
++                                  << " sending matches "
++                                  << blockData->searchResults.matchingLines.cardinality();
++                    } catch ( ... ) {
++                        recordNodeError();
+                     }
+-
+-                    const auto& matcher = std::get<PatternMatcherPtr>( regexMatchers.at( index ) );
+-                    const auto matchStartTime = high_resolution_clock::now();
+-
+-                    blockData->searchResults
+-                        = filterLines( *matcher, blockData->lines, blockData->chunkStart );
+-
+-                    const auto matchEndTime = high_resolution_clock::now();
+-
+-                    microseconds& matchDuration
+-                        = std::get<microseconds>( regexMatchers.at( index ) );
+-                    matchDuration += duration_cast<microseconds>( matchEndTime - matchStartTime );
+-                    LOG_DEBUG << "Searcher " << index << " block " << blockData->chunkStart
+-                              << " sending matches "
+-                              << blockData->searchResults.matchingLines.cardinality();
+                     return blockData;
+                 } ) );
+     }
+@@ -365,50 +502,49 @@
+     auto matchProcessor
+         = tbb::flow::function_node<BlockDataType, tbb::flow::continue_msg, tbb::flow::rejecting>(
+             searchGraph, 1, [ & ]( const BlockDataType& blockData ) {
+-                if ( interruptRequested_ ) {
+-                    LOG_INFO << "Match processor interrupted";
+-                    return tbb::flow::continue_msg{};
+-                }
+-
+-                const auto& matchResults = blockData->searchResults;
+-
+-                const auto matchProcessorStartTime = high_resolution_clock::now();
+-
+-                if ( matchResults.processedLines.get() ) {
+-
+-                    maxLength = qMax( maxLength, matchResults.maxLength );
+-                    const LinesCount matchesCount
+-                        = LinesCount( matchResults.matchingLines.cardinality() );
+-                    nbMatches += matchesCount;
+-
+-                    const auto processedLines = LinesCount{ matchResults.chunkStart.get()
+-                                                            + matchResults.processedLines.get() };
+-
+-                    totalProcessedLines += matchResults.processedLines;
+-
+-                    // After each block, copy the data to shared data
+-                    // and update the client
+-                    searchData.addAll( maxLength, matchResults.matchingLines, matchesCount,
+-                                       processedLines );
+-
+-                    LOG_DEBUG << "done Searching chunk starting at " << matchResults.chunkStart
+-                              << ", " << matchResults.processedLines << " lines read.";
+-                }
+-
+-                delete blockData;
+-
+-                const auto matchProcessorEndTime = high_resolution_clock::now();
+-                matchCombiningDuration += duration_cast<microseconds>( matchProcessorEndTime
+-                                                                       - matchProcessorStartTime );
+-                const int percentage
+-                    = calculateProgress( totalProcessedLines.get(), totalLines.get() );
+-
+-                if ( percentage > reportedPercentage || nbMatches > reportedMatches ) {
+-
+-                    Q_EMIT searchProgressed( nbMatches, std::min( 99, percentage ), initialLine );
+-
+-                    reportedPercentage = percentage;
+-                    reportedMatches = nbMatches;
++                try {
++                    if ( interruptRequested_ || pipelineStopped ) return tbb::flow::continue_msg{};
++
++                    const auto& matchResults = blockData->searchResults;
++
++                    const auto matchProcessorStartTime = high_resolution_clock::now();
++
++                    if ( matchResults.processedLines.get() ) {
++
++                        maxLength = qMax( maxLength, matchResults.maxLength );
++                        const LinesCount matchesCount
++                            = LinesCount( matchResults.matchingLines.cardinality() );
++                        nbMatches += matchesCount;
++
++                        const auto processedLines = LinesCount{ matchResults.chunkStart.get()
++                                                                + matchResults.processedLines.get() };
++
++                        totalProcessedLines += matchResults.processedLines;
++
++                        // After each block, copy the data to shared data
++                        // and update the client
++                        searchData.addAll( maxLength, matchResults.matchingLines, matchesCount,
++                                           processedLines );
++
++                        LOG_DEBUG << "done Searching chunk starting at " << matchResults.chunkStart
++                                  << ", " << matchResults.processedLines << " lines read.";
++                    }
++
++                    const auto matchProcessorEndTime = high_resolution_clock::now();
++                    matchCombiningDuration += duration_cast<microseconds>( matchProcessorEndTime
++                                                                           - matchProcessorStartTime );
++                    const int percentage
++                        = calculateProgress( totalProcessedLines.get(), totalLines.get() );
++
++                    if ( percentage > reportedPercentage || nbMatches > reportedMatches ) {
++
++                        Q_EMIT searchProgressed( nbMatches, std::min( 99, percentage ), initialLine, generation_ );
++
++                        reportedPercentage = percentage;
++                        reportedMatches = nbMatches;
++                    }
++                } catch ( ... ) {
++                    recordNodeError();
+                 }
+ 
+                 return tbb::flow::continue_msg{};
+@@ -425,38 +561,54 @@
+     tbb::flow::make_edge( matchProcessor, blockPrefetcher.decrementer() );
+ 
+     auto chunkStart = initialLine;
+-    while ( chunkStart < endLine && !interruptRequested_ ) {
++    std::exception_ptr readError;
++    while ( chunkStart < endLine && !interruptRequested_ && !pipelineStopped ) {
+         const auto lineSourceStartTime = high_resolution_clock::now();
+         LOG_DEBUG << "Reading chunk starting at " << chunkStart;
+ 
+-        const auto linesInChunk
+-            = LinesCount( qMin( nbLinesInChunk.get(), ( endLine - chunkStart ).get() ) );
+-        auto lines = sourceLogData_.getLinesRaw( chunkStart, linesInChunk );
+-
+-        /*LOG_DEBUG << "Sending chunk starting at " << chunkStart << ", " <<
+-            lines.second.size()
+-                << " lines read.";*/
+-        BlockDataType blockData = new SearchBlockData{ chunkStart, std::move( lines ) };
+-
+-        const auto lineSourceEndTime = high_resolution_clock::now();
+-        const auto chunkReadTime
+-            = duration_cast<microseconds>( lineSourceEndTime - lineSourceStartTime );
+-
+-        /*LOG_DEBUG << "Sent chunk starting at " << chunkStart << ", " <<
+-        blockData->lines.second.size()
+-                << " lines read in " << static_cast<float>( chunkReadTime.count() )
+-        / 1000.f
+-                << " ms";*/
+-
+-        chunkStart = chunkStart + nbLinesInChunk;
+-        fileReadingDuration += chunkReadTime;
+-
+-        while ( !blockPrefetcher.try_put( blockData ) && !interruptRequested_ ) {
+-            std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
++        try {
++            const auto plan = sourceLogData_.planSearchBatch( chunkStart,
++                LinesCount( qMin( nbLinesInChunk.get(), ( endLine - chunkStart ).get() ) ),
++                LogData::MaxByteRead, sourceSnapshot );
++            if ( !plan )
++                throw std::runtime_error( "Source index changed while planning a search block" );
++            if ( plan->lines.get() == 0 )
++                throw std::runtime_error( "A source line exceeds the bounded legacy search block" );
++            // UTF-8 path: raw R + up to 2R for Qt matcher's per-line UTF-16.
++            // Decode path: raw R + UTF-16 2R + existing UTF-8 temporary 4R,
++            // plus 2R for QString detach/replacement. Two offset arrays and the
++            // string_view array fit 32*N; <=65536 consecutive line numbers touch
++            // at most two Roaring containers, covered by 64 KiB per-block overhead.
++            const auto reservation = static_cast<size_t>( plan->rawBytes ) * ( needsDecode ? 9 : 3 )
++                + static_cast<size_t>( plan->lines.get() ) * 32 + 64 * 1024;
++            if ( !byteBudget->acquire( reservation, interruptRequested_, pipelineStopped ) ) break;
++            SearchByteLease lease( byteBudget, reservation );
++            auto lines = sourceLogData_.getLinesRaw( chunkStart, plan->lines );
++            if ( lines.endOfLines.size() != plan->lines.get()
++                 || lines.buffer.size() != static_cast<size_t>( plan->rawBytes )
++                 || !sourceLogData_.matchesSnapshot( sourceSnapshot ) )
++                throw std::runtime_error( "Source changed or a search block could not be read" );
++
++            auto blockData = std::make_shared<SearchBlockData>(
++                chunkStart, std::move(lines), std::move(lease));
++            const auto lineSourceEndTime = high_resolution_clock::now();
++            fileReadingDuration += duration_cast<microseconds>( lineSourceEndTime - lineSourceStartTime );
++            chunkStart = chunkStart + plan->lines;
++
++            while ( !interruptRequested_ && !pipelineStopped
++                    && !blockPrefetcher.try_put( blockData ) ) {
++                std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
++            }
++        } catch ( ... ) {
++            readError = std::current_exception();
++            break;
+         }
+     }
+ 
+     searchGraph.wait_for_all();
++    if ( nodeError ) std::rethrow_exception( nodeError );
++    if ( readError && sourceLogData_.matchesSnapshot( sourceSnapshot ) )
++        std::rethrow_exception( readError );
+ 
+     high_resolution_clock::time_point t2 = high_resolution_clock::now();
+     const auto durationUs = duration_cast<microseconds>( t2 - t1 );
+@@ -483,7 +635,18 @@
+                     / ( 1024 * 1024 )
+              << " MiB/s";
+ 
+-    Q_EMIT searchProgressed( nbMatches, 100, initialLine );
++    if (!sourceLogData_.matchesSnapshot(sourceSnapshot)) {
++        searchData.clear();
++        nbMatches = 0_lcount;
++        searchData.finish(SearchCompletion::SourceChanged, QStringLiteral("Source changed during search."),
++                          {}, byteBudget->peak);
++    }
++    else {
++        searchData.finish(interruptRequested_ ? SearchCompletion::Cancelled : SearchCompletion::Complete,
++            interruptRequested_ ? QStringLiteral("Search cancelled; results are incomplete.") : QString{},
++            {}, byteBudget->peak);
++    }
++    Q_EMIT searchProgressed( nbMatches, 100, initialLine, generation_ );
+     Q_EMIT searchFinished();
+ }
+ 
+@@ -497,10 +660,10 @@
+     } catch ( const std::exception& err ) {
+         const auto errorString = QString( "FullSearchOperation failed: %1" ).arg( err.what() );
+         LOG_ERROR << errorString;
+-        dispatchToMainThread( [ errorString ]() {
+-            IssueReporter::askUserAndReportIssue( IssueTemplate::Exception, errorString );
+-        } );
+         searchData.clear();
++        searchData.finish(SearchCompletion::Failed, errorString);
++        Q_EMIT searchProgressed(0_lcount, 100, startLine_, generation_);
++        Q_EMIT searchFinished();
+     }
+ }
+ 
+@@ -522,9 +685,9 @@
+     } catch ( const std::exception& err ) {
+         const auto errorString = QString( "UpdateSearchOpertaion failed: %1" ).arg( err.what() );
+         LOG_ERROR << errorString;
+-        dispatchToMainThread( [ errorString ]() {
+-            IssueReporter::askUserAndReportIssue( IssueTemplate::Exception, errorString );
+-        } );
+         searchData.clear();
+-    }
+-}
++        searchData.finish(SearchCompletion::Failed, errorString);
++        Q_EMIT searchProgressed(0_lcount, 100, startLine_, generation_);
++        Q_EMIT searchFinished();
++    }
++}
+--- /dev/null
++++ b/src/logdata/src/longlinesearch.cpp
+@@ -0,0 +1,181 @@
++// SPDX-License-Identifier: GPL-3.0-or-later
++#include "longlinesearch.h"
++#include <algorithm>
++#include <cstdint>
++
++namespace {
++// Carries only the incomplete UTF-8 sequence across reads. Rejects overlong
++// sequences, surrogates and values above U+10FFFF without constructing UTF-16.
++struct Utf8Validator {
++    int remaining = 0;
++    unsigned char lower = 0x80, upper = 0xbf;
++    bool consume(unsigned char byte) {
++        if (remaining) {
++            if (byte < lower || byte > upper) return false;
++            --remaining;
++            lower = 0x80;
++            upper = 0xbf;
++            return true;
++        }
++        if (byte < 0x80) return true;
++        if (byte >= 0xc2 && byte <= 0xdf) remaining = 1;
++        else if (byte >= 0xe0 && byte <= 0xef) {
++            remaining = 2;
++            if (byte == 0xe0) lower = 0xa0;
++            if (byte == 0xed) upper = 0x9f;
++        }
++        else if (byte >= 0xf0 && byte <= 0xf4) {
++            remaining = 3;
++            if (byte == 0xf0) lower = 0x90;
++            if (byte == 0xf4) upper = 0x8f;
++        }
++        else return false;
++        return true;
++    }
++};
++}
++
++QString searchCompletionName(SearchCompletion completion)
++{
++    switch (completion) {
++    case SearchCompletion::Running: return QStringLiteral("running");
++    case SearchCompletion::Complete: return QStringLiteral("complete");
++    case SearchCompletion::Cancelled: return QStringLiteral("cancelled");
++    case SearchCompletion::Partial: return QStringLiteral("partial");
++    case SearchCompletion::SourceChanged: return QStringLiteral("source_changed");
++    case SearchCompletion::Failed: return QStringLiteral("failed");
++    }
++    return QStringLiteral("failed");
++}
++
++QString longLineSearchError(const LogData& source, const RegularExpressionPattern& pattern)
++{
++    if (source.getMaxLength().get() < 1024 * 1024) return {};
++    if (!pattern.isPlainText || !pattern.isCaseSensitive || pattern.isExclude
++        || pattern.isBoolean || pattern.isPrefilter || source.hasPrefilter()
++        || source.getDisplayEncoding()->mibEnum() != 106)
++        return QStringLiteral("Long-line search supports case-sensitive UTF-8 literal text only; "
++                              "disable regex, Boolean, exclude and prefilter modes.");
++    if (pattern.pattern.isEmpty() || pattern.pattern.size() > LiteralSearchOptions::MaxPatternBytes
++        || pattern.pattern.contains(QChar::LineFeed)
++        || pattern.pattern.toUtf8().size() > LiteralSearchOptions::MaxPatternBytes)
++        return QStringLiteral("Long-line literal text must contain 1 to 1048576 UTF-8 bytes and no LF.");
++    return {};
++}
++
++LiteralSearchResult searchLiteralBytes(
++    const LogData& source, const LogData::SourceSnapshot& snapshot,
++    LineNumber firstLine, OffsetInFile begin, OffsetInFile end, const QByteArray& pattern,
++    const AtomicFlag& cancelled, const LiteralSearchOptions& options,
++    const std::function<void(qint64, size_t)>& progress)
++{
++    LiteralSearchResult result;
++    const auto finish = [&](SearchCompletion state, const QString& message) {
++        result.completion = state;
++        result.message = message;
++        if (state == SearchCompletion::SourceChanged || state == SearchCompletion::Failed)
++            result.hits.clear();
++    };
++    if (pattern.isEmpty() || pattern.size() > LiteralSearchOptions::MaxPatternBytes
++        || pattern.contains('\n') || options.chunkBytes < 1
++        || options.chunkBytes > LogData::MaxByteRead || options.maxMatchingLines > 65536
++        || begin.get() < 0 || end < begin || end.get() > snapshot.size) {
++        finish(SearchCompletion::Failed, QStringLiteral("Unsupported literal, byte range or search limits."));
++        return result;
++    }
++    Utf8Validator patternValidator;
++    for (const auto byte : pattern) {
++        if (!patternValidator.consume(static_cast<unsigned char>(byte))) {
++            finish(SearchCompletion::Failed, QStringLiteral("The search pattern must be valid UTF-8."));
++            return result;
++        }
++    }
++    if (patternValidator.remaining) {
++        finish(SearchCompletion::Failed, QStringLiteral("The search pattern ends inside a UTF-8 sequence."));
++        return result;
++    }
++
++    std::vector<uint32_t> prefix(static_cast<size_t>(pattern.size()), 0);
++    uint32_t matched = 0;
++    for (qsizetype i = 1; i < pattern.size(); ++i) {
++        while (matched && pattern[i] != pattern[matched]) matched = prefix[matched - 1];
++        if (pattern[i] == pattern[matched]) ++matched;
++        prefix[static_cast<size_t>(i)] = matched;
++    }
++    matched = 0;
++    result.hits.reserve(options.maxMatchingLines);
++    const auto fixedBytes = prefix.capacity() * sizeof(uint32_t)
++                            + result.hits.capacity() * sizeof(LiteralHit)
++                            + static_cast<size_t>(pattern.capacity());
++    Utf8Validator validator;
++    auto line = firstLine;
++    bool lineMatched = false, hasUnterminatedLine = false;
++    qint64 offset = begin.get();
++    while (offset < end.get()) {
++        if (cancelled) {
++            finish(SearchCompletion::Cancelled, QStringLiteral("Search cancelled; results are incomplete."));
++            return result;
++        }
++        const auto requested = std::min(options.chunkBytes, end.get() - offset);
++        const auto block = source.readBytes(snapshot, OffsetInFile(offset), requested);
++        if (block.status != LogData::ReadStatus::Complete) {
++            const auto state = block.status == LogData::ReadStatus::SourceChanged
++                                   ? SearchCompletion::SourceChanged : SearchCompletion::Failed;
++            finish(state, QStringLiteral("The source changed or its byte range could not be read."));
++            return result;
++        }
++        result.peakBufferBytes = std::max(result.peakBufferBytes,
++            fixedBytes + static_cast<size_t>(block.bytes.capacity()));
++        for (qsizetype i = 0; i < block.bytes.size(); ++i) {
++            if ((i & 65535) == 0 && cancelled) {
++                result.bytesProcessed = offset + i - begin.get();
++                finish(SearchCompletion::Cancelled, QStringLiteral("Search cancelled; results are incomplete."));
++                return result;
++            }
++            const char byte = block.bytes[i];
++            if (!validator.consume(static_cast<unsigned char>(byte))) {
++                finish(SearchCompletion::Failed, QStringLiteral("Invalid UTF-8 in the selected source range."));
++                return result;
++            }
++            if (byte == '\n') {
++                ++line;
++                ++result.completedLines;
++                matched = 0;
++                lineMatched = false;
++                hasUnterminatedLine = false;
++                continue;
++            }
++            hasUnterminatedLine = true;
++            if (lineMatched) continue;
++            while (matched && byte != pattern[matched]) matched = prefix[matched - 1];
++            if (byte == pattern[matched]) ++matched;
++            if (matched == static_cast<uint32_t>(pattern.size())) {
++                if (result.hits.size() == options.maxMatchingLines) {
++                    result.bytesProcessed = offset + i + 1 - begin.get();
++                    finish(SearchCompletion::Partial, QStringLiteral("Matching-line limit reached; results are incomplete."));
++                    return result;
++                }
++                result.hits.push_back({line, OffsetInFile(offset + i + 1 - pattern.size())});
++                lineMatched = true;
++                matched = 0;
++            }
++        }
++        offset += block.bytes.size();
++        result.bytesProcessed = offset - begin.get();
++        if (progress) progress(result.bytesProcessed, result.hits.size());
++    }
++    if (!source.matchesSnapshot(snapshot)) {
++        finish(SearchCompletion::SourceChanged, QStringLiteral("Source changed before search completion."));
++    }
++    else if (cancelled) {
++        finish(SearchCompletion::Cancelled, QStringLiteral("Search cancelled; results are incomplete."));
++    }
++    else if (validator.remaining) {
++        finish(SearchCompletion::Failed, QStringLiteral("Source ends inside a UTF-8 sequence."));
++    }
++    else {
++        if (hasUnterminatedLine) ++result.completedLines;
++        finish(SearchCompletion::Complete, {});
++    }
++    return result;
++}
+--- a/src/ui/include/abstractlogview.h
++++ b/src/ui/include/abstractlogview.h
+@@ -53,6 +53,11 @@
+ #include <QColor>
+ #include <QEvent>
+ #include <QFontMetrics>
++#include <QFutureWatcher>
++#include <QVariant>
++#include <atomic>
++#include <memory>
++#include <optional>
+ 
+ #ifdef GLOGG_PERF_MEASURE_FPS
+ #include "perfcounter.h"
+@@ -134,6 +139,10 @@
+     LineNumber getTopLine() const;
+     // Return the text of the current selection.
+     QString getSelectedText() const;
++    Q_INVOKABLE bool isPreviewReady() const { return previewFrame_.has_value() && !previewPending_; }
++    Q_INVOKABLE quint64 previewRetainedBytes() const;
++    Q_INVOKABLE QString previewWindowText( quint64 viewLine ) const;
++    Q_INVOKABLE QVariantMap previewWindowInfo( quint64 viewLine ) const;
+     // True for partial selection
+     bool isPartialSelection() const;
+     // Instructs the widget to select the whole text.
+@@ -243,6 +252,11 @@
+     void highlightersChange();
+ 
+   public Q_SLOTS:
++    // Byte anchors refer to file bytes; selection columns remain window-local.
++    void showByteWindow( LineNumber viewLine, OffsetInFile absoluteByteAnchor );
++    void nextByteWindow();
++    void previousByteWindow();
++    void stopPreview();
+     // Makes the widget select and display the passed line.
+     // Scrolling as necessary
+     void trySelectLine( LineNumber newLine );
+@@ -306,6 +320,24 @@
+     void setColorLabel( QAction* action );
+ 
+   private:
++    struct PreviewFrame {
++        LineNumber first;
++        LinesCount count;
++        quint64 revision = 0;
++        klogg::vector<AbstractLogData::LinePreview> lines;
++    };
++    QFutureWatcher<PreviewFrame> previewWatcher_;
++    std::shared_ptr<std::atomic_bool> previewCancel_;
++    std::optional<PreviewFrame> previewFrame_;
++    std::map<LineNumber, qint64> previewOffsets_;
++    std::optional<std::pair<LineNumber, qint64>> previewAnchor_;
++    quint64 previewRevision_ = 0;
++    bool previewPending_ = false;
++    void requestPreview( LineNumber first, LinesCount count );
++    void clearPreview();
++    const AbstractLogData::LinePreview* cachedPreview( LineNumber line ) const;
++    QString selectionText( bool lineNumbers = false ) const;
++    LineLength selectionSymbols() const;
+     // Graphic parameters
+     static constexpr int OverviewWidth = 27;
+     static constexpr int HookThreshold = 300;
+--- a/src/ui/include/crawlerwidget.h
++++ b/src/ui/include/crawlerwidget.h
+@@ -84,6 +84,7 @@
+ 
+   public:
+     CrawlerWidget( QWidget* parent = nullptr );
++    ~CrawlerWidget() override;
+ 
+     // Get the line number of the first line displayed.
+     LineNumber getTopLine() const;
+@@ -366,8 +367,8 @@
+ 
+     std::shared_ptr<QuickFindPattern> quickFindPattern_;
+ 
+-    LogMainView* logMainView_;
+-    FilteredView* filteredView_;
++    LogMainView* logMainView_ = nullptr;
++    FilteredView* filteredView_ = nullptr;
+     std::unordered_map<FilteredView*, std::shared_ptr<LogFilteredData>> filteredViewsData_;
+     QTabWidget* tabbedFilteredView_;
+ 
+--- a/src/ui/include/quickfind.h
++++ b/src/ui/include/quickfind.h
+@@ -223,6 +223,10 @@
+     IncrementalSearchStatus incrementalSearchStatus_;
+ 
+     // Private functions
++    bool canSearchLine( LineNumber line );
++    bool prepareSource();
++    LineNumber sourceLine( LineNumber line ) const;
++    QString expandedLine( LineNumber line ) const;
+     Portion doSearchForward( const Selection& selection, const QuickFindMatcher& matcher );
+     Portion doSearchForward( const FilePosition& start_position, const Selection& selection,
+                              const QuickFindMatcher& matcher );
+@@ -233,6 +237,9 @@
+     AtomicFlag interruptRequested_;
+     QFuture<Portion> operationFuture_;
+     QFutureWatcher<Portion> operationWatcher_;
++    const AbstractLogData* searchSource_ = nullptr;
++    std::vector<LineNumber> searchLines_;
++    LinesCount searchLineCount_;
+ };
+ 
+ #endif
+--- a/src/ui/include/selection.h
++++ b/src/ui/include/selection.h
+@@ -84,6 +84,7 @@
+     {
+         selectedPartial_.line = {};
+         selectedLine_ = {};
++        selectedRange_.startLine = {};
+     }
+ 
+     // Select one line
+@@ -112,7 +113,7 @@
+     // Returns whether the selection is empty
+     bool isEmpty() const
+     {
+-        return ( !selectedPartial_.line ) && ( !selectedLine_ );
++        return ( !selectedPartial_.line ) && ( !selectedLine_ ) && ( !selectedRange_.startLine );
+     }
+ 
+     // Returns whether the selection is a single line
+--- a/src/ui/include/wrappedstring.h
++++ b/src/ui/include/wrappedstring.h
+@@ -19,6 +19,7 @@
+ 
+ #include <QString>
+ #include <cstddef>
++#include <memory>
+ #include <qchar.h>
+ #include <qglobal.h>
+ 
+@@ -28,6 +29,7 @@
+ #include "linetypes.h"
+ 
+ class WrappedString {
++    struct Storage { klogg::vector<QStringView> rows; QString text; };
+ public:
+     using WrappedStringPart = QStringView;
+ 
+@@ -38,35 +40,42 @@
+ 
+     explicit WrappedString( QString longLine, LineLength visibleColumns )
+     {
+-        unwrappedLine_ = longLine;
++        const auto width = std::max<LineLength::UnderlyingType>( 1, visibleColumns.get() );
++        storage_->text = longLine;
+         if ( longLine.isEmpty() ) {
+-            wrappedLines_.push_back( WrappedStringPart{} );
++            storage_->rows.push_back( WrappedStringPart{} );
+         }
+         else {
+             WrappedStringPart lineToWrap( longLine );
+-            while ( lineToWrap.size() > visibleColumns.get() ) {
+-                WrappedStringPart stringToWrap = lineToWrap.left( visibleColumns.get() );
++            while ( lineToWrap.size() > width ) {
++                WrappedStringPart stringToWrap = lineToWrap.left( width );
+                 auto lastSpaceIt = std::find_if( stringToWrap.rbegin(), stringToWrap.rend(),
+                                                  []( QChar c ) { return c.isSpace(); } );
+                 if ( lastSpaceIt == stringToWrap.rend() ) {
+-                    wrappedLines_.push_back( lineToWrap.left( visibleColumns.get() ) );
+-                    lineToWrap = lineToWrap.mid( visibleColumns.get() );
++                    storage_->rows.push_back( lineToWrap.left( width ) );
++                    lineToWrap = lineToWrap.mid( width );
+                 }
+                 else {
+                     auto spacePos = std::distance( stringToWrap.begin(), lastSpaceIt.base() );
+-                    wrappedLines_.push_back( lineToWrap.left( spacePos ) );
++                    storage_->rows.push_back( lineToWrap.left( spacePos ) );
+                     lineToWrap = lineToWrap.mid( spacePos );
+                 }
+             }
+             if ( lineToWrap.size() > 0 ) {
+-                wrappedLines_.push_back( lineToWrap );
++                storage_->rows.push_back( lineToWrap );
+             }
+         }
+     }
+ 
+     size_t wrappedLinesCount() const
+     {
+-        return wrappedLines_.size();
++        return storage_->rows.size();
++    }
++
++    size_t retainedBytes() const
++    {
++        return sizeof( Storage ) + storage_->rows.capacity() * sizeof( WrappedStringPart )
++               + static_cast<size_t>( storage_->text.capacity() ) * sizeof( QChar );
+     }
+ 
+     klogg::vector<WrappedStringPart> mid( LineColumn start, LineLength length ) const
+@@ -76,8 +85,8 @@
+         };
+ 
+         klogg::vector<WrappedStringPart> resultChunks;
+-        if ( wrappedLines_.size() == 1 ) {
+-            auto& wrappedLine = wrappedLines_.front();
++        if ( storage_->rows.size() == 1 ) {
++            auto& wrappedLine = storage_->rows.front();
+             auto len = std::min( length.get(), getLength( wrappedLine ) - start.get() );
+             resultChunks.push_back( wrappedLine.mid( start.get(), ( len > 0 ? len : 0 ) ) );
+             return resultChunks;
+@@ -85,29 +94,29 @@
+ 
+         size_t wrappedLineIndex = 0;
+         auto positionInWrappedLine = start.get();
+-        while ( positionInWrappedLine > getLength( wrappedLines_[ wrappedLineIndex ] ) ) {
+-            positionInWrappedLine -= getLength( wrappedLines_[ wrappedLineIndex ] );
++        while ( positionInWrappedLine > getLength( storage_->rows[ wrappedLineIndex ] ) ) {
++            positionInWrappedLine -= getLength( storage_->rows[ wrappedLineIndex ] );
+             wrappedLineIndex++;
+-            if ( wrappedLineIndex >= wrappedLines_.size() ) {
++            if ( wrappedLineIndex >= storage_->rows.size() ) {
+                 return resultChunks;
+             }
+         }
+ 
+         auto chunkLength = length.get();
+         while ( positionInWrappedLine + chunkLength
+-                > getLength( wrappedLines_[ wrappedLineIndex ] ) ) {
++                > getLength( storage_->rows[ wrappedLineIndex ] ) ) {
+             resultChunks.push_back(
+-                wrappedLines_[ wrappedLineIndex ].mid( positionInWrappedLine ) );
++                storage_->rows[ wrappedLineIndex ].mid( positionInWrappedLine ) );
+             wrappedLineIndex++;
+             positionInWrappedLine = 0;
+             chunkLength -= getLength( resultChunks.back() );
+-            if ( wrappedLineIndex >= wrappedLines_.size() ) {
++            if ( wrappedLineIndex >= storage_->rows.size() ) {
+                 return resultChunks;
+             }
+         }
+ 
+         if ( chunkLength > 0 ) {
+-            auto& wrappedLine = wrappedLines_[ wrappedLineIndex ];
++            auto& wrappedLine = storage_->rows[ wrappedLineIndex ];
+             auto len = std::min( chunkLength, getLength( wrappedLine ) - positionInWrappedLine );
+             resultChunks.push_back(
+                 wrappedLine.mid( positionInWrappedLine, ( len > 0 ? len : 0 ) ) );
+@@ -118,18 +127,17 @@
+ 
+     bool isEmpty() const
+     {
+-        return unwrappedLine_.isEmpty();
++        return storage_->text.isEmpty();
+     }
+ 
+     WrappedStringPart unwrappedLine() const {
+-        return WrappedStringPart{unwrappedLine_};
++        return WrappedStringPart{storage_->text};
+     }
+ 
+     WrappedStringPart wrappedLine(size_t index) const {
+-        return wrappedLines_[index];
++        return storage_->rows[index];
+     }
+ 
+ private:
+-    klogg::vector<WrappedStringPart> wrappedLines_;
+-    QString unwrappedLine_;
+-};
+\ No newline at end of file
++    std::shared_ptr<Storage> storage_ = std::make_shared<Storage>();
++};
+--- a/src/ui/src/abstractlogview.cpp
++++ b/src/ui/src/abstractlogview.cpp
+@@ -79,6 +79,7 @@
+ #include <tbb/flow_graph.h>
+ 
+ #include "abstractlogview.h"
++#include <QtConcurrent>
+ #include "containers.h"
+ #include "highlightedmatch.h"
+ #include "linetypes.h"
+@@ -89,6 +90,7 @@
+ #include "highlighterset.h"
+ #include "highlightersmenu.h"
+ #include "log.h"
++#include "logdata.h"
+ #include "overview.h"
+ #include "quickfind.h"
+ #include "quickfindpattern.h"
+@@ -422,6 +424,33 @@
+     connect( quickFind_, &QuickFind::searchDone, this, &AbstractLogView::setQuickFindResult,
+              Qt::QueuedConnection );
+ 
++    connect( &previewWatcher_, &QFutureWatcher<PreviewFrame>::finished, this, [ this ] {
++        previewPending_ = false;
++        try {
++            auto frame = previewWatcher_.result();
++            if ( frame.revision == previewRevision_ && previewCancel_ && !previewCancel_->load() )
++                previewFrame_ = std::move( frame );
++            if ( previewAnchor_ ) {
++                const auto line = previewAnchor_->first;
++                const auto preview = cachedPreview( line );
++                if ( preview && preview->error.isEmpty() ) {
++                    // Valid UTF-8 window: convert the source-byte prefix to a
++                    // UTF-16 prefix, then expand its local tabs. Bytes are never
++                    // interpreted directly as display columns.
++                    const auto prefixBytes = std::max<qint64>( 0, previewAnchor_->second - preview->byteBegin );
++                    const auto prefix = QString::fromUtf8( preview->text.toUtf8().left( prefixBytes ) );
++                    const auto column = untabify( QString( prefix ) ).size();
++                    horizontalScrollBar()->setValue( static_cast<int>(
++                        std::max<qint64>( 0, column - getNbVisibleCols().get() / 3 ) ) );
++                    previewAnchor_.reset();
++                }
++            }
++        } catch ( const std::exception& e ) {
++            Q_EMIT notifyQuickFind( QFNotification( tr( "Preview failed: %1" ).arg( e.what() ) ) );
++        }
++        forceRefresh();
++    } );
++
+     connect( &followElasticHook_, SIGNAL( lengthChanged() ), this, SLOT( repaint() ) );
+     connect( &followElasticHook_, SIGNAL( hooked( bool ) ), this,
+              SIGNAL( followModeChanged( bool ) ) );
+@@ -440,6 +469,7 @@
+ 
+ AbstractLogView::~AbstractLogView()
+ {
++    stopPreview();
+     try {
+         if ( quickFind_ ) {
+             quickFind_->stopSearch();
+@@ -574,7 +604,7 @@
+         colorLabelsMenu_->clear();
+         colorLabelsMenu_->setEnabled( selection_.isPortion() || selection_.isSingleLine() );
+         if ( colorLabelsMenu_->isEnabled() ) {
+-            auto selectedText = selection_.getSelectedText( logData_ );
++            auto selectedText = getSelectedText();
+             std::optional<size_t> currentLabel;
+             for ( auto i = 0u; i < quickHighlighters_.size(); ++i ) {
+                 if ( quickHighlighters_[ i ].contains( selectedText ) ) {
+@@ -651,7 +681,7 @@
+                     Q_EMIT newSelection(
+                         lineNumber, selection_.getSelectedLinesCount(),
+                         0_lcol, // portion selection always starts from the first column
+-                        LineLength{ getSelectedText().size() } );
++                        selectionSymbols() );
+ 
+                     update();
+                 }
+@@ -661,9 +691,9 @@
+                 // This is a 'portion' selection
+                 selection_.selectPortion( lineNumber, selectionStartPos_.column(),
+                                           thisEndPos.column() );
+-                auto selectionStr = getSelectedText();
++                const auto selectionLength = selectionSymbols();
+                 Q_EMIT newSelection( lineNumber, 1_lcount, selectionStartPos_.column(),
+-                                     LineLength( selectionStr.size() ) );
++                                     selectionLength );
+                 update();
+             }
+             // On the same line, and moving vertically then
+@@ -1326,7 +1356,7 @@
+ {
+     if ( selection_.isPortion() ) {
+         LOG_DEBUG << "AbstractLogView::addToSearch()";
+-        Q_EMIT addToSearch( selection_.getSelectedText( logData_ ) );
++        Q_EMIT addToSearch( getSelectedText() );
+     }
+     else {
+         LOG_ERROR << "AbstractLogView::addToSearch called for a wrong type of selection";
+@@ -1338,7 +1368,7 @@
+ {
+     if ( selection_.isPortion() ) {
+         LOG_DEBUG << "AbstractLogView::replaceSearch()";
+-        Q_EMIT replaceSearch( selection_.getSelectedText( logData_ ) );
++        Q_EMIT replaceSearch( getSelectedText() );
+     }
+     else {
+         LOG_ERROR << "AbstractLogView::replaceSearch called for a wrong type of selection";
+@@ -1349,7 +1379,7 @@
+ {
+     if ( selection_.isPortion() ) {
+         LOG_DEBUG << "AbstractLogView::excludeFromSearch()";
+-        Q_EMIT excludeFromSearch( selection_.getSelectedText( logData_ ) );
++        Q_EMIT excludeFromSearch( getSelectedText() );
+     }
+     else {
+         LOG_ERROR << "AbstractLogView::excludeFromSearch called for a wrong type of selection";
+@@ -1361,7 +1391,7 @@
+ {
+     // Use the selected 'word' and search forward
+     if ( selection_.isPortion() ) {
+-        Q_EMIT changeQuickFind( selection_.getSelectedText( logData_ ), QuickFindMux::Forward );
++        Q_EMIT changeQuickFind( getSelectedText(), QuickFindMux::Forward );
+         Q_EMIT searchNext();
+     }
+ }
+@@ -1370,7 +1400,7 @@
+ void AbstractLogView::findPreviousSelected()
+ {
+     if ( selection_.isPortion() ) {
+-        Q_EMIT changeQuickFind( selection_.getSelectedText( logData_ ), QuickFindMux::Backward );
++        Q_EMIT changeQuickFind( getSelectedText(), QuickFindMux::Backward );
+         Q_EMIT searchNext();
+     }
+ }
+@@ -1380,11 +1410,12 @@
+ {
+ 
+     try {
+-        auto text = selection_.getSelectedText( logData_ );
++        auto text = selectionText();
+         text.replace( QChar::Null, QChar::Space );
+         sendTextToClipboard( text );
+     } catch ( std::exception& err ) {
+         LOG_ERROR << "failed to copy data to clipboard " << err.what();
++        Q_EMIT notifyQuickFind( QFNotification( tr( "%1" ).arg( err.what() ) ) );
+     }
+ }
+ 
+@@ -1392,11 +1423,12 @@
+ void AbstractLogView::copyWithLineNumbers()
+ {
+     try {
+-        auto text = selection_.getSelectedText( logData_, true );
++        auto text = selectionText( true );
+         text.replace( QChar::Null, QChar::Space );
+         sendTextToClipboard( text );
+     } catch ( std::exception& err ) {
+         LOG_ERROR << "failed to copy data to clipboard " << err.what();
++        Q_EMIT notifyQuickFind( QFNotification( tr( "%1" ).arg( err.what() ) ) );
+     }
+ }
+ 
+@@ -1432,6 +1464,12 @@
+ 
+ void AbstractLogView::saveLinesToFile( LineNumber begin, LineNumber end )
+ {
++    // This legacy exporter is line-batched, not byte-streaming. Do not offer it
++    // as an unbounded escape hatch for the long-line clipboard safety limit.
++    if ( logData_->getMaxLength().get() > AbstractLogData::PreviewByteLimit ) {
++        Q_EMIT notifyQuickFind( QFNotification( tr( "Export for data containing long lines is unavailable until a bounded streaming exporter is supported" ) ) );
++        return;
++    }
+     auto filename = QFileDialog::getSaveFileName( this, "Save content" );
+     if ( filename.isEmpty() ) {
+         return;
+@@ -1581,6 +1619,9 @@
+ 
+ void AbstractLogView::updateData()
+ {
++    clearPreview();
++    previewOffsets_.clear();
++    previewAnchor_.reset();
+     LOG_DEBUG << "AbstractLogView::updateData";
+ 
+     const auto lastLineNumber = LineNumber( logData_->getNbLine().get() );
+@@ -1662,7 +1703,32 @@
+ 
+ QString AbstractLogView::getSelectedText() const
+ {
+-    return selection_.getSelectedText( logData_ );
++    try { return selectionText(); }
++    catch ( const std::exception& e ) {
++        Q_EMIT const_cast<AbstractLogView*>( this )->notifyQuickFind( QFNotification( tr( "%1" ).arg( e.what() ) ) );
++        return {};
++    }
++}
++
++QString AbstractLogView::selectionText( bool lineNumbers ) const
++{
++    const auto position = selection_.getPreviousPosition();
++    const auto portion = selection_.getPortionForLine( position.line() );
++    if ( portion.isValid() && logData_->lineByteSize( portion.line() ) > AbstractLogData::PreviewByteLimit ) {
++        const auto preview = cachedPreview( portion.line() );
++        if ( !preview || !preview->error.isEmpty() ) throw std::length_error( "Preview is not ready" );
++        auto expanded = untabify( QString( preview->text ) );
++        const auto text = expanded.mid( portion.startColumn().get(), portion.size().get() );
++        return lineNumbers ? QStringLiteral( "%1: %2" ).arg( logData_->getLineNumber( portion.line() ).get() ).arg( text ) : text;
++    }
++    return selection_.getSelectedText( logData_, lineNumbers );
++}
++
++LineLength AbstractLogView::selectionSymbols() const
++{
++    const auto position = selection_.getPreviousPosition();
++    const auto portion = selection_.getPortionForLine( position.line() );
++    return portion.isValid() ? portion.size() : 0_length;
+ }
+ 
+ bool AbstractLogView::isPartialSelection() const
+@@ -1888,7 +1954,7 @@
+     selectionStartPos_ = FilePosition{ newLine, 0_lcol };
+     selectionCurrentEndPos_ = selectionStartPos_;
+     Q_EMIT newSelection( newLine, selection_.getSelectedLinesCount(), 0_lcol,
+-                         LineLength{ getSelectedText().size() } );
++                         selectionSymbols() );
+ }
+ 
+ // Make the start of the lines visible
+@@ -1912,7 +1978,19 @@
+ // Make the end of the lines in the selection visible
+ void AbstractLogView::jumpToEndOfLine()
+ {
++    const auto line = selection_.getPreviousPosition().line();
++    const auto bytes = logData_->lineByteSize( line );
++    if ( bytes > AbstractLogData::PreviewByteLimit ) {
++        previewOffsets_.clear();
++        previewOffsets_[ line ] = std::max<qint64>( 0, bytes - AbstractLogData::PreviewByteLimit );
++        clearPreview();
++        horizontalScrollBar()->setValue( 0 );
++        jumpToLine( line );
++        forceRefresh();
++        return;
++    }
+     const auto selection = selection_.getLines();
++    if ( selection.empty() ) return;
+     horizontalScrollBar()->setValue( type_safe::narrow_cast<int>( maxLineLength( selection ).get()
+                                                                   - getNbVisibleCols().get() ) );
+ }
+@@ -1952,9 +2030,12 @@
+ // Select the word under the given position
+ void AbstractLogView::selectWordAtPosition( const FilePosition& pos )
+ {
+-    const QString line = logData_->getExpandedLineString( pos.line() );
++    const auto preview = cachedPreview( pos.line() );
++    if ( !preview || !preview->error.isEmpty() ) return;
++    const QString line = untabify( QString( preview->text ) );
+ 
+     const int clickPos = type_safe::narrow_cast<int>( pos.column().get() );
++    if ( clickPos < 0 || clickPos >= line.size() ) return;
+ 
+     const auto isWordSeparator = []( QChar c ) {
+         return !c.isLetterOrNumber() && c.category() != QChar::Punctuation_Connector;
+@@ -1985,9 +2066,10 @@
+         auto clipboard = QApplication::clipboard();
+         // Updating it only for "non-trivial" (range or portion) selections
+         if ( !selection_.isSingleLine() )
+-            clipboard->setText( selection_.getSelectedText( logData_ ), QClipboard::Selection );
++            clipboard->setText( getSelectedText(), QClipboard::Selection );
+     } catch ( std::exception& err ) {
+         LOG_ERROR << "failed to copy data to clipboard " << err.what();
++        Q_EMIT notifyQuickFind( QFNotification( tr( "%1" ).arg( err.what() ) ) );
+     }
+ }
+ 
+@@ -1998,7 +2080,7 @@
+     selectionCurrentEndPos_ = pos;
+     displayLine( pos.line() );
+     Q_EMIT newSelection( pos.line(), selection_.getSelectedLinesCount(), 0_lcol,
+-                         LineLength{ getSelectedText().size() } );
++                         selectionSymbols() );
+ }
+ 
+ // Create the pop-up menu
+@@ -2114,6 +2196,11 @@
+     popupMenu_->addAction( setSelectionEndAction_ );
+     popupMenu_->addSeparator();
+     popupMenu_->addAction( saveDefaultSplitterSizesAction_ );
++    popupMenu_->addSeparator();
++    auto previousWindow = popupMenu_->addAction( tr( "Previous byte window" ) );
++    connect( previousWindow, &QAction::triggered, this, &AbstractLogView::previousByteWindow );
++    auto nextWindow = popupMenu_->addAction( tr( "Next byte window" ) );
++    connect( nextWindow, &QAction::triggered, this, &AbstractLogView::nextByteWindow );
+     popupMenu_->addAction( saveToFileAction_ );
+     popupMenu_->addAction( saveSelectedToFileAction_ );
+ }
+@@ -2148,7 +2235,8 @@
+         LinesCount unwrappedLines;
+         LineNumber unwrappedLineNumber{ logData_->getNbLine().get() - 1 };
+         while ( unwrappedLines < totalLines && unwrappedLines < visibleLines ) {
+-            QString expandedLine = logData_->getExpandedLineString( unwrappedLineNumber );
++            const auto preview = cachedPreview( unwrappedLineNumber );
++            QString expandedLine = preview ? untabify( QString( preview->text ) ) : QString{};
+             WrappedString wrapped{ expandedLine, visibleColumns };
+             wrappedVisibleLines += LinesCount(
+                 type_safe::narrow_cast<LinesCount::UnderlyingType>( wrapped.wrappedLinesCount() ) );
+@@ -2185,7 +2273,8 @@
+ 
+     int64_t hScrollMaxValue = 0;
+     if ( !useTextWrap_ && logData_->getMaxLength().get() >= visibleColumns.get() ) {
+-        hScrollMaxValue = logData_->getMaxLength().get() - visibleColumns.get() + 1;
++        hScrollMaxValue = std::min<qint64>( logData_->getMaxLength().get(), AbstractLogData::PreviewByteLimit * TabStop )
++                         - visibleColumns.get() + 1;
+     }
+ 
+     hScrollMaxValue
+@@ -2304,7 +2393,14 @@
+     }();
+ 
+     // Lines to write
+-    const auto logLines = logData_->getLines( firstLine_, nbLines );
++    requestPreview( firstLine_, nbLines );
++    klogg::vector<QString> logLines;
++    logLines.reserve( nbLines.get() );
++    for ( auto i = 0_lcount; i < nbLines; ++i ) {
++        const auto preview = cachedPreview( firstLine_ + i );
++        logLines.push_back( !preview ? tr( "Loading bounded preview…" )
++                                    : preview->error.isEmpty() ? preview->text : preview->error );
++    }
+ 
+     const auto highlightPatternMatches = Configuration::get().mainSearchHighlight();
+     const auto variateHighlightPatternMatches = Configuration::get().variateMainSearchHighlight();
+@@ -2348,9 +2444,16 @@
+     int yPos = 0;
+     wrappedLinesInfo_.clear();
+     klogg::vector<std::pair<QColor, QColor>> highlightColors;
++    QString previewNotice;
+     for ( auto currentLine = 0_lcount; currentLine < nbLines; ++currentLine ) {
+         const auto lineNumber = firstLine_ + currentLine;
+         QString logLine = logLines[ currentLine.get() ];
++        const auto preview = cachedPreview( lineNumber );
++        if ( preview && preview->truncated && previewNotice.isEmpty() ) {
++            previewNotice = tr( "Long line %1 — bytes [%2, %3) of %4; local columns, pattern highlighting off. Right-click: previous/next window." )
++                .arg( displayLineNumber( lineNumber ).get() ).arg( preview->byteBegin )
++                .arg( preview->byteEnd ).arg( preview->totalBytes );
++        }
+ 
+         const int xPos = contentStartPosX + ContentMarginWidth;
+ 
+@@ -2369,7 +2472,7 @@
+             if ( lineNumber < searchStartIndex || lineNumber >= searchEndIndex ) {
+                 foreColor = palette.brush( QPalette::Disabled, QPalette::Text ).color();
+             }
+-            else {
++            else if ( !preview || !preview->truncated ) {
+                 const auto highlightType = highlighterSet.matchLine( logLine, highlighterMatches );
+ 
+                 if ( highlightType == HighlighterMatchType::LineMatch ) {
+@@ -2429,7 +2532,8 @@
+ 
+         // Has the line got elements to be highlighted
+         klogg::vector<HighlightedMatch> quickFindMatches;
+-        quickFindPattern_->matchLine( expandedLine, quickFindMatches );
++        if ( preview && !preview->truncated && preview->error.isEmpty() )
++            quickFindPattern_->matchLine( expandedLine, quickFindMatches );
+         allHighlights.addMatches( quickFindMatches );
+ 
+         // Is there something selected in the line?
+@@ -2562,7 +2666,8 @@
+             painter->drawText( lineNumberAreaStartX + LineNumberPadding, yPos + fontAscent,
+                                lineNumberStr );
+         }
+-        for ( size_t i = 0u; i < wrappedLineView.wrappedLinesCount(); ++i ) {
++        const auto visibleWrappedRows = static_cast<size_t>( std::max( 0, viewport()->height() - yPos ) / fontHeight + 1 );
++        for ( size_t i = 0u; i < std::min( wrappedLineView.wrappedLinesCount(), visibleWrappedRows ); ++i ) {
+             wrappedLinesInfo_.emplace_back( WrappedLineData{ lineNumber, i, wrappedLineView } );
+         }
+ 
+@@ -2571,6 +2676,175 @@
+             break;
+         }
+     } // For each line
++    if ( !previewNotice.isEmpty() ) {
++        painter->fillRect( 0, viewport()->height() - fontHeight, viewport()->width(), fontHeight,
++                           QColor( 255, 244, 190 ) );
++        painter->setPen( Qt::black );
++        painter->drawText( 4, viewport()->height() - fontHeight + fontAscent, previewNotice );
++        viewport()->setToolTip( previewNotice );
++    }
++}
++
++void AbstractLogView::clearPreview()
++{
++    ++previewRevision_;
++    if ( previewCancel_ ) previewCancel_->store( true );
++    previewFrame_.reset();
++}
++
++void AbstractLogView::stopPreview()
++{
++    ++previewRevision_;
++    if ( previewCancel_ ) previewCancel_->store( true );
++    previewWatcher_.waitForFinished();
++    if ( quickFind_ ) quickFind_->stopSearch();
++}
++
++quint64 AbstractLogView::previewRetainedBytes() const
++{
++    quint64 bytes = static_cast<quint64>( wrappedLinesInfo_.capacity() * sizeof( WrappedLineData ) );
++    if ( previewFrame_ ) {
++        bytes += static_cast<quint64>( previewFrame_->lines.capacity() * sizeof( AbstractLogData::LinePreview ) );
++        for ( const auto& preview : previewFrame_->lines )
++            bytes += static_cast<quint64>( preview.text.capacity() + preview.error.capacity() ) * sizeof( QChar );
++    }
++    OptionalLineNumber previous;
++    for ( const auto& row : wrappedLinesInfo_ ) {
++        if ( !previous || *previous != row.lineNumber ) bytes += row.wrappedString.retainedBytes();
++        previous = row.lineNumber;
++    }
++    return bytes; // excludes worker scratch, allocator overhead, pixmaps and other Qt objects
++}
++
++QString AbstractLogView::previewWindowText( quint64 viewLine ) const
++{
++    const auto preview = cachedPreview( LineNumber( viewLine ) );
++    return preview && preview->error.isEmpty() ? preview->text : QString{};
++}
++
++QVariantMap AbstractLogView::previewWindowInfo( quint64 viewLine ) const
++{
++    const auto preview = cachedPreview( LineNumber( viewLine ) );
++    if ( !preview ) return { { "ready", false } };
++    return { { "ready", true }, { "absolute_line_begin", preview->absoluteLineBegin },
++             { "byte_begin", preview->byteBegin }, { "byte_end", preview->byteEnd },
++             { "total_bytes", preview->totalBytes }, { "truncated", preview->truncated },
++             { "error", preview->error }, { "text_utf16_units", preview->text.size() } };
++}
++
++const AbstractLogData::LinePreview* AbstractLogView::cachedPreview( LineNumber line ) const
++{
++    if ( !previewFrame_ || previewFrame_->revision != previewRevision_ || line < previewFrame_->first )
++        return nullptr;
++    const auto index = ( line - previewFrame_->first ).get();
++    if ( index >= previewFrame_->lines.size() ) return nullptr;
++    return &previewFrame_->lines[ static_cast<size_t>( index ) ];
++}
++
++void AbstractLogView::requestPreview( LineNumber first, LinesCount count )
++{
++    if ( previewFrame_ && previewFrame_->first == first && previewFrame_->count == count
++         && previewFrame_->revision == previewRevision_ ) return;
++    if ( previewPending_ ) {
++        if ( previewFrame_ && previewFrame_->first != first && previewCancel_ ) previewCancel_->store( true );
++        return;
++    }
++    previewPending_ = true;
++    previewCancel_ = std::make_shared<std::atomic_bool>( false );
++    const auto cancel = previewCancel_;
++    const auto sourceData = logData_->previewSource();
++    const auto rawSource = qobject_cast<const LogData*>( sourceData );
++    const auto expected = rawSource ? rawSource->snapshot() : LogData::SourceSnapshot{};
++    klogg::vector<std::pair<LineNumber, qint64>> tasks;
++    const auto rows = std::min<uint64_t>( count.get(), 256 );
++    tasks.reserve( static_cast<size_t>( rows ) );
++    for ( uint64_t i = 0; i < rows; ++i ) {
++        const auto viewLine = first + LinesCount( i );
++        const auto found = previewOffsets_.find( viewLine );
++        tasks.emplace_back( logData_->previewSourceLine( viewLine ),
++                            found == previewOffsets_.end() ? 0 : found->second );
++    }
++    const auto revision = previewRevision_;
++    previewWatcher_.setFuture( QtConcurrent::run( [ sourceData, rawSource, expected, first, count, tasks = std::move( tasks ), revision, cancel ] {
++        PreviewFrame frame{ first, count, revision, {} };
++        // Covers bounded source text; tab expansion is at most 8x and QString
++        // UTF-16 at most 2x these input bytes. Row metadata is separately capped.
++        qint64 remaining = 128 * 1024;
++        frame.lines.reserve( tasks.size() );
++        for ( const auto& task : tasks ) {
++            if ( cancel->load() ) break;
++            AbstractLogData::LinePreview preview;
++            if ( !rawSource || !rawSource->matchesSnapshot( expected ) )
++                preview.error = QObject::tr( "Source changed; refresh the file" );
++            else if ( remaining > 0 ) {
++                const auto reserved = std::min( remaining, AbstractLogData::PreviewByteLimit );
++                const auto requested = std::min( reserved,
++                    std::max<qint64>( 0, sourceData->lineByteSize( task.first ) - task.second ) );
++                preview = sourceData->linePreview( task.first, task.second,
++                                                  reserved );
++                remaining -= std::max<qint64>( 1, requested );
++            }
++            else preview.error = QObject::tr( "Preview budget reached; scroll to view this line" );
++            frame.lines.push_back( std::move( preview ) );
++        }
++        if ( rawSource && !rawSource->matchesSnapshot( expected ) ) {
++            for ( auto& preview : frame.lines ) {
++                preview.text.clear();
++                preview.error = QObject::tr( "Source changed; refresh the file" );
++            }
++        }
++        return frame;
++    } ) );
++}
++
++void AbstractLogView::showByteWindow( LineNumber viewLine, OffsetInFile absoluteByteAnchor )
++{
++    // Metadata/tiny bounded read only; the larger window is obtained asynchronously.
++    const auto metadata = logData_->linePreview( viewLine, 0, 1 );
++    if ( !metadata.error.isEmpty() ) {
++        Q_EMIT notifyQuickFind( QFNotification( metadata.error ) );
++        return;
++    }
++    const auto relative = std::clamp<qint64>( absoluteByteAnchor.get() <= metadata.absoluteLineBegin ? 0
++                                             : absoluteByteAnchor.get() - metadata.absoluteLineBegin,
++                                             0, metadata.totalBytes );
++    previewOffsets_.clear();
++    previewOffsets_[ viewLine ] = std::max<qint64>( 0, relative - 32 );
++    selection_.selectLine( viewLine );
++    clearPreview();
++    previewAnchor_ = std::make_pair( viewLine, relative );
++    horizontalScrollBar()->setValue( 0 );
++    jumpToLine( viewLine );
++    forceRefresh();
++}
++
++void AbstractLogView::nextByteWindow()
++{
++    const auto line = getViewPosition();
++    if ( const auto preview = cachedPreview( line ) ) {
++        if ( previewOffsets_.size() >= 8 ) previewOffsets_.clear();
++        previewOffsets_[ line ] = std::min( preview->byteEnd,
++                                           std::max<qint64>( 0, preview->totalBytes - 1 ) );
++        selection_.selectLine( line );
++        previewAnchor_.reset();
++        clearPreview();
++        horizontalScrollBar()->setValue( 0 );
++        forceRefresh();
++    }
++}
++
++void AbstractLogView::previousByteWindow()
++{
++    const auto line = getViewPosition();
++    if ( const auto preview = cachedPreview( line ) ) {
++        if ( previewOffsets_.size() >= 8 ) previewOffsets_.clear();
++        previewOffsets_[ line ] = std::max<qint64>( 0, preview->byteBegin - AbstractLogData::PreviewByteLimit );
++        selection_.selectLine( line );
++        previewAnchor_.reset();
++        clearPreview();
++        horizontalScrollBar()->setValue( 0 );
++        forceRefresh();
++    }
+ }
+ 
+ // Draw the "pull to follow" bar and return a pixmap.
+--- a/src/ui/src/crawlerwidget.cpp
++++ b/src/ui/src/crawlerwidget.cpp
+@@ -168,6 +168,29 @@
+ }
+ 
+ // The top line is first one on the main display
++CrawlerWidget::~CrawlerWidget()
++{
++    // QObject destroys children only after this class's members. In particular,
++    // tab removal/destruction may emit currentChanged/destroyed, and views keep
++    // raw pointers into the member-owned data and overview. Tear them down now,
++    // while those objects and the filtered-view map are still alive.
++    const auto childObjects = findChildren<QObject*>();
++    for (auto* child : childObjects) QObject::disconnect(child, nullptr, this, nullptr);
++    if (logData_) QObject::disconnect(logData_.get(), nullptr, this, nullptr);
++    if (logFilteredData_) QObject::disconnect(logFilteredData_.get(), nullptr, this, nullptr);
++    for (const auto& entry : filteredViewsData_)
++        QObject::disconnect(entry.second.get(), nullptr, this, nullptr);
++
++    // Enumerate live child objects rather than relying on map keys: a tab may
++    // already have a pending DeferredDelete event when the crawler is closed.
++    const auto views = findChildren<AbstractLogView*>();
++    for (auto* view : views) view->stopPreview();
++    for (auto* view : views) delete view;
++    logMainView_ = nullptr;
++    filteredView_ = nullptr;
++    filteredViewsData_.clear();
++}
++
+ LineNumber CrawlerWidget::getTopLine() const
+ {
+     return logMainView_->getTopLine();
+@@ -389,7 +412,7 @@
+         tabbedFilteredView_->setCurrentIndex( index );
+ 
+         connect( logFilteredData_.get(), &LogFilteredData::searchProgressed, this,
+-                 &CrawlerWidget::updateFilteredView, Qt::QueuedConnection );
++                 &CrawlerWidget::updateFilteredView );
+ 
+         logMainView_->useNewFiltering( logFilteredData_.get() );
+ 
+@@ -481,6 +504,7 @@
+ void CrawlerWidget::updateFilteredView( LinesCount nbMatches, int progress,
+                                         LineNumber initialPosition )
+ {
++    if (sender() && sender() != logFilteredData_.get()) return;
+     LOG_DEBUG << "updateFilteredView received.";
+ 
+     searchInfoLine_->show();
+@@ -548,6 +572,10 @@
+                                         LineColumn startCol, LineLength nSymbols )
+ {
+     const auto mainViewLine = logFilteredData_->getMatchingLineNumber( filteredLineNb );
++    if (const auto anchor = logFilteredData_->firstMatchByte(mainViewLine)) {
++        logMainView_->showByteWindow(mainViewLine, *anchor);
++        return;
++    }
+     logMainView_->selectPortionAndDisplayLine( mainViewLine, nLines, startCol,
+                                                nSymbols ); // FIXME: should be done with a signal.
+ }
+@@ -704,6 +732,9 @@
+ 
+     // searchButton_->setEnabled( true );
+ 
++    // Set the source interpretation before an asynchronous search captures it.
++    updateEncoding();
++
+     // See if we need to auto-refresh the search
+     if ( searchState_.isAutorefreshAllowed() ) {
+         searchEndLine_ = LineNumber( logData_->getNbLine().get() );
+@@ -713,9 +744,6 @@
+         else
+             logFilteredData_->updateSearch( searchStartLine_, searchEndLine_ );
+     }
+-
+-    // Set the encoding for the views
+-    updateEncoding();
+ 
+     clearSearchLimits();
+ 
+@@ -1082,7 +1110,9 @@
+     searchLineEdit_->addItems( savedSearches_->recentSearches() );
+     searchLineEdit_->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Minimum );
+     searchLineEdit_->setSizeAdjustPolicy( QComboBox::AdjustToMinimumContentsLengthWithIcon );
+-    searchLineEdit_->lineEdit()->setMaxLength( std::numeric_limits<int>::max() / 1024 );
++    // Permit the supported one-MiB ASCII literal without QLineEdit's default
++    // silent truncation. searchError still enforces the UTF-8 byte budget.
++    searchLineEdit_->lineEdit()->setMaxLength( 1024 * 1024 );
+     searchLineEdit_->setContentsMargins( 2, 2, 2, 2 );
+ 
+     QAction* clearSearchHistoryAction = new QAction( tr( "Clear search history" ), this );
+@@ -1251,7 +1281,7 @@
+     connect( logMainView_, &LogMainView::changeFontSize, this, &CrawlerWidget::changeFontSize );
+ 
+     connect( logFilteredData_.get(), &LogFilteredData::searchProgressed, this,
+-             &CrawlerWidget::updateFilteredView, Qt::QueuedConnection );
++             &CrawlerWidget::updateFilteredView );
+ 
+     // Sent load file update to MainWindow (for status update)
+     connect( logData_.get(), &LogData::loadingProgressed, this, &CrawlerWidget::loadingProgressed );
+@@ -1326,7 +1356,11 @@
+ 
+ void CrawlerWidget::filteredViewDestroyed( QObject* view )
+ {
+-    filteredViewsData_.erase( qobject_cast<FilteredView*>( view ) );
++    // QObject::destroyed is emitted after the derived meta-object has gone;
++    // qobject_cast<FilteredView*> can no longer recover this map's original key.
++    const auto found = std::find_if(filteredViewsData_.begin(), filteredViewsData_.end(),
++        [view](const auto& entry) { return static_cast<QObject*>(entry.first) == view; });
++    if (found != filteredViewsData_.end()) filteredViewsData_.erase(found);
+ }
+ 
+ void CrawlerWidget::saveSplitterSizes() const
+@@ -1595,8 +1629,20 @@
+             searchText, matchCaseButton_->isChecked(), inverseButton_->isChecked(),
+             booleanButton_->isChecked(), !useRegexpButton_->isChecked() );
+ 
+-        RegularExpression hsExpression{ regexpPattern };
+-        auto isValidExpression = hsExpression.isValid();
++        const auto compatibilityError = logFilteredData_->searchError(regexpPattern);
++        if (!compatibilityError.isEmpty()) {
++            logFilteredData_->clearSearch();
++            filteredView_->updateData();
++            searchState_.resetState();
++            searchInfoLine_->setPalette(ErrorPalette);
++            searchInfoLine_->setText(compatibilityError);
++            searchInfoLine_->show();
++            return;
++        }
++        const bool boundedLiteral = logData_->getMaxLength().get() >= 1024 * 1024;
++        std::optional<RegularExpression> hsExpression;
++        if (!boundedLiteral) hsExpression.emplace(regexpPattern);
++        const bool isValidExpression = boundedLiteral || hsExpression->isValid();
+ 
+         if ( isValidExpression ) {
+             // Activate the stop button
+@@ -1619,7 +1665,7 @@
+             searchState_.resetState();
+ 
+             // Inform the user
+-            QString errorString = hsExpression.errorString();
++            QString errorString = hsExpression->errorString();
+             QString errorMessage = tr( "Error in expression" );
+             // const int offset = regexp.patternErrorOffset();
+             // if ( offset != -1 ) {
+@@ -1672,6 +1718,11 @@
+         // Some languages translate the plural the same as the singular, so use the full string
+         text = nbMatches.get() > 1 ? tr( "%1 matches found" ).arg( nbMatches.get() )
+                                    : tr( "%1 match found" ).arg( nbMatches.get() );
++        if (logFilteredData_->searchCompletion() != SearchCompletion::Complete
++            && logFilteredData_->searchCompletion() != SearchCompletion::Running) {
++            text += QStringLiteral(" — ") + searchCompletionName(logFilteredData_->searchCompletion())
++                    + QStringLiteral(": ") + logFilteredData_->searchMessage();
++        }
+         break;
+     case SearchState::FileTruncated:
+     case SearchState::TruncatedAutorefreshing:
+--- a/src/ui/src/quickfind.cpp
++++ b/src/ui/src/quickfind.cpp
+@@ -166,7 +166,13 @@
+ 
+ void QuickFind::onSearchFutureReady()
+ {
+-    auto selection = operationFuture_.result();
++    if ( interruptRequested_ || !operationFuture_.isFinished() ) return;
++    Portion selection;
++    try { selection = operationFuture_.result(); }
++    catch ( const std::exception& e ) {
++        sendNotification( QFNotification( tr( "Quick Find stopped: %1" ).arg( e.what() ) ) );
++        return;
++    }
+ 
+     if ( selection.isValid() ) {
+         Q_EMIT searchDone( true, selection );
+@@ -185,6 +191,8 @@
+ 
+     interruptRequested_.set();
+     operationWatcher_.waitForFinished();
++    if ( !prepareSource() ) return;
++    interruptRequested_.clear();
+ 
+     // Position where we start the search from
+     FilePosition start_position = selection.getNextPosition();
+@@ -219,6 +227,8 @@
+ 
+     interruptRequested_.set();
+     operationWatcher_.waitForFinished();
++    if ( !prepareSource() ) return;
++    interruptRequested_.clear();
+ 
+     // Position where we start the search from
+     FilePosition start_position = selection.getPreviousPosition();
+@@ -251,6 +261,8 @@
+     incrementalSearchStatus_ = IncrementalSearchStatus();
+     interruptRequested_.set();
+     operationWatcher_.waitForFinished();
++    if ( !prepareSource() ) return;
++    interruptRequested_.clear();
+ 
+ #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+     operationFuture_ = QtConcurrent::run( this, &QuickFind::doSearchForward, selection, matcher );
+@@ -267,6 +279,8 @@
+     incrementalSearchStatus_ = IncrementalSearchStatus();
+     interruptRequested_.set();
+     operationWatcher_.waitForFinished();
++    if ( !prepareSource() ) return;
++    interruptRequested_.clear();
+ 
+ #if QT_VERSION < QT_VERSION_CHECK( 6, 0, 0 )
+     operationFuture_ = QtConcurrent::run( this, &QuickFind::doSearchBackward, selection, matcher );
+@@ -278,6 +292,45 @@
+     operationWatcher_.setFuture( operationFuture_ );
+ }
+ 
++bool QuickFind::canSearchLine( LineNumber line )
++{
++    if ( interruptRequested_ || line >= searchLineCount_ ) return false;
++    const auto bytes = searchSource_->lineByteSize( sourceLine( line ) );
++    if ( bytes < 0 || bytes > AbstractLogData::PreviewByteLimit ) {
++        interruptRequested_.set();
++        sendNotification( QFNotification( tr( "Quick Find cannot search this long line. Use case-sensitive literal main search; preview is a byte window." ) ) );
++        return false;
++    }
++    return true;
++}
++
++bool QuickFind::prepareSource()
++{
++    searchSource_ = logData_.previewSource();
++    searchLineCount_ = logData_.getNbLine();
++    searchLines_.clear();
++    if ( searchSource_ != &logData_ ) {
++        if ( searchLineCount_.get() > 65536 ) {
++            sendNotification( QFNotification( tr( "Quick Find in a filtered view is limited to 65536 stable rows; use main search" ) ) );
++            return false;
++        }
++        searchLines_.reserve( static_cast<size_t>( searchLineCount_.get() ) );
++        for ( uint64_t i = 0; i < searchLineCount_.get(); ++i )
++            searchLines_.push_back( logData_.previewSourceLine( LineNumber( i ) ) );
++    }
++    return true;
++}
++
++LineNumber QuickFind::sourceLine( LineNumber line ) const
++{
++    return searchSource_ == &logData_ ? line : searchLines_.at( static_cast<size_t>( line.get() ) );
++}
++
++QString QuickFind::expandedLine( LineNumber line ) const
++{
++    return searchSource_->getExpandedLineString( sourceLine( line ) );
++}
++
+ Portion QuickFind::doSearchForward( const Selection& selection, const QuickFindMatcher& matcher )
+ {
+     return doSearchForward( selection.getNextPosition(), selection, matcher );
+@@ -289,7 +342,6 @@
+ Portion QuickFind::doSearchForward( const FilePosition& start_position, const Selection& selection,
+                                     const QuickFindMatcher& matcher )
+ {
+-    interruptRequested_.clear();
+ 
+     bool found = false;
+     LineColumn found_start_col{};
+@@ -310,7 +362,8 @@
+     auto line = start_position.line();
+     LOG_DEBUG << "Start searching at line " << line;
+     // We look at the rest of the first line
+-    if ( matcher.isLineMatching( logData_.getExpandedLineString( line ),
++    if ( !canSearchLine( line ) ) return {};
++    if ( matcher.isLineMatching( expandedLine( line ),
+                                  start_position.column() ) ) {
+         std::tie( found_start_col, found_end_col ) = matcher.getLastMatch();
+         found = true;
+@@ -318,10 +371,11 @@
+     else {
+         searchingNotifier_.reset();
+         // And then the rest of the file
+-        const auto nb_lines = logData_.getNbLine();
++        const auto nb_lines = searchLineCount_;
+         ++line;
+         while ( line < nb_lines ) {
+-            if ( matcher.isLineMatching( logData_.getExpandedLineString( line ) ) ) {
++            if ( !canSearchLine( line ) ) return {};
++            if ( matcher.isLineMatching( expandedLine( line ) ) ) {
+                 std::tie( found_start_col, found_end_col ) = matcher.getLastMatch();
+                 found = true;
+                 break;
+@@ -372,7 +426,6 @@
+ Portion QuickFind::doSearchBackward( const FilePosition& start_position, const Selection& selection,
+                                      const QuickFindMatcher& matcher )
+ {
+-    interruptRequested_.clear();
+ 
+     bool found = false;
+     LineColumn start_col{};
+@@ -393,8 +446,9 @@
+     auto line = start_position.line();
+     LOG_DEBUG << "Start searching at line " << line;
+     // We look at the beginning of the first line
++    if ( !canSearchLine( line ) ) return {};
+     if ( ( start_position.column() > 0_lcol )
+-         && ( matcher.isLineMatchingBackward( logData_.getExpandedLineString( line ),
++         && ( matcher.isLineMatchingBackward( expandedLine( line ),
+                                               start_position.column() ) ) ) {
+         std::tie( start_col, end_col ) = matcher.getLastMatch();
+         found = true;
+@@ -402,11 +456,12 @@
+     else {
+         searchingNotifier_.reset();
+         // And then the rest of the file
+-        const auto nb_lines = logData_.getNbLine();
++        const auto nb_lines = searchLineCount_;
+         if ( line > 0_lnum ) {
+             --line;
+             while ( true ) {
+-                if ( matcher.isLineMatchingBackward( logData_.getExpandedLineString( line ) ) ) {
++                if ( !canSearchLine( line ) ) return {};
++                if ( matcher.isLineMatchingBackward( expandedLine( line ) ) ) {
+                     std::tie( start_col, end_col ) = matcher.getLastMatch();
+                     found = true;
+                     break;
+@@ -453,11 +508,15 @@
+ 
+ void QuickFind::resetLimits()
+ {
++    stopSearch();
+     lastMatch_.reset();
+     firstMatch_.reset();
+ }
+ 
+ void QuickFind::sendNotification( QFNotification notification )
+ {
+-    dispatchToMainThread( [ this, notification ]() { notify( notification ); } );
+-}
++    // The receiver context removes a queued notification when this search/view
++    // is destroyed; a dispatcher-owned lambda capturing this could outlive it.
++    QMetaObject::invokeMethod( this, [ this, notification ] { Q_EMIT notify( notification ); },
++                               Qt::QueuedConnection );
++}
+--- a/src/ui/src/selection.cpp
++++ b/src/ui/src/selection.cpp
+@@ -24,6 +24,7 @@
+ // at any time.
+ 
+ #include <numeric>
++#include <stdexcept>
+ 
+ #include "abstractlogdata.h"
+ #include "containers.h"
+@@ -192,6 +193,24 @@
+ std::map<LineNumber, QString>
+ Selection::getSelectionWithLineNumbers( const AbstractLogData* logData ) const
+ {
++    // Clipboard requires a single QString. Validate the complete requested scope
++    // before reading any lines; a preview prefix is never a successful full copy.
++    constexpr qint64 SelectionByteLimit = 512 * 1024;
++    qint64 estimate = 0;
++    const auto check = [&]( LineNumber line ) {
++        const auto bytes = logData->lineByteSize( line );
++        if ( bytes < 0 || bytes > AbstractLogData::PreviewByteLimit
++             || bytes > SelectionByteLimit - estimate - 64 )
++            throw std::length_error( "Selection exceeds the safe clipboard limit; select text inside the displayed byte window" );
++        estimate += bytes + 64;
++    };
++    if ( selectedLine_ ) check( *selectedLine_ );
++    else if ( selectedPartial_.line ) check( *selectedPartial_.line );
++    else if ( selectedRange_.startLine ) {
++        if ( selectedRange_.size().get() > 8192 )
++            throw std::length_error( "Selection exceeds the safe clipboard line limit" );
++        for ( auto line = *selectedRange_.startLine; line <= selectedRange_.endLine; ++line ) check( line );
++    }
+     std::map<LineNumber, QString> selectionData;
+ 
+     if ( selectedLine_.has_value() ) {
+--- a/tests/unit/linepositionarray_test.cpp
++++ b/tests/unit/linepositionarray_test.cpp
+@@ -28,6 +28,7 @@
+ #include <array>
+ #include <iostream>
+ #include <random>
++#include <utility>
+ #include <vector>
+ 
+ #include <configuration.h>
+@@ -269,3 +270,86 @@
+         }
+     }
+ }
++
++TEST_CASE( "Compressed line storage keeps wide block deltas lossless", "[linepositionarray][compressed]" )
++{
++    CompressedLinePositionStorage positions;
++    std::vector<int64_t> expected;
++    constexpr size_t count = 128;
++    const uint64_t base = 17;
++    const uint64_t span = uint64_t{ 1 } << 32;
++
++    for ( size_t i = 0; i < count; ++i ) {
++        const auto value = base + span * i / ( count - 1 );
++        expected.push_back( static_cast<int64_t>( value ) );
++        positions.append( OffsetInFile( static_cast<int64_t>( value ) ) );
++    }
++
++    REQUIRE( positions.size() == LinesCount( count ) );
++    const auto ranged = positions.range( LineNumber( 0 ), LinesCount( count ) );
++    REQUIRE( ranged.size() == count );
++    for ( size_t i = 0; i < count; ++i ) {
++        CAPTURE( i );
++        REQUIRE( positions.at( i ).get() == expected[i] );
++        REQUIRE( ranged[i].get() == expected[i] );
++    }
++}
++
++TEST_CASE( "Compressed line storage supports mixed-width lifecycle operations",
++           "[linepositionarray][compressed]" )
++{
++    constexpr size_t blockSize = 128;
++    CompressedLinePositionStorage positions;
++    std::vector<int64_t> expected;
++    const auto appendBlock = [&]( int64_t base, uint64_t span ) {
++        for ( size_t i = 0; i < blockSize; ++i ) {
++            const auto value = base + static_cast<int64_t>( span * i / ( blockSize - 1 ) );
++            positions.append( OffsetInFile( value ) );
++            expected.push_back( value );
++        }
++    };
++
++    appendBlock( 100, 127 );
++    appendBlock( 1000, UINT32_MAX );
++    appendBlock( 5000000000LL, 127 );
++
++    for ( const auto start : { size_t{ 120 }, size_t{ 240 } } ) {
++        const auto range = positions.range( LineNumber( start ), LinesCount( 144 ) );
++        REQUIRE( range.size() == 144 );
++        for ( size_t i = 0; i < range.size(); ++i ) {
++            CAPTURE( start, i );
++            REQUIRE( range[i].get() == expected[start + i] );
++        }
++    }
++
++    // Remove the narrow tail and the preceding wide block, then recompress a
++    // narrow block over the retained packed prefix.
++    for ( size_t i = 0; i < 2 * blockSize; ++i ) {
++        positions.pop_back();
++        expected.pop_back();
++    }
++    appendBlock( 5000000000LL, 127 );
++    for ( size_t i = 0; i < expected.size(); ++i ) {
++        CAPTURE( i );
++        REQUIRE( positions.at( i ).get() == expected[i] );
++    }
++
++    CompressedLinePositionStorage destination;
++    destination.append( OffsetInFile( 7 ) );
++    destination = std::move( positions );
++    REQUIRE( destination.size() == LinesCount( expected.size() ) );
++    REQUIRE( destination.at( expected.size() - 1 ).get() == expected.back() );
++
++    // The moved-from object is reusable, and self-move leaves the destination intact.
++    positions.append( OffsetInFile( 1 ) );
++    REQUIRE( positions.at( 0 ).get() == 1 );
++    destination = std::move( destination );
++    REQUIRE( destination.size() == LinesCount( expected.size() ) );
++    REQUIRE( destination.at( expected.size() - 1 ).get() == expected.back() );
++}
++
++TEST_CASE( "Compressed line storage accepts an empty range", "[linepositionarray][compressed]" )
++{
++    CompressedLinePositionStorage positions;
++    REQUIRE( positions.range( LineNumber( 0 ), LinesCount( 0 ) ).empty() );
++}

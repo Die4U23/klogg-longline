@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": {
+    "child_exit_zero": true,
+    "runner_completed": true,
+    "source_hash_unchanged": true,
+    "gui_completed": true,
+    "view_destroyed": true,
+    "gui_heartbeat_under_500ms": true
+  },
+  "measurements": {
+    "max_gui_heartbeat_ms": 46.9901
+  },
+  "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\clean-candidate\\gui-1mib",
+  "oracle": null
+}

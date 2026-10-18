@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "checks": {
+    "child_exit_zero": true,
+    "runner_completed": true,
+    "source_hash_unchanged": true,
+    "gui_completed": true,
+    "view_destroyed": true,
+    "gui_heartbeat_under_500ms": true,
+    "real_anchor_stage_completed": true
+  },
+  "measurements": {
+    "max_gui_heartbeat_ms": 269.8491,
+    "anchor_detail": {
+      "absolute_anchor_byte": "5368708973",
+      "cached_window": {
+        "absolute_line_begin": 0,
+        "byte_begin": 5368708941,
+        "byte_end": 5368709120,
+        "error": "",
+        "ready": true,
+        "text_utf16_units": 179,
+        "total_bytes": 5368709120,
+        "truncated": true
+      }
+    }
+  },
+  "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\clean-candidate\\gui-5gib-windows",
+  "oracle": null
+}

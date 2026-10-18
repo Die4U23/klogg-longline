@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "method": "PATH restricted to package and Windows system directories; no Qt/build PATH; native Windows QPA",
+  "commands": [
+    {
+      "flag": "-v",
+      "exit_code": 0,
+      "stdout": "klogg 24.11.0.0\r\n",
+      "stderr": ""
+    },
+    {
+      "flag": "--help",
+      "exit_code": 0,
+      "stdout": "Usage: E:\\codex\\klogg\\.local\\dist\\klogg-longline-windows-x64\\klogg.exe [options]\r\nKlogg log viewer\r\n\r\nOptions:\r\n  -?, -h, --help             Displays help on commandline options.\r\n  --help-all                 Displays help, including generic Qt options.\r\n  -v, --version              Displays version information.\r\n  -d, --debug <debug_level>  output more debug (increase number for more\r\n                             verbosity)\r\n  -m, --multi                allow multiple instance of klogg to run\r\n                             simultaneously (use together with -s)\r\n  -s, --load-session         load the previous session (default when no file is\r\n                             passed)\r\n  -n, --new-session          do not load the previous session (default when a\r\n                             file is passed)\r\n  -l, --log                  save the log to a file\r\n  -f, --follow               follow initial opened files\r\n  --window-width <1024>      new window width\r\n  --window-height <768>      new window height\r\n",
+      "stderr": ""
+    }
+  ],
+  "manifest_hash_mismatches": [],
+  "archive_sha256": "6524fa9fe3f378978503a51d893b33fd5f0bb3d9979e715bd8bc6a88060e180f",
+  "archive_bytes": 44441318,
+  "executable_sha256": "358f68a286579da2928bad5fdae7b75a7d11338233562641ad695ebd8470e0a1"
+}

@@ -1,0 +1,19 @@
+klogg-longline contains a source snapshot of klogg.
+
+Upstream repository: https://github.com/variar/klogg
+Snapshot commit: 25c7de6d8f6da2ce6a00882e5af70b4f331af4c5
+Snapshot directory: upstream/klogg/
+
+The upstream authors' notices and third-party notices remain in
+upstream/klogg/NOTICE and the corresponding source files. klogg is based on
+glogg by Nicolas Bonnefon and includes work by Anton Filimonov and other
+contributors. Retaining these notices does not import their Git history.
+
+The application is distributed under GPL-3.0-or-later, with the license text
+in LICENSE and upstream/klogg/COPYING. Third-party components retain their
+own notices and licenses. Project-specific additions use GPL-3.0-or-later
+unless a file states otherwise. This project is an independent derivative;
+it does not claim authorship of the complete upstream viewer.
+
+See UPSTREAM.json for provenance, and project evidence documentation for
+the changes actually implemented and the validation performed.

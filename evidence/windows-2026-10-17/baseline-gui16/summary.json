@@ -1,0 +1,68 @@
+{
+  "arguments": [
+    "--file",
+    "E:/codex/klogg/.local/fixtures/full/long_16mib.log",
+    "--action",
+    "all",
+    "--label",
+    "baseline",
+    "--timeout-ms",
+    "80000"
+  ],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_gui_probe.exe",
+    "--file",
+    "E:/codex/klogg/.local/fixtures/full/long_16mib.log",
+    "--action",
+    "all",
+    "--label",
+    "baseline",
+    "--timeout-ms",
+    "80000"
+  ],
+  "compiler": null,
+  "elapsed_seconds": 52.938,
+  "ended_utc": "2026-10-17T03:42:37.727733+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe"
+    ],
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_gui_probe.exe",
+  "executable_sha256": "9c3bff4ec1ee746300b746ed7fb73ea563d2f4fff2f8db0c3841b313bd8b0081",
+  "executable_size_bytes": 11387904,
+  "exit_code": 1,
+  "input": {
+    "changed": false,
+    "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\long_16mib.log",
+    "sha256_after": "52aca0fafd7270c0415fcab63de11a126d8c47adb9733993a88c5e8c88dd2e3c",
+    "sha256_before": "52aca0fafd7270c0415fcab63de11a126d8c47adb9733993a88c5e8c88dd2e3c",
+    "size_bytes_after": 16777216,
+    "size_bytes_before": 16777216
+  },
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 8747659264,
+    "private_bytes": 52581208064,
+    "rss_bytes": 8736661504,
+    "vms_bytes": 52581208064
+  },
+  "qpa": "offscreen",
+  "runner_exit_code": 1,
+  "runner_status": "child_failed",
+  "sample_count": 1899,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-17T03:41:44.802039+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 90.0
+}

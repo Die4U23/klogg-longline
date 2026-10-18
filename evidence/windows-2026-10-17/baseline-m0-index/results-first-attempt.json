@@ -1,0 +1,103 @@
+{
+  "schema": "klogg-index-only-m0-baseline-v1",
+  "source_commit": "25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+  "source_root": ".local/baseline/klogg-25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+  "built_sources": [
+    "src/logdata/src/compressedlinestorage.cpp",
+    "src/utils/src/cpu_info.cpp",
+    "src/logging/src/logger.cpp"
+  ],
+  "configuration": "x64 RelWithDebInfo, MSVC 19.44.35211.0, Qt 6.7.3, CMake 3.29.2, Ninja 1.12.0",
+  "dependencies": {
+    "mimalloc_version": "2.1.7",
+    "mimalloc_archive_sha256": "FA61CF01E3DD869B35275BFD8BE95BFDE77F0B65DFA7E34012C09A66E1EA463F",
+    "streamvbyte_archive_sha256": "BF4CE4024D53C34C7F3652BA1DDD6194179E84DFDD40A31BD6FD1E5D6AB52B10",
+    "type_safe": "cached from CPM at .local/cpm-cache/type_safe/71a1f33a7b982527e268b7782e28521750f87981",
+    "streamvbyte_version": "1.0.0"
+  },
+  "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd",
+  "configure_log": ".local/logs/index-only-configure-20261017-113358-315.log",
+  "build_log": ".local/logs/index-only-build-20261017-113358-315.log",
+  "raw_run_root": ".local/evidence/index-only-baseline/final-baseline",
+  "crash_note": "The 2^32 span and zero-count range processes terminate abnormally before emitting final probe JSON. Their runner wall times and RSS/private samples stop at process termination and do not contain a final in-probe elapsed_ns or allocatedSize.",
+  "cases": [
+    {
+      "case": "high-absolute-small-span",
+      "status": "measured",
+      "matches_expected": true,
+      "allocated_size_bytes": 576,
+      "elapsed_ns": 337500,
+      "runner_elapsed_seconds": 0.031,
+      "peak_private_bytes": 663552,
+      "child_exit_code": 0,
+      "runner_exit_code": 0,
+      "sample_count": 2,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    },
+    {
+      "case": "uint32-max-span",
+      "status": "measured",
+      "matches_expected": true,
+      "allocated_size_bytes": 576,
+      "elapsed_ns": 372400,
+      "runner_elapsed_seconds": 0.031,
+      "peak_private_bytes": 655360,
+      "child_exit_code": 0,
+      "runner_exit_code": 0,
+      "sample_count": 2,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    },
+    {
+      "case": "two-to-32-span",
+      "status": "child_crash",
+      "matches_expected": null,
+      "allocated_size_bytes": null,
+      "elapsed_ns": null,
+      "runner_elapsed_seconds": 5.875,
+      "peak_private_bytes": 35700736,
+      "child_exit_code": 3221226505,
+      "runner_exit_code": 1,
+      "sample_count": 235,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    },
+    {
+      "case": "lifecycle-pop-recompress",
+      "status": "measured",
+      "matches_expected": true,
+      "allocated_size_bytes": null,
+      "elapsed_ns": null,
+      "runner_elapsed_seconds": 0.031,
+      "peak_private_bytes": 655360,
+      "child_exit_code": 0,
+      "runner_exit_code": 0,
+      "sample_count": 2,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    },
+    {
+      "case": "lifecycle-move-append",
+      "status": "measured",
+      "matches_expected": false,
+      "allocated_size_bytes": 592,
+      "elapsed_ns": null,
+      "runner_elapsed_seconds": 0.031,
+      "peak_private_bytes": 659456,
+      "child_exit_code": 0,
+      "runner_exit_code": 0,
+      "sample_count": 2,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    },
+    {
+      "case": "range-zero",
+      "status": "child_crash",
+      "matches_expected": null,
+      "allocated_size_bytes": null,
+      "elapsed_ns": null,
+      "runner_elapsed_seconds": 5.75,
+      "peak_private_bytes": 35688448,
+      "child_exit_code": 3221225477,
+      "runner_exit_code": 1,
+      "sample_count": 231,
+      "binary_sha256": "86cde098c6c065d551f707b7cfaec2f500df5b5fb6de7ee68b406f09c541abbd"
+    }
+  ]
+}

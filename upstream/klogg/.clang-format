@@ -1,0 +1,25 @@
+# Standard Qt style
+BasedOnStyle: llvm
+AccessModifierOffset: -4
+BreakBeforeBinaryOperators: true
+ColumnLimit: 100
+Standard: c++17
+IndentWidth: 4
+
+# Glogg-specific options
+PointerAlignment: Left
+SpacesInParentheses: true
+SpacesInSquareBrackets: true
+# DerivePointerAlignment: true
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+    BeforeElse: true
+    AfterFunction: true
+
+AllowShortFunctionsOnASingleLine: Empty
+AllowAllParametersOfDeclarationOnNextLine: true
+Cpp11BracedListStyle: false
+SpacesInContainerLiterals: true
+BreakConstructorInitializers: BeforeComma
+AlwaysBreakTemplateDeclarations: true

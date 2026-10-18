@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/variar/klogg",
+  "commit": "25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+  "archive_url": "https://codeload.github.com/variar/klogg/zip/25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+  "archive_sha256": "4c3da4351685d8c5da1e0afe12ca55949008935e23e84ad4f3655ec7c1f2eb12",
+  "source_directory": "upstream/klogg",
+  "import_method": "source snapshot, no upstream Git history",
+  "license": "GPL-3.0-or-later",
+  "license_file": "upstream/klogg/COPYING",
+  "notice_file": "upstream/klogg/NOTICE",
+  "verified_default_branch_head_date": "2026-10-17"
+}

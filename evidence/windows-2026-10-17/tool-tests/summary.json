@@ -1,0 +1,8 @@
+{
+  "command": ".local/python/Scripts/python.exe -m unittest discover -s tests -p test_*.py",
+  "exit_code": 0,
+  "result": "passed",
+  "failure_log_preserved": ".local/logs/python-final-tests.log",
+  "stdout": "stdout.txt",
+  "completed_local": "2026-10-17T12:33:08.4845576+08:00"
+}
