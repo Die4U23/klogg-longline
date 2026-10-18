@@ -17,6 +17,7 @@ import stat
 import sys
 import tempfile
 import urllib.error
+import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path, PurePosixPath
@@ -51,7 +52,12 @@ PACKAGES = {
 
 
 def _request(url: str) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": "klogg-dependency-fetch/1.0", "Accept": "application/vnd.github+json"})
+    headers = {"User-Agent": "klogg-dependency-fetch/1.0", "Accept": "application/vnd.github+json"}
+    token = os.environ.get("GITHUB_TOKEN")
+    endpoint = urllib.parse.urlsplit(url)
+    if token and endpoint.scheme == "https" and endpoint.netloc == "api.github.com":
+        headers["Authorization"] = f"Bearer {token}"
+    request = urllib.request.Request(url, headers=headers)
     with urllib.request.urlopen(request, timeout=45) as response:
         return response.read()
 

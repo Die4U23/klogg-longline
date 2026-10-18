@@ -71,6 +71,8 @@ jobs:
 
       - name: 获取固定第三方依赖并构建候选源码、运行测试
         shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./tools/ci_windows.ps1
 
       - name: 上传 Windows 构建与测试日志
