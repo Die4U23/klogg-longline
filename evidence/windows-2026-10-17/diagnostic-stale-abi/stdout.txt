@@ -1,0 +1,21 @@
+Filters: [crawler][follow]
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+klogg_crawler_tests.exe is a Catch v2.13.8 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Real polling follow appends with unchanged codec and preserves old and new hits
+-------------------------------------------------------------------------------
+E:\codex\klogg\tests\native\crawler_tests.cpp(125)
+...............................................................................
+
+E:\codex\klogg\tests\native\crawler_tests.cpp(125): FAILED:
+  {Unknown expression after the reported line}
+due to a fatal error condition:
+  SIGSEGV - Segmentation violation signal
+
+===============================================================================
+test cases: 1 | 1 failed
+assertions: 7 | 6 passed | 1 failed
+

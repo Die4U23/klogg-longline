@@ -1,0 +1,11 @@
+name: "Run all tests"
+description: "Run tests with ctest"
+runs:
+  using: "composite"
+  steps:
+
+    - name: test
+      shell: sh
+      run: |
+        cd $KLOGG_BUILD_ROOT
+        ctest --verbose

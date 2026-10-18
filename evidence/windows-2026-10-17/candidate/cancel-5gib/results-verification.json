@@ -1,0 +1,20 @@
+{
+  "passed": true,
+  "checks": {
+    "child_exit_zero": true,
+    "runner_completed": true,
+    "source_hash_unchanged": true,
+    "search_record_present": true,
+    "explicit_completion": true,
+    "result_not_truncated": true,
+    "active_budget_under_128mib": true,
+    "cancel_under_one_second": true
+  },
+  "measurements": {
+    "search_ms": 117.043,
+    "peak_search_buffer_bytes": 3145759,
+    "cancel_ms": 17.6038
+  },
+  "evidence_directory": ".local\\evidence\\clean-candidate\\cancel-5gib",
+  "oracle": null
+}

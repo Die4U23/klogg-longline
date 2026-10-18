@@ -1,0 +1,355 @@
+/*
+ * Copyright (C) 2016 -- 2019 Anton Filimonov and other contributors
+ *
+ * This file is part of klogg.
+ *
+ * klogg is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * klogg is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with klogg.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <catch2/catch.hpp>
+
+#include "linetypes.h"
+#include "log.h"
+
+#include "linepositionarray.h"
+
+#include <algorithm>
+#include <array>
+#include <iostream>
+#include <random>
+#include <utility>
+#include <vector>
+
+#include <configuration.h>
+
+SCENARIO( "LinePositionArray with small number of lines", "[linepositionarray]" )
+{
+
+    std::array<OffsetInFile, 6> offsets = { 4_offset,     8_offset, 10_offset,
+                                            345_offset,   // A longer (>128) line
+                                            20000_offset, // An even longer (>16384) line
+                                            20020_offset };
+
+    GIVEN( "LinePositionArray with small number of lines" )
+    {
+
+        LinePositionArray line_array;
+
+        for ( const auto& offset : offsets ) {
+            line_array.append( offset );
+        }
+
+        REQUIRE( line_array.size() == 6_lcount );
+
+        WHEN( "Access items in linear order" )
+        {
+            THEN( "Corrent offsets returned" )
+            {
+                for ( auto i = 0u; i < offsets.size(); ++i ) {
+                    REQUIRE( line_array.at( i ) == offsets[ i ] );
+                }
+            }
+        }
+
+        WHEN( "Access items in random order" )
+        {
+            std::random_device rd;
+            std::mt19937 g( rd() );
+
+            auto index = std::vector<uint32_t>( offsets.size() );
+            std::generate( index.begin(), index.end(), [ n = 0u ]() mutable { return n++; } );
+
+            THEN( "Corrent offsets returned" )
+            {
+                for ( auto i : index ) {
+                    std::cout << "Test " << i << std::endl;
+                    REQUIRE( line_array.at( i ) == offsets[ i ] );
+                }
+            }
+        }
+
+        WHEN( "Adding fake lf" )
+        {
+            line_array.setFakeFinalLF();
+
+            THEN( "Last offset is returned" )
+            {
+                REQUIRE( line_array.at( 5 ) == offsets[ 5 ] );
+            }
+        }
+
+        WHEN( "Adding line after fake lf" )
+        {
+            line_array.setFakeFinalLF();
+            line_array.append( 20030_offset );
+
+            THEN( "New last offset is returned" )
+            {
+                REQUIRE( line_array.at( 5 ) == 20030_offset );
+            }
+        }
+
+        WHEN( "Add line to single line array with fake lf" )
+        {
+            LinePositionArray one_line_array;
+            one_line_array.append( 10_offset );
+            one_line_array.setFakeFinalLF();
+            one_line_array.append( 20_offset );
+            THEN( "New last offset is returned" )
+            {
+                REQUIRE( one_line_array.at( 0 ) == 20_offset );
+            }
+        }
+
+        WHEN( "Appending other array " )
+        {
+
+            GIVEN( "FastLinePositionArray" )
+            {
+                FastLinePositionArray other_array;
+                other_array.append( 150000_offset );
+                other_array.append( 150023_offset );
+
+                WHEN( "Appending other array without fake lf" )
+                {
+                    line_array.append_list( other_array );
+
+                    THEN( "All lines are kept" )
+                    {
+                        for ( auto i = 0u; i < offsets.size(); ++i ) {
+                            REQUIRE( line_array.at( i ) == offsets[ i ] );
+                        }
+                        REQUIRE( line_array.at( 6 ) == other_array.at( 0 ) );
+                        REQUIRE( line_array.at( 7 ) == other_array.at( 1 ) );
+                    }
+                }
+
+                WHEN( "Appending after fake lf" )
+                {
+                    line_array.setFakeFinalLF();
+                    line_array.append_list( other_array );
+
+                    THEN( "Last line is popped back" )
+                    {
+                        REQUIRE( line_array.size() == 7_lcount );
+                        for ( auto i = 0u; i < offsets.size() - 1; ++i ) {
+                            REQUIRE( line_array.at( i ) == offsets[ i ] );
+                        }
+                        REQUIRE( line_array.at( 5 ) == other_array.at( 0 ) );
+                        REQUIRE( line_array.at( 6 ) == other_array.at( 1 ) );
+                    }
+                }
+            }
+        }
+    }
+}
+
+SCENARIO( "LinePositionArray with full block of lines", "[linepositionarray]" )
+{
+
+    GIVEN( "LinePositionArray with block of lines" )
+    {
+
+        LinePositionArray line_array;
+
+        // Add 255 lines (of various sizes)
+        const int lines = 255;
+        for ( int i = 0; i < lines; ++i )
+            line_array.append( OffsetInFile( i * 4 ) );
+        // Line no 256
+        line_array.append( OffsetInFile( 255 * 4 ) );
+
+        WHEN( "Adding line after block" )
+        {
+            // Add line no 257
+            line_array.append( OffsetInFile( 255 * 4 + 10 ) );
+
+            THEN( "Correct offset is returned" )
+            {
+                REQUIRE( line_array.at( 256 ) == OffsetInFile( 255 * 4 + 10 ) );
+            }
+        }
+
+        WHEN( "Adding lines after fake lf" )
+        {
+            THEN( "Correct offset is returned" )
+            for ( uint32_t i = 0; i < 1000; ++i ) {
+                int64_t pos = ( 257LL * 4 ) + i * 35LL;
+                line_array.append( OffsetInFile( pos ) );
+                line_array.setFakeFinalLF();
+                REQUIRE( line_array.at( 256 + i ) == OffsetInFile( pos ) );
+                line_array.append( OffsetInFile( pos + 21LL ) );
+                REQUIRE( line_array.at( 256 + i ) == OffsetInFile( pos + 21LL ) );
+            }
+        }
+    }
+}
+
+SCENARIO( "LinePositionArray with UINT32_MAX offsets", "[linepositionarray]" )
+{
+
+    GIVEN( "LinePositionArray with long offsets" )
+    {
+        std::array<OffsetInFile, 3> offsets = {
+            OffsetInFile( UINT32_MAX - 10 ),
+            OffsetInFile( (uint64_t)UINT32_MAX + 10LL ),
+            OffsetInFile( (uint64_t)UINT32_MAX + 30LL ),
+        };
+
+        LinePositionArray line_array;
+
+        for ( const auto& offset : offsets ) {
+            line_array.append( offset );
+        }
+
+        REQUIRE( line_array.size() == 3_lcount );
+
+        WHEN( "Access items in linear order" )
+        {
+            THEN( "Corrent offsets returned" )
+            {
+                for ( auto i = 0u; i < offsets.size(); ++i ) {
+                    REQUIRE( line_array.at( i ) == offsets[ i ] );
+                }
+            }
+        }
+
+        WHEN( "Adding lines after fake lf" )
+        {
+            THEN( "Correct offset is returned" )
+            for ( uint32_t i = 0; i < 1000; ++i ) {
+                int64_t pos = UINT32_MAX + 524LL + i * 35LL;
+                line_array.append( OffsetInFile( pos ) );
+                line_array.setFakeFinalLF();
+                REQUIRE( line_array.at( offsets.size() + i ) == OffsetInFile( pos ) );
+                line_array.append( OffsetInFile( pos + 21LL ) );
+                REQUIRE( line_array.at( offsets.size() + i ) == OffsetInFile( pos + 21LL ) );
+            }
+        }
+    }
+
+    GIVEN( "LinePositionArray with small lines" )
+    {
+        std::array<OffsetInFile, 2> offsets = {
+            OffsetInFile( (uint64_t)UINT32_MAX / 2 + 10LL ),
+            OffsetInFile( (uint64_t)UINT32_MAX / 2 + 12LL ),
+        };
+        LinePositionArray line_array;
+        for ( const auto& offset : offsets ) {
+            line_array.append( offset );
+        }
+
+        WHEN( "Appending large lines" )
+        {
+            FastLinePositionArray other_array;
+            other_array.append( OffsetInFile( (uint64_t)UINT32_MAX + 10LL ) );
+            other_array.append( OffsetInFile( (uint64_t)UINT32_MAX + 30LL ) );
+
+            line_array.append_list( other_array );
+
+            THEN( "Correct offsets are returned" )
+            {
+                REQUIRE( line_array.size() == 4_lcount );
+
+                REQUIRE( line_array.at( 0 ) == offsets[ 0 ] );
+                REQUIRE( line_array.at( 1 ) == offsets[ 1 ] );
+                REQUIRE( line_array.at( 2 ) == OffsetInFile( (uint64_t)UINT32_MAX + 10 ) );
+                REQUIRE( line_array.at( 3 ) == OffsetInFile( (uint64_t)UINT32_MAX + 30 ) );
+            }
+        }
+    }
+}
+
+TEST_CASE( "Compressed line storage keeps wide block deltas lossless", "[linepositionarray][compressed]" )
+{
+    CompressedLinePositionStorage positions;
+    std::vector<int64_t> expected;
+    constexpr size_t count = 128;
+    const uint64_t base = 17;
+    const uint64_t span = uint64_t{ 1 } << 32;
+
+    for ( size_t i = 0; i < count; ++i ) {
+        const auto value = base + span * i / ( count - 1 );
+        expected.push_back( static_cast<int64_t>( value ) );
+        positions.append( OffsetInFile( static_cast<int64_t>( value ) ) );
+    }
+
+    REQUIRE( positions.size() == LinesCount( count ) );
+    const auto ranged = positions.range( LineNumber( 0 ), LinesCount( count ) );
+    REQUIRE( ranged.size() == count );
+    for ( size_t i = 0; i < count; ++i ) {
+        CAPTURE( i );
+        REQUIRE( positions.at( i ).get() == expected[i] );
+        REQUIRE( ranged[i].get() == expected[i] );
+    }
+}
+
+TEST_CASE( "Compressed line storage supports mixed-width lifecycle operations",
+           "[linepositionarray][compressed]" )
+{
+    constexpr size_t blockSize = 128;
+    CompressedLinePositionStorage positions;
+    std::vector<int64_t> expected;
+    const auto appendBlock = [&]( int64_t base, uint64_t span ) {
+        for ( size_t i = 0; i < blockSize; ++i ) {
+            const auto value = base + static_cast<int64_t>( span * i / ( blockSize - 1 ) );
+            positions.append( OffsetInFile( value ) );
+            expected.push_back( value );
+        }
+    };
+
+    appendBlock( 100, 127 );
+    appendBlock( 1000, UINT32_MAX );
+    appendBlock( 5000000000LL, 127 );
+
+    for ( const auto start : { size_t{ 120 }, size_t{ 240 } } ) {
+        const auto range = positions.range( LineNumber( start ), LinesCount( 144 ) );
+        REQUIRE( range.size() == 144 );
+        for ( size_t i = 0; i < range.size(); ++i ) {
+            CAPTURE( start, i );
+            REQUIRE( range[i].get() == expected[start + i] );
+        }
+    }
+
+    // Remove the narrow tail and the preceding wide block, then recompress a
+    // narrow block over the retained packed prefix.
+    for ( size_t i = 0; i < 2 * blockSize; ++i ) {
+        positions.pop_back();
+        expected.pop_back();
+    }
+    appendBlock( 5000000000LL, 127 );
+    for ( size_t i = 0; i < expected.size(); ++i ) {
+        CAPTURE( i );
+        REQUIRE( positions.at( i ).get() == expected[i] );
+    }
+
+    CompressedLinePositionStorage destination;
+    destination.append( OffsetInFile( 7 ) );
+    destination = std::move( positions );
+    REQUIRE( destination.size() == LinesCount( expected.size() ) );
+    REQUIRE( destination.at( expected.size() - 1 ).get() == expected.back() );
+
+    // The moved-from object is reusable, and self-move leaves the destination intact.
+    positions.append( OffsetInFile( 1 ) );
+    REQUIRE( positions.at( 0 ).get() == 1 );
+    destination = std::move( destination );
+    REQUIRE( destination.size() == LinesCount( expected.size() ) );
+    REQUIRE( destination.at( expected.size() - 1 ).get() == expected.back() );
+}
+
+TEST_CASE( "Compressed line storage accepts an empty range", "[linepositionarray][compressed]" )
+{
+    CompressedLinePositionStorage positions;
+    REQUIRE( positions.range( LineNumber( 0 ), LinesCount( 0 ) ).empty() );
+}

@@ -1,0 +1,1 @@
+[debug assert] E:\codex\klogg\.local\cpm-cache\type_safe\71a1f33a7b982527e268b7782e28521750f87981\include\type_safe/narrow_cast.hpp:86: Unreachable code reached - conversion would truncate value.

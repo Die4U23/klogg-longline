@@ -1,0 +1,60 @@
+{
+  "arguments": [
+    "raw-allocation",
+    "E:/codex/klogg/.local/fixtures/full/long_64mib.log",
+    "--timeout-ms",
+    "110000"
+  ],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+    "raw-allocation",
+    "E:/codex/klogg/.local/fixtures/full/long_64mib.log",
+    "--timeout-ms",
+    "110000"
+  ],
+  "compiler": null,
+  "elapsed_seconds": 0.407,
+  "ended_utc": "2026-10-17T03:41:39.855045+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-baseline\\output",
+      "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe"
+    ],
+    "QT_QPA_PLATFORM": "offscreen"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+  "executable_sha256": "68a3fe498c6df416cce0ec769e547258ffa5c3230f1ca014c758920dbcb18152",
+  "executable_size_bytes": 8686080,
+  "exit_code": 0,
+  "input": {
+    "changed": false,
+    "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\long_64mib.log",
+    "sha256_after": "d483da2dfbfee856a2a85b761ce909c1f7a6cada62204d874d5bfa29aa872ba2",
+    "sha256_before": "d483da2dfbfee856a2a85b761ce909c1f7a6cada62204d874d5bfa29aa872ba2",
+    "size_bytes_after": 67108864,
+    "size_bytes_before": 67108864
+  },
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 93442048,
+    "private_bytes": 97759232,
+    "rss_bytes": 93442048,
+    "vms_bytes": 97759232
+  },
+  "qpa": "offscreen",
+  "runner_exit_code": 0,
+  "runner_status": "completed",
+  "sample_count": 16,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-17T03:41:39.446181+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 120.0
+}

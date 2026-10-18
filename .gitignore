@@ -1,0 +1,7 @@
+/.local/
+/build/
+/build-*/
+__pycache__/
+*.pyc
+/.venv/
+/aqtinstall.log

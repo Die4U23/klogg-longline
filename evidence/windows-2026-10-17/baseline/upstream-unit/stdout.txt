@@ -1,0 +1,32 @@
+2026-10-17T12:33:11 info [14568] [PersistentInfo::PersistentInfo@84] Portable config path "E:\\codex\\klogg\\.local\\build-baseline\\output\\klogg.conf"
+2026-10-17T12:33:11 info [14568] [PersistentInfo::UpdateSettings@145] App settings version1
+2026-10-17T12:33:11 info [14568] [PersistentInfo::UpdateSettings@169] Session settings version2
+Test 0
+Test 1
+Test 2
+Test 3
+Test 4
+Test 5
+2026-10-17T12:33:11 info [14568] [`anonymous-namespace'::parseBooleanExpressions@102] Parsed pattern: "p_1"
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+2026-10-17T12:33:11 info [14568] [`anonymous-namespace'::parseBooleanExpressions@102] Parsed pattern: "p_3 | p_4"
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 2 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 3 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 2 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 3 is true
+2026-10-17T12:33:11 info [14568] [`anonymous-namespace'::parseBooleanExpressions@102] Parsed pattern: "(p_6 | p_7) & !(p_8)"
+2026-10-17T12:33:11 info [14568] [`anonymous-namespace'::parseBooleanExpressions@102] Parsed pattern: "p_10"
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 0 is false
+2026-10-17T12:33:11 info [14568] [BooleanExpressionEvaluator::BooleanExpressionEvaluator@76] precomputed result for 1 is true
+===============================================================================
+All tests passed (4054 assertions in 4 test cases)
+

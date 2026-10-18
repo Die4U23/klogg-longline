@@ -1,0 +1,17 @@
+用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.44.35211 版
+版权所有(C) Microsoft Corporation。保留所有权利。
+
+编译器扫描遍数:
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\cl.exe:        版本 19.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\c1.dll:        版本 19.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\c1xx.dll:      版本 19.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\c2.dll:        版本 19.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\c1xx.dll:      版本 19.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\link.exe:      版本 14.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\mspdb140.dll:  版本 14.44.35211.0
+ C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\HostX64\x64\2052\clui.dll: 版本 19.44.35211.0
+
+cl: 命令行 error D8003 :缺少源文件名
+
+cl /Bv exit code: 2 (D8003 is expected without a source file)
+ASan runtime: C:\Program Files\Microsoft Visual Studio\2022\Preview\VC\Tools\MSVC\14.44.35207\bin\Hostx64\x64\clang_rt.asan_dynamic-x86_64.dll

@@ -1,0 +1,10 @@
+name: "Run tests in container"
+description: "Run all the tests in container"
+runs:
+  using: "composite"
+  steps:
+    - name: test
+      shell: sh
+      run: |
+        docker run --env KLOGG_BUILD_ROOT=$KLOGG_BUILD_ROOT -v "$KLOGG_WORKSPACE":/usr/local ${{ matrix.config.container }} /bin/bash -c "cd /usr/local/$KLOGG_BUILD_ROOT && ctest --verbose"
+

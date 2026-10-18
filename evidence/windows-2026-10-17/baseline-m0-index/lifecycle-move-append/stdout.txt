@@ -1,0 +1,1 @@
+{"allocated_size_bytes":592,"case":"lifecycle-move-append","expected_values":["100","101"],"matches_expected":false,"range_values":["100","33818740"],"status":"measured"}

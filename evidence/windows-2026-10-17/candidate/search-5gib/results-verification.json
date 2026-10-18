@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "checks": {
+    "child_exit_zero": true,
+    "runner_completed": true,
+    "source_hash_unchanged": true,
+    "search_record_present": true,
+    "explicit_completion": true,
+    "result_not_truncated": true,
+    "active_budget_under_128mib": true,
+    "exact_oracle_lines": true,
+    "exact_oracle_offsets": true,
+    "exact_oracle_count": true
+  },
+  "measurements": {
+    "search_ms": 40013.9201,
+    "peak_search_buffer_bytes": 3145843
+  },
+  "evidence_directory": ".local\\evidence\\clean-candidate\\search-5gib",
+  "oracle": ".local\\fixtures\\full\\reference-hit-b.jsonl"
+}

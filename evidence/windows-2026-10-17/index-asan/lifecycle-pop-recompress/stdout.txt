@@ -1,0 +1,1 @@
+{"allocated_size_after_pop":2269,"allocated_size_after_recompress":2269,"allocated_size_before_pop":2269,"case":"lifecycle-pop-recompress","elapsed_ns":18286500,"matches_expected":true,"status":"measured"}
