@@ -1,0 +1,31 @@
+{
+  "scope": "Intermediate combined candidate; production source already matched final fix, preview-close regression not yet gated",
+  "command": [
+    "ctest",
+    "-R",
+    "^klogg_crawler_tests$",
+    "--repeat",
+    "until-fail:20"
+  ],
+  "passed_rounds_before_failure": 9,
+  "failed_round": 10,
+  "exit_code": 8,
+  "failed_case": "Closing real Crawler joins queued or running preview and Quick Find work",
+  "assertion": "REQUIRE_FALSE(fixture.visitor.view()->isPreviewReady())",
+  "observed": "isPreviewReady was true; no access violation. This did not establish that the newly requested preview had completed.",
+  "test_fix": "Explicitly select UTF-8, assert valid metadata, then use the real global-thread-pool gate to keep the valid preview queued. Release before owner close; RAII restores the pool on assertion failure.",
+  "raw_log": ".local/lifecycle-audit/combined-validation/crawler-repeat.log",
+  "followup_diagnostics": [
+    {
+      "test_change": "Only occupy global thread pool",
+      "result": "Same assertion failed on first repeat round",
+      "raw_log": ".local/lifecycle-audit/crawler-gate-repeat.log"
+    },
+    {
+      "test_change": "Assert linePreview(1, 0, 1).error is empty",
+      "result": "Failed in full suite: Long-line preview supports UTF-8 without a prefilter only",
+      "raw_log": ".local/lifecycle-audit/crawler-metadata-repeat.log"
+    }
+  ],
+  "root_cause": "ASCII auto-detection did not guarantee UTF-8. showByteWindow returned on unsupported-codec metadata before clearing the existing preview."
+}

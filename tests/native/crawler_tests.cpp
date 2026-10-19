@@ -6,11 +6,14 @@
 #include <QComboBox>
 #include <QDir>
 #include <QElapsedTimer>
+#include <QEvent>
 #include <QEventLoop>
 #include <QFile>
 #include <QLineEdit>
 #include <QPointer>
+#include <QSemaphore>
 #include <QTemporaryDir>
+#include <QThreadPool>
 #include <QTimer>
 #include <functional>
 #include <memory>
@@ -23,6 +26,7 @@
 #include "logger.h"
 #include "persistentinfo.h"
 #include "quickfindpattern.h"
+#include "runnable_lambda.h"
 #include "savedsearches.h"
 #include "session.h"
 
@@ -49,6 +53,7 @@ struct CrawlerWidget::access_by<CrawlerRegressionPrivate> {
         REQUIRE(crawler->searchLineEdit_->currentText() == pattern);
         crawler->startNewSearch();
     }
+    void replaceSearch(const QString& pattern) { crawler->replaceSearch(pattern); }
     void enableFollow()
     {
         Q_EMIT crawler->followSet(true);
@@ -57,6 +62,38 @@ struct CrawlerWidget::access_by<CrawlerRegressionPrivate> {
 using CrawlerVisitor = CrawlerWidget::access_by<CrawlerRegressionPrivate>;
 
 namespace {
+class QueuedWorkGate {
+public:
+    QueuedWorkGate() : pool_(QThreadPool::globalInstance()), previousLimit_(pool_->maxThreadCount())
+    {
+        pool_->waitForDone();
+        pool_->setMaxThreadCount(1);
+        pool_->start(createRunnable([this] {
+            entered_.release();
+            released_.acquire();
+        }));
+        entered_.acquire();
+    }
+    ~QueuedWorkGate()
+    {
+        release();
+        pool_->waitForDone();
+        pool_->setMaxThreadCount(previousLimit_);
+    }
+    void release()
+    {
+        if (!open_) {
+            open_ = true;
+            released_.release();
+        }
+    }
+private:
+    QThreadPool* pool_;
+    int previousLimit_;
+    QSemaphore entered_, released_;
+    bool open_ = false;
+};
+
 bool waitUntil(const std::function<bool()>& ready, int milliseconds = 15000)
 {
     if (ready()) return true;
@@ -71,6 +108,19 @@ bool waitUntil(const std::function<bool()>& ready, int milliseconds = 15000)
     loop.exec();
     return ready();
 }
+
+struct ScopedAutoRunSearch {
+    explicit ScopedAutoRunSearch(bool value)
+        : config(Configuration::getSynced())
+        , previous(config.autoRunSearchOnPatternChange())
+    {
+        config.setAutoRunSearchOnPatternChange(value);
+    }
+    ~ScopedAutoRunSearch() { config.setAutoRunSearchOnPatternChange(previous); }
+
+    Configuration& config;
+    bool previous;
+};
 
 struct CrawlerFixture {
     QTemporaryDir directory{QDir(QCoreApplication::applicationDirPath()).filePath("crawler-test-XXXXXX")};
@@ -122,6 +172,45 @@ TEST_CASE("Real Crawler search accepts a one-MiB literal without regex compilati
     REQUIRE(fixture.visitor.filtered()->firstMatchByte(0_lnum).has_value());
     REQUIRE(fixture.visitor.filtered()->firstMatchByte(0_lnum)->get() == bom.size());
     REQUIRE_FALSE(fixture.visitor.info().contains("Error in expression"));
+}
+
+TEST_CASE("Closing Crawler drains a queued style-change callback safely", "[crawler][close]")
+{
+    CrawlerFixture fixture("first line\nsecond line\n");
+    const QPointer<CrawlerWidget> crawlerGuard(fixture.visitor.crawler.get());
+
+    QEvent styleChange(QEvent::StyleChange);
+    QApplication::sendEvent(fixture.visitor.crawler.get(), &styleChange);
+    fixture.close();
+
+    REQUIRE(crawlerGuard.isNull());
+}
+
+TEST_CASE("Closing Crawler drains a queued automatic-search callback safely", "[crawler][close]")
+{
+    ScopedAutoRunSearch autoRun(true);
+    CrawlerFixture fixture("needle\nother line\n");
+    const QPointer<CrawlerWidget> crawlerGuard(fixture.visitor.crawler.get());
+
+    fixture.visitor.replaceSearch("needle");
+    fixture.close();
+
+    REQUIRE(crawlerGuard.isNull());
+}
+
+TEST_CASE("Queued automatic search still runs while Crawler remains alive", "[crawler][search]")
+{
+    ScopedAutoRunSearch autoRun(true);
+    CrawlerFixture fixture("needle\nother line\n");
+
+    fixture.visitor.replaceSearch("needle");
+    const bool completed = waitUntil([&] {
+        return fixture.visitor.filtered()->searchCompletion() == SearchCompletion::Complete
+               && fixture.visitor.filtered()->getNbMatches() == 1_lcount;
+    });
+
+    REQUIRE(completed);
+    REQUIRE(fixture.visitor.filtered()->getMatchingLineNumber(0_lnum) == 0_lnum);
 }
 
 TEST_CASE("Real polling follow appends with unchanged codec and preserves old and new hits", "[crawler][follow]")
@@ -182,16 +271,29 @@ TEST_CASE("Closing real Crawler joins queued or running preview and Quick Find w
     for (int i = 0; i < 20000; ++i) bytes += "short ordinary row without the target\n";
     for (int iteration = 0; iteration < 5; ++iteration) {
         CrawlerFixture fixture(bytes);
+        // ASCII auto-detection may choose another display codec; byte-window
+        // requests require UTF-8 even when the sample only contains ASCII.
+        fixture.visitor.crawler->setEncoding(106);
+        REQUIRE(waitUntil([&] { return fixture.visitor.view()->isPreviewReady(); }));
+        // Hold the real global pool so grab() cannot complete the new preview
+        // before the pending-state assertion. The guard opens on assertion failure too.
+        QueuedWorkGate queuedWork;
         fixture.session.quickFindPattern()->changeSearchPattern("ABSENT_NEEDLE", false, false);
         fixture.visitor.view()->searchForward();
         const auto range = fixture.visitor.data()->lineByteRange(1_lnum, fixture.visitor.data()->snapshot());
         REQUIRE(range.has_value());
+        const auto metadata = fixture.visitor.data()->linePreview(1_lnum, 0, 1);
+        INFO(metadata.error.toStdString());
+        REQUIRE(metadata.error.isEmpty());
         fixture.visitor.view()->showByteWindow(1_lnum, range->begin);
         fixture.visitor.crawler->grab(); // schedules the real preview worker
         REQUIRE_FALSE(fixture.visitor.view()->isPreviewReady());
         const QPointer<LogMainView> viewGuard(fixture.visitor.view());
         const QPointer<LogData> dataGuard(fixture.visitor.data());
         const QPointer<CrawlerWidget> crawlerGuard(fixture.visitor.crawler.get());
+        // No event processing between opening the pool and closing the owner:
+        // even a fast worker's queued completion is still pending when close begins.
+        queuedWork.release();
         fixture.close();
         REQUIRE(crawlerGuard.isNull());
         REQUIRE(viewGuard.isNull());

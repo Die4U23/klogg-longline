@@ -1,5 +1,7 @@
 # 项目状态
 
+2026-10-18 生命周期复查：定位并修复索引任务退出死锁，以及[窗口关闭后的排队回调](ui-callback-lifecycle-fix.md)，见[索引任务生命周期报告](worker-lifecycle-fix.md)。
+
 2026-10-18 后续修复：首版合并后的 CI 暴露了 Windows 文件监控取消时的释放后写入；独立复现、修补与回归边界见 [IOCP 生命周期修复](windows-iocp-fix.md)。下列 2026-10-17 性能数据仍归属历史源码。
 
 更新日期：2026-10-17。M0—M4 的 Windows 本地交付已完成，结论限定于实际覆盖的场景，见 [验证报告](validation-report.md)。

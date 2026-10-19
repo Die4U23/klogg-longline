@@ -41,6 +41,46 @@
       "path": "upstream/klogg/3rdparty/efsw-win32/README.md",
       "before_sha256": null,
       "after_sha256": "c3c655781edc96663713f9088b8cbd344ead332acddc9d8a53415263d7ee02cf"
+    },
+    {
+      "path": "upstream/klogg/src/logdata/src/logdataworker.cpp",
+      "before_sha256": "c01c9a23f31c98b57d4a8573d8e128a8fb6c54f24e95ee9263c13d44d0922383",
+      "after_sha256": "4d9505af43b09b3a20f24b4cedfc343e581d986e257f826e80f35e656ea7ffbe"
+    },
+    {
+      "path": "upstream/klogg/src/logdata/include/logdataworker.h",
+      "before_sha256": "359b83aa274aecf101071226c9739e6a75d285581c5934716358383b6e50b804",
+      "after_sha256": "f4a927eb525ae0b2048e5c4645338498880d140fa3689305c41af2e20e5a9141"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/crawlerwidget.cpp",
+      "before_sha256": "113176748d065b85622b172d1440a2a0771c99a0c2443706f616afa7da29f374",
+      "after_sha256": "639f4a2e14d4c3e2622b36722647365e7050456c5d274553d0a2ee3b523ed1fe"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/highlightersdialog.cpp",
+      "before_sha256": "a58500b8b7860c85a4738d09ca0f1b275952840de95e8048ead883c471f3d741",
+      "after_sha256": "f277c385ce341a345f30048d352c8eaaeca3298b97b908ed108e654e8458a850"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/highlightersetedit.cpp",
+      "before_sha256": "6c052b61124fc612e39a8652942081fca41c2d771d0842d09b4ebcf22ee8678a",
+      "after_sha256": "963c10e8dd2c7cded0b162cff06c4b8081652d70075d2d1783314431dcfdf6ee"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/predefinedfiltersdialog.cpp",
+      "before_sha256": "08f1d278e80af83146b8ebcdeb7c1dea4cb06690a96c045905e9b047dffc3556",
+      "after_sha256": "c1f43cf1638abf55fa0a270d4cad1964a3615f2ed35c3eb2f0c557469c3ac5d9"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/tabbedcrawlerwidget.cpp",
+      "before_sha256": "f829f6adbb68d788ed6a72808d252776081ea08c300151155cef5481f575c8de",
+      "after_sha256": "0fdf9d73c5bfe435191d0f501997cc426a53e087cf73858b5f34d262c1463c0e"
+    },
+    {
+      "path": "upstream/klogg/src/ui/src/mainwindow.cpp",
+      "before_sha256": "9c580d3d8e7f504203f7002f70e3edc02b62a68b841ea680bc6372e3102bded9",
+      "after_sha256": "befc515ac0cee2ced5d38d650f5e36688060aa561c45ea66cc757e00966539f0"
     }
   ]
 }

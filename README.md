@@ -1,5 +1,7 @@
 # klogg-longline
 
+2026-10-18 生命周期复查：定位并修复索引任务退出死锁，以及[窗口关闭后的排队回调](docs/ui-callback-lifecycle-fix.md)，见[索引任务生命周期报告](docs/worker-lifecycle-fix.md)。
+
 2026-10-18 后续修复：首版合并后的 CI 暴露了 Windows 文件监控取消时的释放后写入；独立复现、修补与回归边界见 [IOCP 生命周期修复](docs/windows-iocp-fix.md)。下列 2026-10-17 性能数据仍归属历史源码。
 
 基于 [klogg](https://github.com/variar/klogg) 的大文件与超长行可靠性改进：64 位索引边界修复、完整字面搜索、按字节控制的搜索批次，以及异步有界预览。
