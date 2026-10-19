@@ -1,0 +1,44 @@
+{
+  "base_commit": "d1c1df6349a0e518a68dfd6c73c9b40347861caf",
+  "binary_sha256": "39f59215c062a0f869b11aa8b217b793731a0201430afb26bb4fa9a75211ed1d",
+  "runs": [
+    {
+      "case": "destroy",
+      "timeout": true,
+      "exit_code": 1,
+      "seconds": 15.031,
+      "peak_rss_bytes": 20516864
+    },
+    {
+      "case": "partial",
+      "timeout": true,
+      "exit_code": 1,
+      "seconds": 15.031,
+      "peak_rss_bytes": 18751488
+    },
+    {
+      "case": "check",
+      "timeout": true,
+      "exit_code": 1,
+      "seconds": 15.031,
+      "peak_rss_bytes": 18771968
+    },
+    {
+      "case": "next",
+      "timeout": true,
+      "exit_code": 1,
+      "seconds": 15.031,
+      "peak_rss_bytes": 31096832
+    }
+  ],
+  "scope": "Windows x64 MSVC 19.44 Qt 6.7.3; unchanged production at d1c1df6 with new public-API test target",
+  "fixture": {
+    "bytes": 2097184,
+    "lines": 32,
+    "iterations_per_case": 100,
+    "iterations_completed": "unknown because process timed out",
+    "forced_stop_seconds": 15,
+    "peak_rss": "sampled process RSS, not allocated bytes or a memory limit"
+  },
+  "exit_code_note": "Exit code 1 follows recorder process.kill after timeout; it is not an application-reported success or failure."
+}

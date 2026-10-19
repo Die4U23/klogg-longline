@@ -1,0 +1,68 @@
+{
+  "capture_after_seconds": 3,
+  "base_commit": "d1c1df6349a0e518a68dfd6c73c9b40347861caf",
+  "threads": [
+    [
+      {
+        "symbol": "NtWaitForSingleObject"
+      },
+      {
+        "symbol": "NtWaitForSingleObject"
+      },
+      {
+        "symbol": "WaitForSingleObjectEx"
+      },
+      {
+        "symbol": "QWaitCondition::wait"
+      },
+      {
+        "symbol": "QThreadPoolPrivate::waitForDone"
+      },
+      {
+        "symbol": "LogDataWorker::~LogDataWorker",
+        "source": "upstream/klogg/src/logdata/src/logdataworker.cpp",
+        "line": 196
+      },
+      {
+        "symbol": "LogDataWorker::`scalar deleting destructor'"
+      },
+      {
+        "symbol": "`anonymous namespace'::destroyImmediatelyAfterFullIndex"
+      },
+      {
+        "symbol": "C_A_T_C_H_T_E_S_T_0"
+      }
+    ],
+    [
+      {
+        "symbol": "ZwWaitForAlertByThreadId"
+      },
+      {
+        "symbol": "ZwWaitForAlertByThreadId"
+      },
+      {
+        "symbol": "RtlSleepConditionVariableSRW"
+      },
+      {
+        "symbol": "RtlAcquireSRWLockExclusive"
+      },
+      {
+        "symbol": "RunnableWrapper<`LogDataWorker::indexAll'::`2'::<lambda_1> >::run",
+        "source": "upstream/klogg/src/utils/include/runnable_lambda.h",
+        "line": 36
+      },
+      {
+        "symbol": "QThreadPoolPrivate::reset"
+      },
+      {
+        "symbol": "QThread::start"
+      },
+      {
+        "symbol": "BaseThreadInitThunk"
+      },
+      {
+        "symbol": "RtlUserThreadStart"
+      }
+    ]
+  ]
+}

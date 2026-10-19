@@ -1,0 +1,158 @@
+{
+  "scope": "Windows x64, Qt 6.7.3, MSVC, Ninja; final combined worker and UI fixes",
+  "base_commit": "d1c1df6349a0e518a68dfd6c73c9b40347861caf",
+  "clean_build": {
+    "steps": 455,
+    "exit_code": 0,
+    "log": ".local/lifecycle-audit/combined-clean-build.log",
+    "note": "After this clean production build, only the crawler test was changed and its target rebuilt successfully; production source unchanged."
+  },
+  "final_checks": [
+    {
+      "name": "ctest-all",
+      "command": [
+        "ctest",
+        "--test-dir",
+        ".local/build-candidate",
+        "--output-on-failure",
+        "--timeout",
+        "120"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 26.047
+    },
+    {
+      "name": "crawler-repeat",
+      "command": [
+        "ctest",
+        "--test-dir",
+        ".local/build-candidate",
+        "-R",
+        "^klogg_crawler_tests$",
+        "--repeat",
+        "until-fail:20",
+        "--output-on-failure",
+        "--timeout",
+        "60"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 31.782
+    },
+    {
+      "name": "crawler-direct",
+      "command": [
+        ".local/build-candidate/reliability-probe/klogg_crawler_tests.exe",
+        "--durations",
+        "yes"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.796
+    },
+    {
+      "name": "worker-direct",
+      "command": [
+        ".local/build-candidate/reliability-probe/klogg_worker_lifecycle_tests.exe",
+        "--durations",
+        "yes"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 8.657
+    },
+    {
+      "name": "python",
+      "command": [
+        "python",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.593
+    },
+    {
+      "name": "integrity",
+      "command": [
+        "python",
+        "tools/verify_repository.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.079
+    }
+  ],
+  "unchanged_worker_and_integration_repeats": [
+    {
+      "name": "worker-repeat",
+      "command": [
+        "ctest",
+        "--test-dir",
+        ".local/build-candidate",
+        "-R",
+        "^klogg_worker_lifecycle_tests$",
+        "--repeat",
+        "until-fail:10",
+        "--output-on-failure",
+        "--timeout",
+        "60"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 52.922
+    },
+    {
+      "name": "integration-repeat",
+      "command": [
+        "ctest",
+        "--test-dir",
+        ".local/build-candidate",
+        "-R",
+        "^klogg_itests$",
+        "--repeat",
+        "until-fail:10",
+        "--output-on-failure",
+        "--timeout",
+        "120"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 126.203
+    }
+  ],
+  "direct_counts": {
+    "crawler_cases": 11,
+    "crawler_assertions": 131,
+    "worker_cases": 6,
+    "worker_assertions": 9,
+    "python_tests": 39
+  },
+  "new_cases": {
+    "worker": 6,
+    "ui": 8
+  },
+  "binary_sha256": {
+    ".local/build-candidate/output/klogg_itests.exe": "63ab1771091414c5e8eba2b2051ec842b7a756ccb87d4b06e67549f108ce8709",
+    ".local/build-candidate/reliability-probe/klogg_worker_lifecycle_tests.exe": "27f8d12c9081ae2e7955a045ec80d06f97a17eeae68679735abe9f10cf5c7863",
+    ".local/build-candidate/output/klogg_logdata.lib": "c6a31924f28a0e6703bfd73d0da297172a286e4fb8de3ff4e77fed6d9db14a71",
+    ".local/build-candidate/reliability-probe/klogg_crawler_tests.exe": "4b3db380c033906a66a8df6d00aa6ef010e0e69785ab1c5633067e024129ae76",
+    ".local/build-candidate/output/klogg_ui.lib": "9825ebb1da080ccab217166eac711bd5ac97d53edd5004680f7622814a45e041"
+  },
+  "source_sha256": {
+    "tests/native/crawler_tests.cpp": "fe0931b0d245ca664312dc6a138aeb25400c38cd610225e5e416c729ca0b246d",
+    "tests/native/queued_ui_lifecycle_tests.cpp": "fa12bf5a936bb8ad54e9f9c30188ed6c4f9402e883538daadd10deecc8ffbabe",
+    "tests/native/worker_lifecycle_tests.cpp": "36dfa12f1383aab4c2545034ab51025da3e53a1f37606910e29041d7b62bf4b2"
+  },
+  "integrity": {
+    "source_files": 658,
+    "historical_patch_files": 23,
+    "historical_evidence_files": 279
+  },
+  "limitations": [
+    "Not a new 5 GiB performance acceptance",
+    "No whole-application sanitizer claim",
+    "MainWindow tray and macOS callbacks reviewed and compiled, not independently runtime-tested",
+    "PR and merged-main CI are separate publication checks"
+  ],
+  "intermediate_failures": "intermediate-preview-test-failure.json"
+}

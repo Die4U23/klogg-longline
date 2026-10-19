@@ -1,0 +1,31 @@
+{
+  "ui_source_base": "d1c1df6349a0e518a68dfd6c73c9b40347861caf",
+  "scope": "Unchanged UI production source with candidate index-worker lock fix; not a pristine full baseline",
+  "binary_sha256": "d82db83a2eddca279bcd6a7dbfd95ae3110d39f85ac7dc29fb2e4b761dc5d2d4",
+  "runs": [
+    {
+      "case": "style",
+      "exit_code": 3221225477,
+      "exit_hex": "0xc0000005",
+      "timeout": false,
+      "elapsed_seconds": 7.453,
+      "peak_rss_bytes": 50900992
+    },
+    {
+      "case": "search",
+      "exit_code": 3221225477,
+      "exit_hex": "0xc0000005",
+      "timeout": false,
+      "elapsed_seconds": 6.922,
+      "peak_rss_bytes": 50958336
+    },
+    {
+      "case": "alive",
+      "exit_code": 0,
+      "exit_hex": "0x0",
+      "timeout": false,
+      "elapsed_seconds": 0.219,
+      "peak_rss_bytes": 42139648
+    }
+  ]
+}

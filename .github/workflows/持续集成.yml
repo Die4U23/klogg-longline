@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   windows-native:
-    name: Windows 2022 原生编译、七项 CTest 与集成复跑
+    name: Windows 2022 原生编译、八项 CTest 与集成复跑
     runs-on: windows-2022
     timeout-minutes: 60
     steps:

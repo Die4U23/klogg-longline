@@ -267,10 +267,10 @@ void CrawlerWidget::doSendAllStateSignals()
 void CrawlerWidget::changeEvent( QEvent* event )
 {
     if ( event->type() == QEvent::StyleChange ) {
-        dispatchToMainThread( [ this ] {
+        dispatchToObject( [ this ] {
             loadIcons();
             searchInfoLineDefaultPalette_ = this->palette();
-        } );
+        }, this );
     }
 
     QWidget::changeEvent( event );
@@ -947,7 +947,7 @@ void CrawlerWidget::setSearchPattern( const QString& searchPattern )
     searchLineEdit_->lineEdit()->setFocus();
 
     if ( Configuration::get().autoRunSearchOnPatternChange() ) {
-        dispatchToMainThread( [ this ] { startNewSearch(); } );
+        dispatchToObject( [ this ] { startNewSearch(); }, this );
     }
 }
 

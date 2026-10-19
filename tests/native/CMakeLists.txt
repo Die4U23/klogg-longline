@@ -10,6 +10,13 @@ if(WIN32)
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/logdata/include/longlinesearch.h")
   target_compile_definitions(klogg_reliability_probe PRIVATE KLOGG_LONG_LINE_CANDIDATE=1)
+  add_executable(klogg_worker_lifecycle_tests "${CMAKE_CURRENT_LIST_DIR}/worker_lifecycle_tests.cpp")
+  target_link_libraries(klogg_worker_lifecycle_tests PRIVATE Catch2 klogg_logdata klogg_logging
+    Qt${QT_VERSION_MAJOR}::Widgets Threads::Threads)
+  set_target_properties(klogg_worker_lifecycle_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/reliability-probe")
+  add_test(NAME klogg_worker_lifecycle_tests COMMAND klogg_worker_lifecycle_tests)
+  set_tests_properties(klogg_worker_lifecycle_tests PROPERTIES TIMEOUT 60)
   if(WIN32)
     add_executable(klogg_efsw_lifecycle_tests "${CMAKE_CURRENT_LIST_DIR}/efsw_lifecycle_tests.cpp")
     target_link_libraries(klogg_efsw_lifecycle_tests PRIVATE Catch2 efsw)
@@ -36,9 +43,15 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/src/logdata/include/longlinesearch.h")
     add_test(NAME klogg_preview_tests COMMAND klogg_preview_tests)
   endif()
   if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/crawler_tests.cpp")
-    add_executable(klogg_crawler_tests "${CMAKE_CURRENT_LIST_DIR}/crawler_tests.cpp")
+    add_executable(klogg_crawler_tests "${CMAKE_CURRENT_LIST_DIR}/crawler_tests.cpp"
+      "${CMAKE_CURRENT_LIST_DIR}/queued_ui_lifecycle_tests.cpp")
     target_link_libraries(klogg_crawler_tests PRIVATE Catch2 klogg_ui klogg_logging
       Qt${QT_VERSION_MAJOR}::Widgets Threads::Threads)
+    # Dialog headers inherit their generated Ui classes; expose them only to this test.
+    get_target_property(klogg_ui_binary_dir klogg_ui BINARY_DIR)
+    target_include_directories(klogg_crawler_tests PRIVATE
+      "${klogg_ui_binary_dir}/klogg_ui_autogen/include")
+    add_dependencies(klogg_crawler_tests klogg_ui_autogen)
     set_target_properties(klogg_crawler_tests PROPERTIES CXX_STANDARD 17 CXX_STANDARD_REQUIRED YES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/reliability-probe")
     add_test(NAME klogg_crawler_tests COMMAND klogg_crawler_tests)

@@ -106,7 +106,7 @@ TabbedCrawlerWidget::TabbedCrawlerWidget()
     connect( &myTabBar_, &CrawlerTabBar::showTabContextMenu, this,
              &TabbedCrawlerWidget::showContextMenu );
 
-    dispatchToMainThread( [ this ] { loadIcons(); } );
+    dispatchToObject( [ this ] { loadIcons(); }, this );
 }
 
 void TabbedCrawlerWidget::loadIcons()
@@ -121,7 +121,7 @@ void TabbedCrawlerWidget::loadIcons()
 void TabbedCrawlerWidget::changeEvent( QEvent* event )
 {
     if ( event->type() == QEvent::StyleChange ) {
-        dispatchToMainThread( [ this ] { loadIcons(); } );
+        dispatchToObject( [ this ] { loadIcons(); }, this );
     }
 
     QWidget::changeEvent( event );

@@ -1,0 +1,68 @@
+{
+  "exception": "0xc0000005",
+  "scope": "Unchanged UI source at d1c1df6 with index-worker candidate fix",
+  "trace": [
+    {
+      "symbol": "QObject::parent"
+    },
+    {
+      "symbol": "QObject::parent"
+    },
+    {
+      "symbol": "QWidget::window"
+    },
+    {
+      "symbol": "QStyleOption::initFrom"
+    },
+    {
+      "symbol": "IconLoader::shouldInvert",
+      "source": "upstream/klogg/src/ui/src/iconloader.cpp",
+      "line": 47
+    },
+    {
+      "symbol": "IconLoader::loadPixmap",
+      "source": "upstream/klogg/src/ui/src/iconloader.cpp",
+      "line": 59
+    },
+    {
+      "symbol": "IconLoader::load",
+      "source": "upstream/klogg/src/ui/src/iconloader.cpp",
+      "line": 37
+    },
+    {
+      "symbol": "CrawlerWidget::loadIcons",
+      "source": "upstream/klogg/src/ui/src/crawlerwidget.cpp",
+      "line": 1582
+    },
+    {
+      "symbol": "QtPrivate::QCallableObject<`CrawlerWidget::changeEvent'::`5'::<lambda_1>,QtPrivate::List<>,void>::impl"
+    },
+    {
+      "symbol": "QMetaCallEvent::placeMetaCall"
+    },
+    {
+      "symbol": "QObject::event"
+    },
+    {
+      "symbol": "QEventDispatcherWin32::event"
+    },
+    {
+      "symbol": "QApplicationPrivate::notify_helper"
+    },
+    {
+      "symbol": "QApplication::notify"
+    },
+    {
+      "symbol": "QCoreApplication::notifyInternal2"
+    },
+    {
+      "symbol": "QCoreApplicationPrivate::sendPostedEvents"
+    },
+    {
+      "symbol": "QEventDispatcherWin32::processEvents"
+    },
+    {
+      "symbol": "qt_plugin_query_metadata_v2"
+    }
+  ]
+}

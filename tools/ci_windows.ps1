@@ -77,10 +77,11 @@ $testDocument = ($testList -join "`n") | ConvertFrom-Json
 $actualTests = @($testDocument.tests | ForEach-Object { $_.name } | Sort-Object)
 $expectedTests = @(
     'klogg_crawler_tests', 'klogg_itests', 'klogg_literal_tests',
-    'klogg_preview_tests', 'klogg_smoke', 'klogg_tests', 'klogg_efsw_lifecycle_tests'
+    'klogg_preview_tests', 'klogg_smoke', 'klogg_tests', 'klogg_efsw_lifecycle_tests',
+    'klogg_worker_lifecycle_tests'
 ) | Sort-Object
 if (($actualTests -join "`n") -ne ($expectedTests -join "`n")) {
-    throw "要求七项原生测试（$($expectedTests -join ', ')），实际为（$($actualTests -join ', ')）；日志：$testListPath"
+    throw "要求八项原生测试（$($expectedTests -join ', ')），实际为（$($actualTests -join ', ')）；日志：$testListPath"
 }
 
 Invoke-LoggedCommand -Name 'native-ctest' -Executable $ctest -Arguments @(

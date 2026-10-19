@@ -401,7 +401,8 @@ private Q_SLOTS:
 private:
     OperationResult connectSignalsAndRun( IndexOperation* operationRequested );
 
-    // Mutex to wait for operations
+    // The single-thread pool serializes execution. This mutex serializes callers
+    // only: tasks must not acquire a lock held by a caller in waitForDone().
     QThreadPool operationsPool_;
     Mutex operationsMutex_;
     AtomicFlag interruptRequest_;
