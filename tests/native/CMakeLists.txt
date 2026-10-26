@@ -10,6 +10,11 @@ if(WIN32)
 endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/src/logdata/include/longlinesearch.h")
   target_compile_definitions(klogg_reliability_probe PRIVATE KLOGG_LONG_LINE_CANDIDATE=1)
+  set(empty_search_fixture "${CMAKE_BINARY_DIR}/reliability-probe/empty-search-fixture.log")
+  file(WRITE "${empty_search_fixture}" "")
+  add_test(NAME klogg_empty_search_probe COMMAND klogg_reliability_probe
+    search "${empty_search_fixture}" "KLOGG_EMPTY_PROBE" --timeout-ms 15000)
+  set_tests_properties(klogg_empty_search_probe PROPERTIES TIMEOUT 30)
   add_executable(klogg_worker_lifecycle_tests "${CMAKE_CURRENT_LIST_DIR}/worker_lifecycle_tests.cpp")
   target_link_libraries(klogg_worker_lifecycle_tests PRIVATE Catch2 klogg_logdata klogg_logging
     Qt${QT_VERSION_MAJOR}::Widgets Threads::Threads)

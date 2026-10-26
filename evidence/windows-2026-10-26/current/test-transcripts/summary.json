@@ -1,0 +1,54 @@
+[
+  {
+    "path": ".local/evidence/release-20261026-accepted/commands/02-ctest-9.stdout.txt",
+    "sha256": "7e28c187131b284a21a51a2c8e0f3ef5a5f1e3dd802a6836300f441027cd7292",
+    "size_bytes": 1126,
+    "last_45_lines": [
+      "Internal ctest changing into directory: E:/codex/klogg/.local/build-candidate",
+      "Test project E:/codex/klogg/.local/build-candidate",
+      "    Start 1: klogg_smoke",
+      "1/9 Test #1: klogg_smoke ......................   Passed    0.35 sec",
+      "    Start 2: klogg_empty_search_probe",
+      "2/9 Test #2: klogg_empty_search_probe .........   Passed    0.40 sec",
+      "    Start 3: klogg_worker_lifecycle_tests",
+      "3/9 Test #3: klogg_worker_lifecycle_tests .....   Passed   13.22 sec",
+      "    Start 4: klogg_efsw_lifecycle_tests",
+      "4/9 Test #4: klogg_efsw_lifecycle_tests .......   Passed    0.11 sec",
+      "    Start 5: klogg_literal_tests",
+      "5/9 Test #5: klogg_literal_tests ..............   Passed    3.22 sec",
+      "    Start 6: klogg_preview_tests",
+      "6/9 Test #6: klogg_preview_tests ..............   Passed    0.65 sec",
+      "    Start 7: klogg_crawler_tests",
+      "7/9 Test #7: klogg_crawler_tests ..............   Passed    2.98 sec",
+      "    Start 8: klogg_tests",
+      "8/9 Test #8: klogg_tests ......................   Passed    0.12 sec",
+      "    Start 9: klogg_itests",
+      "9/9 Test #9: klogg_itests .....................   Passed   14.39 sec",
+      "",
+      "100% tests passed, 0 tests failed out of 9",
+      "",
+      "Total Test time (real) =  35.49 sec"
+    ]
+  },
+  {
+    "path": ".local/evidence/release-20261026-remaining/commands/02-python-unittest.stderr.txt",
+    "sha256": "065f44c7abb6bcc19d8377033da683942f75c76488fea59ae0808f1c69302c5f",
+    "size_bytes": 153,
+    "last_45_lines": [
+      "................................................",
+      "----------------------------------------------------------------------",
+      "Ran 48 tests in 11.467s",
+      "",
+      "OK"
+    ]
+  },
+  {
+    "path": ".local/evidence/release-20261026-remaining/commands/03-repository-integrity.stdout.txt",
+    "sha256": "18e3c7fcd3369cf9c98c250ab86eba447a58350607e873f6e5f2c09f1ee49e53",
+    "size_bytes": 165,
+    "last_45_lines": [
+      "完整性核验通过：658 个源码文件，23 个补丁文件，279 份证据。",
+      "此检查只核验来源和内容完整性，不代替测试或性能验收。"
+    ]
+  }
+]

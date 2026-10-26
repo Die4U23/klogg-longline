@@ -1,0 +1,87 @@
+{
+  "arguments": [
+    "--file",
+    "E:/codex/klogg/.local/fixtures/full/full_5gib.log",
+    "--action",
+    "wrap",
+    "--anchor-byte",
+    "5368708973",
+    "--expect-text",
+    "KLOGG_FIXTURE_HIT_B",
+    "--label",
+    "diagnostic",
+    "--trace-events",
+    "--timeout-ms",
+    "120000"
+  ],
+  "artifacts": {
+    "samples": "samples.jsonl",
+    "stderr": "stderr.txt",
+    "stdout": "stdout.txt"
+  },
+  "command": [
+    "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe\\klogg_gui_probe.exe",
+    "--file",
+    "E:/codex/klogg/.local/fixtures/full/full_5gib.log",
+    "--action",
+    "wrap",
+    "--anchor-byte",
+    "5368708973",
+    "--expect-text",
+    "KLOGG_FIXTURE_HIT_B",
+    "--label",
+    "diagnostic",
+    "--trace-events",
+    "--timeout-ms",
+    "120000"
+  ],
+  "compiler": null,
+  "elapsed_seconds": 10.328,
+  "ended_utc": "2026-10-26T06:36:22.780582+00:00",
+  "environment": {
+    "PATH_prepend": [
+      "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+      "E:\\codex\\klogg\\.local\\build-candidate\\output",
+      "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe"
+    ],
+    "QT_QPA_PLATFORM": "windows"
+  },
+  "executable": "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe\\klogg_gui_probe.exe",
+  "executable_sha256": "a11673aca59c5b6af21de9ae049f7b5d96cbefa712f1b3ef8c80b032e7562d5e",
+  "executable_size_bytes": 11555840,
+  "exit_code": 0,
+  "input": {
+    "changed": false,
+    "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\full_5gib.log",
+    "sha256_after": "93ef93929545c35396d2b3c9d58860a68dd2ad59243e99d5182318384d64d35a",
+    "sha256_before": "93ef93929545c35396d2b3c9d58860a68dd2ad59243e99d5182318384d64d35a",
+    "size_bytes_after": 5368709120,
+    "size_bytes_before": 5368709120
+  },
+  "monitor_init_error": null,
+  "peak_observed_bytes": {
+    "peak_wset_bytes": 65597440,
+    "private_bytes": 64258048,
+    "rss_bytes": 63856640,
+    "vms_bytes": 64258048
+  },
+  "process_cleanup": null,
+  "qpa": "windows",
+  "resource_limit": {
+    "exceeded": false,
+    "max_private_mib": 1024,
+    "measured_private_bytes_at_termination": 15228928,
+    "runner_terminated_child": false,
+    "threshold_bytes": 1073741824,
+    "unavailable": false
+  },
+  "runner_exit_code": 0,
+  "runner_status": "completed",
+  "sample_count": 304,
+  "sample_interval_seconds": 0.02,
+  "schema": "klogg-process-probe-runner-v1",
+  "started_utc": "2026-10-26T06:36:12.458158+00:00",
+  "termination_error": null,
+  "timed_out": false,
+  "timeout_seconds": 130.0
+}

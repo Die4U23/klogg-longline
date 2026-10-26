@@ -1,0 +1,187 @@
+{
+  "baseline-probe": {
+    "probe": ".local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+    "sha256": "ec3aed3f7532d093799f8ece58500a24f90a0a5e9797ffef8c4e7b8aebccd8e3",
+    "matches_historical_clean_baseline": true,
+    "historical_evidence": "evidence/windows-2026-10-17/reproducibility/summary.json"
+  },
+  "baseline-verification": {
+    "baseline": "E:\\codex\\klogg\\.local\\baseline\\klogg-25c7de6d8f6da2ce6a00882e5af70b4f331af4c5",
+    "archive_sha256": "4c3da4351685d8c5da1e0afe12ca55949008935e23e84ad4f3655ec7c1f2eb12",
+    "verified_files": 649
+  },
+  "intermediate-validation": {
+    "intermediate_runs": [
+      {
+        "directory": ".local/evidence/release-20261026",
+        "status": "failed",
+        "failure": "ValidationFailure: small compare_search 有 mismatch、缺失样本或未知 skip 状态",
+        "cause": "Orchestrator did not allow the declared empty fixture without a search pattern; native comparisons succeeded.",
+        "summary_sha256": "66066a270da9b24124060fa25b05f3188543ca439afc28f10524b8671f296991",
+        "commands": [
+          {
+            "name": "source-identity",
+            "exit_code": 0,
+            "elapsed_seconds": 0.109
+          },
+          {
+            "name": "ctest-8",
+            "exit_code": 0,
+            "elapsed_seconds": 30.938
+          },
+          {
+            "name": "small-compare-search",
+            "exit_code": 0,
+            "elapsed_seconds": 3.25
+          }
+        ]
+      },
+      {
+        "directory": ".local/evidence/release-20261026-complete",
+        "status": "failed",
+        "failure": "ValidationFailure: 命令 empty-search-runner 失败，exit=1",
+        "cause": "Diagnostic search probe incorrectly required a valid line number before searching an empty file.",
+        "summary_sha256": "ffdab9b6f4f120378c73738f9249ac899f9c7e1445bf46d47a7889bec456d201",
+        "commands": [
+          {
+            "name": "source-identity",
+            "exit_code": 0,
+            "elapsed_seconds": 0.219
+          },
+          {
+            "name": "empty-oracle",
+            "exit_code": 0,
+            "elapsed_seconds": 0.281
+          },
+          {
+            "name": "empty-search-runner",
+            "exit_code": 1,
+            "elapsed_seconds": 0.859
+          }
+        ]
+      },
+      {
+        "directory": ".local/evidence/release-20261026-final",
+        "status": "failed",
+        "failure": "ValidationFailure: 命令 ctest-9 失败，exit=8",
+        "cause": "Literal follow test reloaded persistent configuration, re-enabling file watchers during explicit reload and search.",
+        "summary_sha256": "7a7ecb7630bbc1c2c6baa10a6e688619c3d7e5939300e9d126502616309db6b3",
+        "commands": [
+          {
+            "name": "source-identity",
+            "exit_code": 0,
+            "elapsed_seconds": 0.078
+          },
+          {
+            "name": "ctest-9",
+            "exit_code": 8,
+            "elapsed_seconds": 27.594
+          }
+        ]
+      }
+    ],
+    "literal_failure_log_sha256": "01ca3c065739205a18cab6de47545195dde4111c8b5b468b514b779d1768f797",
+    "literal_failure_excerpt": [
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@196] currentFileId index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@191] current indexed hash=8275223308892215509",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@192] info file_->size()=11",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@194] attached_file_->size()=11",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@195] attached_file_id_ index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@196] currentFileId index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@192] info file_->size()=11",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@194] attached_file_->size()=11",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@195] attached_file_id_ index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@196] currentFileId index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0",
+      "2026-10-26T14:04:31 info [21300] [CheckDataChangesOperation::doStart@69] Checking file changes",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@194] attached_file_->size()=11",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@195] attached_file_id_ index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@196] currentFileId index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0",
+      "2026-10-26T14:04:31 info [21300] [CheckDataChangesOperation::doStart@69] Checking file changes",
+      "2026-10-26T14:04:31 info [21300] [LogDataWorker::checkFileChanges@257] Check file changes requested",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@195] attached_file_id_ index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [LogData::fileChangedOnDisk@196] currentFileId index 20266198323754679",
+      "2026-10-26T14:04:31 info [21300] [OperationQueue::enqueueOperation@124] Enqueue operation 4, now executing 0",
+      "2026-10-26T14:04:31 info [21300] [CheckDataChangesOperation::doStart@69] Checking file changes",
+      "2026-10-26T14:04:31 info [21300] [LogDataWorker::checkFileChanges@257] Check file changes requested",
+      "2026-10-26T14:04:31 info [31244] [SearchOperation::doSearch@617] Searching done, overall duration 5.415 ms",
+      "",
+      "E:\\codex\\klogg\\tests\\native\\literal_tests.cpp(697): FAILED:",
+      "  REQUIRE( filtered->searchCompletion() == SearchCompletion::Complete )",
+      "with expansion:",
+      "  5 == 1",
+      "",
+      "2026-10-26T14:04:31 info [21300] [FileHolder::~FileHolder@73] destroy file holder 0x232a964b0f0 for \"C:/Users/7/AppData/Local/Temp/klogg_literal_tests-lLxEQP/literal-input.log\"",
+      "2026-10-26T14:04:31 info [21300] [FileWatcher::updateConfiguration@388] Polling files enabled",
+      "===============================================================================",
+      "test cases:     18 |     17 passed | 1 failed",
+      "assertions: 393603 | 393602 passed | 1 failed",
+      "",
+      "",
+      "The following tests FAILED:",
+      "\t  5 - klogg_literal_tests (Failed)"
+    ],
+    "literal_recovery_repeat": {
+      "rounds": 10,
+      "exit_code": 0,
+      "elapsed_seconds_ctest": 24.55,
+      "raw_log": ".local/release-20261026/literal-isolation-repeat.log"
+    },
+    "scope": "Diagnostics and test-only repairs; production source under upstream/klogg unchanged."
+  },
+  "original-patch-reconstruction": {
+    "original_export_report": "passed",
+    "actual_apply_exit_code": 0,
+    "actual_apply_stderr": "",
+    "files": [
+      {
+        "path": "3rdparty/efsw-win32/efsw/FileWatcherWin32.hpp",
+        "expected_sha256": "d5246370090ff20121af709e13e7705832605d21a5a618a6895913f4c1e29865",
+        "rebuilt_sha256": "6da632af6724020bb4e84d87f9bd6f141071d6a1688882126f25f6dcea2ee4f1"
+      },
+      {
+        "path": "3rdparty/efsw-win32/overlay.cmake",
+        "expected_sha256": "946d0db9ce163eb356fb739ac9e99e75be615f94218e88ca3404ba0bb8df2369",
+        "rebuilt_sha256": "8fca6230abf3082b3f74c3a1b966a55dac1e9b45b8281ec031a4039a532852c9"
+      }
+    ],
+    "scope": "Original exporter; isolated baseline copy and actual git apply; no production source changed.",
+    "intermediate_package": {
+      "path": ".local/dist/klogg-longline-windows-x64-20261026-current.zip",
+      "sha256": "8105c59b0bbddadd087347502784abc1d284410c1cc35f860544b312722fb67b",
+      "build_steps": 455,
+      "build_exit_code": 0,
+      "delivery_status": "diagnostic_only_patch_does_not_preserve_exact_source_bytes"
+    }
+  },
+  "package-verification": {
+    "status": "passed",
+    "package": ".local\\dist\\klogg-longline-windows-x64-20261026-final",
+    "package_file_count": 46,
+    "production_file_count": 658,
+    "archive_sha256": "86ab4d36d20da2f07a3f47245830a27fe7f5426e54099928b395e68f9e753f54",
+    "archive_size_bytes": 51955488,
+    "executable_sha256": "60bd71ed360623195210802cb333a6fff55a75574c8fffc2473efa6b86075ed2",
+    "full_patch_sha256": "bc9820899188d91a11bd313c073574a57549dc0e2568be8f6df2e7d88456deeb",
+    "patch_changed_files": 38,
+    "reconstruction_check": "passed",
+    "source_fingerprint_sha256": "edc078385d25e9863a266b9af61037926fb1ac30d787f5baf7453724b24df478",
+    "isolated_path_startup": [
+      {
+        "argument": "--version",
+        "exit_code": 0,
+        "stdout": "klogg 24.11.0.0\r\n",
+        "stderr": ""
+      },
+      {
+        "argument": "--help",
+        "exit_code": 0,
+        "stdout": "Usage: E:\\codex\\klogg\\.local\\dist\\klogg-longline-windows-x64-20261026-final\\klogg.exe [options]\r\nKlogg log viewer\r\n\r\nOptions:\r\n  -?, -h, --help             Displays help on commandline options.\r\n  --help-all                 Displays help, including generic Qt options.\r\n  -v, --version              Displays version information.\r\n  -d, --debug <debug_level>  output more debug (increase number for more\r\n                             verbosity)\r\n  -m, --multi                allow multiple instance of klogg to run\r\n                             simultaneously (use together with -s)\r\n  -s, --load-session         load the previous session (default when no file is\r\n                             passed)\r\n  -n, --new-session          do not load the previous session (default when a\r\n                             file is passed)\r\n  -l, --log                  save the log to a file\r\n  -f, --follow               follow initial opened files\r\n  --window-width <1024>      new window width\r\n  --window-height <768>      new window height\r\n",
+        "stderr": ""
+      }
+    ],
+    "limits": "Unsigned local validation package; version/help startup is not a clean-machine installer qualification."
+  }
+}
