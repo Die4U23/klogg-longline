@@ -1,6 +1,6 @@
 # klogg-longline
 
-2026-10-26 交付复核：已更新可追溯 Windows 本地包，修复源码补丁的行尾重建校验与测试配置污染；九项 CTest、48 项 Python 测试、5 GiB 搜索/取消及普通日志性能对照通过。**原生 Windows 首次建窗仍出现超过 500 ms 的心跳间隔，完整 GUI 验收未通过**，见 [本轮报告](docs/validation-report-2026-10-26.md) 和 [问题 #9](https://github.com/Die4U23/klogg-longline/issues/9)。下列 2026-10-17 数据保留为历史记录。
+2026-10-26 交付复核：已更新可追溯 Windows 本地包，修复源码补丁的行尾重建校验与测试配置污染；九项 CTest、49 项 Python 测试、5 GiB 搜索/取消及普通日志性能对照通过。**原生 Windows 首次建窗仍出现超过 500 ms 的心跳间隔，完整 GUI 验收未通过**，见 [本轮报告](docs/validation-report-2026-10-26.md) 和 [问题 #9](https://github.com/Die4U23/klogg-longline/issues/9)。下列 2026-10-17 数据保留为历史记录。
 
 2026-10-18 生命周期复查：定位并修复索引任务退出死锁，以及[窗口关闭后的排队回调](docs/ui-callback-lifecycle-fix.md)，见[索引任务生命周期报告](docs/worker-lifecycle-fix.md)。
 

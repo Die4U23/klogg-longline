@@ -315,6 +315,18 @@
       "source_sha256": "9974ef5516184bc1c542a23f159010fdea7f75c922d8ab489ca185f3105988e6",
       "status": "copied",
       "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2784,
+      "output_path": "evidence/windows-2026-10-26/current/integrity-followup/summary.json",
+      "output_sha256": "2f71966acb3da529c0ad8bea073e7cf501fd801040c953b1f8aaf4d7680feeeb",
+      "source_bytes": 2784,
+      "source_path": ".local/evidence/release-20261026-curated/integrity-followup/summary.json",
+      "source_sha256": "2f71966acb3da529c0ad8bea073e7cf501fd801040c953b1f8aaf4d7680feeeb",
+      "status": "copied",
+      "truncated": false
     }
-  ]
+  ],
+  "updated_utc": "2026-10-26T07:05:14.683813+00:00"
 }

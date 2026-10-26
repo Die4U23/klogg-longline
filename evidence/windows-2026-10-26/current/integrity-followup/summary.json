@@ -1,0 +1,23 @@
+{
+  "status": "passed_after_reproduced_omission",
+  "change": "Validate every date-level exported evidence manifest, retain mandatory historical source chain, reject modified or escaping current evidence.",
+  "logs": [
+    {
+      "path": ".local/release-20261026/new-evidence-before.log",
+      "sha256": "a78ae24a2fbcdc54df323a7f61677d317485666deccfc812061a46139dece9a7",
+      "text": "test_before_hash_must_match_historical_snapshot (test_verify_repository.VerifyRepositoryTests.test_before_hash_must_match_historical_snapshot) ... ok\ntest_duplicate_and_escaping_paths_are_rejected (test_verify_repository.VerifyRepositoryTests.test_duplicate_and_escaping_paths_are_rejected) ... ok\ntest_new_evidence_exports_are_verified (test_verify_repository.VerifyRepositoryTests.test_new_evidence_exports_are_verified) ... FAIL\ntest_source_tampering_is_detected (test_verify_repository.VerifyRepositoryTests.test_source_tampering_is_detected) ... ok\ntest_undeclared_new_file_is_detected (test_verify_repository.VerifyRepositoryTests.test_undeclared_new_file_is_detected) ... ok\ntest_unknown_delete_is_rejected (test_verify_repository.VerifyRepositoryTests.test_unknown_delete_is_rejected) ... ok\ntest_valid_overlay_updates_file_and_adds_file (test_verify_repository.VerifyRepositoryTests.test_valid_overlay_updates_file_and_adds_file) ... ok\n\n======================================================================\nFAIL: test_new_evidence_exports_are_verified (test_verify_repository.VerifyRepositoryTests.test_new_evidence_exports_are_verified)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"E:\\codex\\klogg\\tests\\test_verify_repository.py\", line 90, in test_new_evidence_exports_are_verified\n    self.assertEqual(1, verify_repository(self.root)[\"evidence_files\"])\nAssertionError: 1 != 0\n\n----------------------------------------------------------------------\nRan 7 tests in 0.209s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "path": ".local/release-20261026/evidence-coverage-tests.log",
+      "sha256": "78f95332c30d030d0a459d31c1575ef773c498dd62bc1a66edfe4a3bc15f0dc9",
+      "text": ".................................................\n----------------------------------------------------------------------\nRan 49 tests in 14.981s\n\nOK\n"
+    },
+    {
+      "path": ".local/release-20261026/evidence-coverage-integrity.log",
+      "sha256": "5bbf7176e8f306e370c589ad6b11adab20840fbb843f765659a4d721e621fb02",
+      "text": "完整性核验通过：658 个源码文件，23 个补丁文件，307 份证据。\n此检查只核验来源和内容完整性，不代替测试或性能验收。\n"
+    }
+  ],
+  "test_count": 49,
+  "scope": "Windows Python tests; original GUI failures remain open."
+}

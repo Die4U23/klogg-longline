@@ -1,6 +1,6 @@
 # 项目状态
 
-更新日期：2026-10-26。本轮完成当前生产源码的 Windows 运行包更新、源码重建校验、空文件探针及测试配置隔离修复。九项 CTest、48 项 Python 测试、5 GiB 搜索/取消/索引和普通日志五对测量通过，详见 [本轮报告](validation-report-2026-10-26.md)。**完整 GUI 心跳验收仍未通过**：首次建窗出现 862 ms 停顿，诊断复测及上游基线也保留失败，具体原因由 [问题 #9](https://github.com/Die4U23/klogg-longline/issues/9) 跟踪。不能据本轮工具交付或绿色 CI 将该问题关闭。
+更新日期：2026-10-26。本轮完成当前生产源码的 Windows 运行包更新、源码重建校验、空文件探针及测试配置隔离修复。九项 CTest、49 项 Python 测试、5 GiB 搜索/取消/索引和普通日志五对测量通过，详见 [本轮报告](validation-report-2026-10-26.md)。**完整 GUI 心跳验收仍未通过**：首次建窗出现 862 ms 停顿，诊断复测及上游基线也保留失败，具体原因由 [问题 #9](https://github.com/Die4U23/klogg-longline/issues/9) 跟踪。不能据本轮工具交付或绿色 CI 将该问题关闭。
 
 2026-10-18 生命周期复查：定位并修复索引任务退出死锁，以及[窗口关闭后的排队回调](ui-callback-lifecycle-fix.md)，见[索引任务生命周期报告](worker-lifecycle-fix.md)。
 

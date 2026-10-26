@@ -77,6 +77,25 @@ class VerifyRepositoryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "最终来源映射不一致"):
             verify_repository(self.root)
 
+    def test_new_evidence_exports_are_verified(self):
+        exported = self.root / "evidence/windows-2026-10-26"
+        exported.mkdir()
+        payload = b"current evidence\r\n"
+        record = exported / "summary.json"
+        record.write_bytes(payload)
+        manifest = exported / "manifest.json"
+        entry = {"status": "copied", "output_path": record.relative_to(self.root).as_posix(),
+                 "output_bytes": len(payload), "output_sha256": sha(payload)}
+        manifest.write_text(json.dumps({"sources": [entry]}), encoding="utf-8")
+        self.assertEqual(1, verify_repository(self.root)["evidence_files"])
+        record.write_bytes(b"changed evidence\r\n")
+        with self.assertRaisesRegex(ValueError, "导出证据完整性校验失败"):
+            verify_repository(self.root)
+        entry["output_path"] = "upstream/klogg/old.cpp"
+        manifest.write_text(json.dumps({"sources": [entry]}), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "证据路径越界"):
+            verify_repository(self.root)
+
     def test_undeclared_new_file_is_detected(self):
         (self.sources / "surprise.txt").write_bytes(b"surprise")
         with self.assertRaisesRegex(ValueError, "未声明新增"):

@@ -94,19 +94,23 @@ def verify_repository(root: Path = ROOT) -> dict[str, int]:
         raise ValueError("补丁哈希与来源记录不一致")
 
     evidence_root = root / "evidence/windows-2026-10-17"
-    manifest = _load_json(evidence_root / "manifest.json")
+    # The historical manifest is mandatory; later exports must be checked too.
+    manifests = {evidence_root / "manifest.json"}
+    manifests.update((root / "evidence").glob("*/manifest.json"))
     copied = 0
-    for entry in manifest["sources"]:
-        if entry["status"] == "source_changed_during_export":
-            raise ValueError("证据导出期间原始文件发生变化")
-        if "output_path" not in entry:
-            continue
-        path = repository_file(root, entry["output_path"])
-        if not path.is_relative_to(evidence_root.resolve()):
-            raise ValueError(f"证据路径越界：{entry['output_path']}")
-        if path.stat().st_size != entry["output_bytes"] or digest(path) != entry["output_sha256"]:
-            raise ValueError(f"导出证据完整性校验失败：{entry['output_path']}")
-        copied += 1
+    for manifest_path in sorted(manifests):
+        manifest = _load_json(manifest_path)
+        for entry in manifest["sources"]:
+            if entry["status"] == "source_changed_during_export":
+                raise ValueError("证据导出期间原始文件发生变化")
+            if "output_path" not in entry:
+                continue
+            path = repository_file(root, entry["output_path"])
+            if not path.is_relative_to(manifest_path.parent.resolve()):
+                raise ValueError(f"证据路径越界：{entry['output_path']}")
+            if path.stat().st_size != entry["output_bytes"] or digest(path) != entry["output_sha256"]:
+                raise ValueError(f"导出证据完整性校验失败：{entry['output_path']}")
+            copied += 1
 
     recorded = _load_json(evidence_root / "reproducibility/summary.json")
     production = {
