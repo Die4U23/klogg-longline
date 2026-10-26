@@ -53,8 +53,7 @@ public:
     {
         if ( !directory_.isValid() || !write( bytes ) ) return false;
         source_ = std::make_unique<LogData>();
-        // getSynced() in other cases may reload the portable default. These
-        // fixtures explicitly exercise UTF-8, independently of encoding guess.
+        // These fixtures explicitly exercise UTF-8, independently of encoding guess.
         source_->setDisplayEncoding("UTF-8");
 
         QEventLoop loop;
@@ -439,7 +438,7 @@ TEST_CASE( "a cleared long literal search cannot replace the newer generation",
 TEST_CASE( "cached search follow replaces the unrelated worker accumulator",
            "[literal][native][filtered][cache]" )
 {
-    auto& config = Configuration::getSynced();
+    auto& config = Configuration::get();
     struct RestoreCacheSetting {
         Configuration& config;
         bool previous;
@@ -535,7 +534,7 @@ TEST_CASE( "search batch planning obeys physical bytes and stale source snapshot
 TEST_CASE( "filtered literal search reports its real matching-line cap as partial",
            "[literal][native][filtered][limit][cache]" )
 {
-    auto& config = Configuration::getSynced();
+    auto& config = Configuration::get();
     struct RestoreCacheSetting {
         Configuration& config;
         bool previous;
@@ -596,7 +595,7 @@ TEST_CASE( "filtered long literal search preserves CR as line content",
 TEST_CASE( "ordinary search bounds subthreshold line batches including decoded buffers",
            "[literal][native][filtered][budget]" )
 {
-    auto& config = Configuration::getSynced();
+    auto& config = Configuration::get();
     struct RestoreSearchSettings {
         Configuration& config;
         bool parallel;
@@ -647,6 +646,9 @@ TEST_CASE( "ordinary search bounds subthreshold line batches including decoded b
 namespace {
 void requireOrdinaryFollowAfterAppend( const QByteArray& suffix, LinesCount expectedMatches )
 {
+    // Reload is explicit here; a watcher must not start another source check.
+    REQUIRE_FALSE( Configuration::get().nativeFileWatchEnabled() );
+    REQUIRE_FALSE( Configuration::get().pollingEnabled() );
     AttachedSource file;
     REQUIRE( file.attach( QByteArray( "hit1\nhit42" ) ) );
     auto filtered = file.source().getNewFilteredData();

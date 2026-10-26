@@ -104,10 +104,10 @@ $env:QT_QPA_PLATFORM = 'offscreen'
 ctest --test-dir $build --output-on-failure
 ```
 
-当前 Windows candidate CTest 注册 8 项：`klogg_smoke`、`klogg_tests`、`klogg_itests`、`klogg_literal_tests`、`klogg_preview_tests`、`klogg_crawler_tests`、`klogg_efsw_lifecycle_tests` 和 `klogg_worker_lifecycle_tests`。IOCP 用例只在 Windows 注册；worker 用例覆盖索引任务立即关闭、连续提交和文件重新绑定。若只重跑 unit、integration 与 native regressions，可用：
+当前 Windows candidate CTest 注册 9 项：`klogg_smoke`、`klogg_tests`、`klogg_itests`、`klogg_literal_tests`、`klogg_preview_tests`、`klogg_crawler_tests`、`klogg_efsw_lifecycle_tests`、`klogg_worker_lifecycle_tests` 和 `klogg_empty_search_probe`。空文件探针必须完成搜索并返回零匹配。IOCP 用例只在 Windows 注册；worker 用例覆盖索引任务立即关闭、连续提交和文件重新绑定。若只重跑 unit、integration 与 native regressions，可用：
 
 ```powershell
-ctest --test-dir $build -R 'klogg_tests|klogg_itests|klogg_literal_tests|klogg_preview_tests|klogg_crawler_tests|klogg_efsw_lifecycle_tests|klogg_worker_lifecycle_tests' --output-on-failure
+ctest --test-dir $build -R 'klogg_tests|klogg_itests|klogg_literal_tests|klogg_preview_tests|klogg_crawler_tests|klogg_efsw_lifecycle_tests|klogg_worker_lifecycle_tests|klogg_empty_search_probe' --output-on-failure
 ```
 
 baseline 不包含 candidate-only native tests。失败时保留完整 CTest 输出和构建日志，不要只记录最后一行。
@@ -212,7 +212,7 @@ $probe = (Resolve-Path .local/build-candidate/reliability-probe/klogg_reliabilit
 `tools/run_index_asan.ps1` 构建独立的 index-only 目标，并使用 MSVC `/fsanitize=address /Zi` 运行索引边界及生命周期用例。当前脚本固定选择 candidate 源码，没有 `-Variant` 参数：
 
 ```powershell
-.\tools\run_index_asan.ps1 -Variant candidate -Jobs 2 -RunId index-asan-candidate-01
+.\tools\run_index_asan.ps1 -Jobs 2 -RunId index-asan-candidate-01
 ```
 
 该脚本要求本地已有 Qt、`type_safe`、streamvbyte 和 mimalloc 源码。它固定使用 `.local/build-index-asan`，并拒绝重用已存在的构建目录或同名证据目录；不要删除已有目录来强制重跑，需在全新 checkout/workspace 或由维护者安排新建隔离 build 路径。ASan 覆盖的是独立压缩索引组件对象，不是完整 klogg 应用；这是 Windows/MSVC、Qt 后端下的组件检查。当前验证只覆盖 Windows Qt backend；Hyperscan、macOS 和 Linux 尚未验证。
@@ -230,15 +230,13 @@ $env:PATH = "$qtRoot\bin;$build\output;$env:PATH"
 
 需要检查便携目录时，可对一个新的本地 staging 目录运行 Qt 的 `windeployqt.exe`，并确保 TBB DLL 也进入该目录或在 PATH 可见。此步骤只是依赖部署准备；在没有完成并核验打包产物前，不要称其为发行版或可发布安装包。
 
-候选运行包工具会从 `.local/build-candidate/output/klogg.exe` 和 oneTBB runtime 生成内部验证包，拒绝覆盖固定的目标目录；可选 `-Zip` 同时生成 ZIP：
+打包工具每次都会先对当前 candidate 源码执行完整 clean build，不提供跳过构建的选项。每次运行使用新的安全 RunId；工具拒绝覆盖已存在的同名目录或 ZIP，并保留先前包：
 
 ```powershell
-.\tools\package.ps1
-# 或者，在 .local/dist/klogg-longline-windows-x64 及其 .zip 均不存在时：
-.\tools\package.ps1 -Zip
+.\tools\package.ps1 -RunId 20261026-current-01 -Zip -Jobs 4
 ```
 
-该工具调用 Qt 6.7.3 `windeployqt --release --compiler-runtime --translations zh_CN`，额外复制 MSVC x64 CRT DLL、oneTBB、license/provenance 并写入 SHA-256 manifest。默认查找本机 Visual Studio 2022 Preview；其他安装需设置 `VCINSTALLDIR` 为对应 `VC` 目录。输出是未签名的内部验证包，不是安装器或发行版。
+输出位于 `.local/dist/klogg-longline-windows-x64-20261026-current-01/`，`-Zip` 另生成同名 `.zip`。包内含当前完整源码补丁及 JSON、运行文件哈希清单，以及当前 Git HEAD/dirty 状态和生产源码指纹；工具会核对基线归档及完整文件集合，在 clean build 和补丁导出前后比较生产源码快照，并在隔离副本中实际应用完整补丁、核对全部文件字节；任何不一致都会拒绝打包。工具调用 Qt 6.7.3 `windeployqt --release --compiler-runtime --translations zh_CN`，额外复制 MSVC x64 CRT DLL、oneTBB 和许可/来源文件。默认查找本机 Visual Studio 2022 Preview；其他安装需设置 `VCINSTALLDIR` 为对应 `VC` 目录。输出是未签名的本地内部验证包，不是安装器或发行版；生成包本身不代表本轮长行、5 GiB 或性能验收已通过，须引用对应本轮证据。
 
 ## 验证范围
 

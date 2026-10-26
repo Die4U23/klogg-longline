@@ -13,6 +13,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QPainter>
+#include <QThread>
 #include <QTimer>
 
 #include <algorithm>
@@ -288,10 +289,32 @@ void render(LogMainView& view)
 }
 } // namespace
 
+class DiagnosticApplication : public QApplication {
+public:
+    using QApplication::QApplication;
+    bool traceEvents = false;
+    QJsonArray slowEvents;
+    bool notify(QObject* receiver, QEvent* event) override
+    {
+        if (QThread::currentThread() != thread() || !traceEvents)
+            return QApplication::notify(receiver, event);
+        const QString receiverClass = receiver->metaObject()->className();
+        const auto type = event->type();
+        QElapsedTimer timer;
+        timer.start();
+        const bool result = QApplication::notify(receiver, event);
+        const auto elapsed = timer.nsecsElapsed();
+        if (elapsed >= 5'000'000 && slowEvents.size() < 256)
+            slowEvents.append(QJsonObject{{"receiver_class", receiverClass}, {"event_type", int(type)},
+                {"elapsed_ns", QString::number(elapsed)}});
+        return result;
+    }
+};
+
 int main(int argc, char** argv)
 {
     if (qgetenv("QT_QPA_PLATFORM").isEmpty()) qputenv("QT_QPA_PLATFORM", "offscreen");
-    QApplication app(argc, argv);
+    DiagnosticApplication app(argc, argv);
     logging::enableLogging(false);
     app.setApplicationName("klogg_gui_probe");
     app.setQuitOnLastWindowClosed(false);
@@ -305,6 +328,7 @@ int main(int argc, char** argv)
         {"timeout-ms", "Whole-process wall-time limit including teardown.", "milliseconds", "120000"},
         {"anchor-byte", "Candidate-only absolute file-byte anchor for the requested line.", "offset"},
         {"expect-text", "Require this nonempty token in the actual cached preview window.", "token"},
+        {"trace-events", "Record up to 256 event deliveries taking at least 5 ms (diagnostic only)."},
         {"label", "Caller-supplied baseline/candidate/diagnostic label.", "text", "unspecified"}});
     parser.process(app);
     bool lineOk = false, timeoutOk = false;
@@ -333,6 +357,7 @@ int main(int argc, char** argv)
         {"file_size_bytes", QString::number(file.size())}, {"source_line", QString::number(lineValue)},
         {"qt_version", qVersion()}, {"platform", QGuiApplication::platformName()},
         {"candidate_api", candidate}, {"anchor_byte", parser.isSet("anchor-byte") ? QString::number(anchor) : QString{}},
+        {"event_trace_enabled", parser.isSet("trace-events")},
         {"portable", true}, {"cache_state", "uncontrolled"},
         {"proof_boundary", "real product widget on reported Qt platform; process memory sampling is not exact allocation attribution or formal acceptance"}};
     output(QJsonObject{{"status", "started"}, {"metadata", metadata}});
@@ -379,22 +404,36 @@ int main(int argc, char** argv)
         auto overviewWidget = std::make_unique<OverviewWidget>();
         overviewWidget->setOverview(&overview);
         std::unique_ptr<LogMainView> view;
+        app.traceEvents = parser.isSet("trace-events");
         perform({1, "view_setup_and_initial_paint", [&] {
+            QJsonObject setupStepNs;
+            auto timed = [&](const char* name, const auto& action) {
+                const auto begin = heartbeat.now();
+                action();
+                setupStepNs.insert(name, QString::number(heartbeat.now() - begin));
+            };
             // A real OverviewWidget is mandatory: refreshOverview dereferences
             // it even when the overview itself is invisible.
-            view = std::make_unique<LogMainView>(&data, &pattern, &overview, overviewWidget.get());
-            view->resize(1000, 600);
-            view->updateFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-            view->setLineNumbersVisible(true);
-            view->updateData();
-            view->jumpToLine(LineNumber(lineValue));
-            view->show();
-            render(*view);
+            timed("construct_view", [&] {
+                view = std::make_unique<LogMainView>(&data, &pattern, &overview, overviewWidget.get());
+            });
+            timed("resize", [&] { view->resize(1000, 600); });
+            timed("update_font", [&] { view->updateFont(QFontDatabase::systemFont(QFontDatabase::FixedFont)); });
+            timed("line_numbers", [&] { view->setLineNumbersVisible(true); });
+            timed("update_data", [&] { view->updateData(); });
+            timed("jump_to_line", [&] { view->jumpToLine(LineNumber(lineValue)); });
+            timed("show", [&] { view->show(); });
+            timed("render", [&] { render(*view); });
             return QJsonObject{{"widget", view->metaObject()->className()}, {"width", view->width()},
                                {"height", view->height()}, {"text_wrap", view->isTextWrapEnabled()},
                                {"first_visible_line", QString::number(view->getTopLine().get())},
-                               {"font", view->font().toString()}};
+                               {"font", view->font().toString()}, {"setup_step_ns", setupStepNs}};
         }}, monitor, heartbeat);
+        if (app.traceEvents) {
+            app.traceEvents = false;
+            output({{"status", "setup_event_diagnostic"}, {"slow_events", app.slowEvents},
+                    {"scope", "nested event delivery durations; do not sum nested events"}});
+        }
         if (parser.isSet("anchor-byte")) {
             perform({9, "byte_anchor_jump_and_render", [&] {
                 const bool invoked = QMetaObject::invokeMethod(view.get(), "showByteWindow", Qt::DirectConnection,

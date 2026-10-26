@@ -1,0 +1,332 @@
+{
+  "created_utc": "2026-10-26T06:52:16+00:00",
+  "generator_version": "1",
+  "limits": {
+    "structured_json_bytes": 16777216,
+    "text_bytes": 2097152
+  },
+  "repository_relative_root": ".",
+  "schema_version": 1,
+  "sources": [
+    {
+      "label": "current",
+      "output_bytes": 1934,
+      "output_path": "evidence/windows-2026-10-26/current/benchmark/summary.json",
+      "output_sha256": "9f2d1464e8a6ab04e6005d97efa137c0dd9a62496b6a395ca6e2c266ac864427",
+      "source_bytes": 1934,
+      "source_path": ".local/evidence/release-20261026-curated/benchmark/summary.json",
+      "source_sha256": "9f2d1464e8a6ab04e6005d97efa137c0dd9a62496b6a395ca6e2c266ac864427",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 7753,
+      "output_path": "evidence/windows-2026-10-26/current/benchmark/trials.jsonl",
+      "output_sha256": "e271b65499e219444b5da3e776bd2e3d15d0746739a83002232a9a75171f0304",
+      "source_bytes": 7753,
+      "source_path": ".local/evidence/release-20261026-curated/benchmark/trials.jsonl",
+      "source_sha256": "e271b65499e219444b5da3e776bd2e3d15d0746739a83002232a9a75171f0304",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 10033,
+      "output_path": "evidence/windows-2026-10-26/current/checks/summary.json",
+      "output_sha256": "5cb3c94ad2dbfced9c92836c1bc2e9bea137fd6bf4edc4fd7ea70932fcaa2bb4",
+      "source_bytes": 10033,
+      "source_path": ".local/evidence/release-20261026-curated/checks/summary.json",
+      "source_sha256": "5cb3c94ad2dbfced9c92836c1bc2e9bea137fd6bf4edc4fd7ea70932fcaa2bb4",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 23700,
+      "output_path": "evidence/windows-2026-10-26/current/current-run/summary.json",
+      "output_sha256": "854514a9bf09e59c9c1891ad50456d3e829c4f626c66b1326ecf7f8da156b1ae",
+      "source_bytes": 23700,
+      "source_path": ".local/evidence/release-20261026-curated/current-run/summary.json",
+      "source_sha256": "854514a9bf09e59c9c1891ad50456d3e829c4f626c66b1326ecf7f8da156b1ae",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 10520,
+      "output_path": "evidence/windows-2026-10-26/current/delivery/summary.json",
+      "output_sha256": "d88c8c83a6bd90602d682b5f29d19f144da4ad07e61281c080e267b2a457e6d9",
+      "source_bytes": 10520,
+      "source_path": ".local/evidence/release-20261026-curated/delivery/summary.json",
+      "source_sha256": "d88c8c83a6bd90602d682b5f29d19f144da4ad07e61281c080e267b2a457e6d9",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 59305,
+      "output_path": "evidence/windows-2026-10-26/current/final-review/summary.json",
+      "output_sha256": "3c8036372913a0ea30ff11baaad589f720c71debeed6bae2b43a3135e75879ab",
+      "source_bytes": 59305,
+      "source_path": ".local/evidence/release-20261026-curated/final-review/summary.json",
+      "source_sha256": "3c8036372913a0ea30ff11baaad589f720c71debeed6bae2b43a3135e75879ab",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-events/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-events/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 9621,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-events/stdout.txt",
+      "output_sha256": "6afa64d3cf2a45bf6b7f0499bb26b675d642285f60d446942b6f408a9e660bbc",
+      "source_bytes": 9621,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-events/stdout.txt",
+      "source_sha256": "6afa64d3cf2a45bf6b7f0499bb26b675d642285f60d446942b6f408a9e660bbc",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2417,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-events/summary.json",
+      "output_sha256": "8202c38d63b06eceea0304fc78ce0a997a950f9c567d733e1342c2c3ebaee934",
+      "source_bytes": 2417,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-events/summary.json",
+      "source_sha256": "8202c38d63b06eceea0304fc78ce0a997a950f9c567d733e1342c2c3ebaee934",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-timing/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-timing/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 9184,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-timing/stdout.txt",
+      "output_sha256": "628d2bf1c2ef1b154fa740d09f048b28f3b30f19c7a718251a1673cc20533796",
+      "source_bytes": 9184,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-timing/stdout.txt",
+      "source_sha256": "628d2bf1c2ef1b154fa740d09f048b28f3b30f19c7a718251a1673cc20533796",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2387,
+      "output_path": "evidence/windows-2026-10-26/current/gui-1mib-timing/summary.json",
+      "output_sha256": "55dacfaf2f084cd2d1c99a6e5bb2f3728d2716be33ad8e438d16b1761a5a30d5",
+      "source_bytes": 2387,
+      "source_path": ".local/evidence/release-20261026-curated/gui-1mib-timing/summary.json",
+      "source_sha256": "55dacfaf2f084cd2d1c99a6e5bb2f3728d2716be33ad8e438d16b1761a5a30d5",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-5gib-timing/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-5gib-timing/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 22970,
+      "output_path": "evidence/windows-2026-10-26/current/gui-5gib-timing/stdout.txt",
+      "output_sha256": "f975df7c3a08c8d06c658f43949b9455ab7e07f9ef957b166f45358f3e970563",
+      "source_bytes": 22970,
+      "source_path": ".local/evidence/release-20261026-curated/gui-5gib-timing/stdout.txt",
+      "source_sha256": "f975df7c3a08c8d06c658f43949b9455ab7e07f9ef957b166f45358f3e970563",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2578,
+      "output_path": "evidence/windows-2026-10-26/current/gui-5gib-timing/summary.json",
+      "output_sha256": "4d40a501b67917ffc5007735da499c6be48f984191a937471bf4fb5a8d4b3999",
+      "source_bytes": 2578,
+      "source_path": ".local/evidence/release-20261026-curated/gui-5gib-timing/summary.json",
+      "source_sha256": "4d40a501b67917ffc5007735da499c6be48f984191a937471bf4fb5a8d4b3999",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-baseline-1mib/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-baseline-1mib/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 6845,
+      "output_path": "evidence/windows-2026-10-26/current/gui-baseline-1mib/stdout.txt",
+      "output_sha256": "9ab5262023b229411dda214747dee36c109e066f079a530972eaeb176a2346ea",
+      "source_bytes": 6845,
+      "source_path": ".local/evidence/release-20261026-curated/gui-baseline-1mib/stdout.txt",
+      "source_sha256": "9ab5262023b229411dda214747dee36c109e066f079a530972eaeb176a2346ea",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2366,
+      "output_path": "evidence/windows-2026-10-26/current/gui-baseline-1mib/summary.json",
+      "output_sha256": "a07fa93ca489b7099c981c7da431022d3ef34b7c6459fc5a8cc98d4a50491db2",
+      "source_bytes": 2366,
+      "source_path": ".local/evidence/release-20261026-curated/gui-baseline-1mib/summary.json",
+      "source_sha256": "a07fa93ca489b7099c981c7da431022d3ef34b7c6459fc5a8cc98d4a50491db2",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 10975,
+      "output_path": "evidence/windows-2026-10-26/current/gui-empty-controls/summary.json",
+      "output_sha256": "7a08b6669233b7fb2ee0a8dcbc62134d1ac0727d148095b17d00c32b577e3813",
+      "source_bytes": 10975,
+      "source_path": ".local/evidence/release-20261026-curated/gui-empty-controls/summary.json",
+      "source_sha256": "7a08b6669233b7fb2ee0a8dcbc62134d1ac0727d148095b17d00c32b577e3813",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-final-trace/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-final-trace/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 23280,
+      "output_path": "evidence/windows-2026-10-26/current/gui-final-trace/stdout.txt",
+      "output_sha256": "8459f48c9989fef3bea4bd2e2191e7fd5103d24d8e9f012a126f8449af6e3c17",
+      "source_bytes": 23280,
+      "source_path": ".local/evidence/release-20261026-curated/gui-final-trace/stdout.txt",
+      "source_sha256": "8459f48c9989fef3bea4bd2e2191e7fd5103d24d8e9f012a126f8449af6e3c17",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2612,
+      "output_path": "evidence/windows-2026-10-26/current/gui-final-trace/summary.json",
+      "output_sha256": "dbd8ed30defa65f403263e17e50e353b8472c91a469677c0364c7eb23ccf6ce2",
+      "source_bytes": 2612,
+      "source_path": ".local/evidence/release-20261026-curated/gui-final-trace/summary.json",
+      "source_sha256": "dbd8ed30defa65f403263e17e50e353b8472c91a469677c0364c7eb23ccf6ce2",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 0,
+      "output_path": "evidence/windows-2026-10-26/current/gui-initial-failure/stderr.txt",
+      "output_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source_bytes": 0,
+      "source_path": ".local/evidence/release-20261026-curated/gui-initial-failure/stderr.txt",
+      "source_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 22459,
+      "output_path": "evidence/windows-2026-10-26/current/gui-initial-failure/stdout.txt",
+      "output_sha256": "06b535590c7664a11604aa6c8dd3f896de355640d66952bab60bfac0c17576d4",
+      "source_bytes": 22459,
+      "source_path": ".local/evidence/release-20261026-curated/gui-initial-failure/stdout.txt",
+      "source_sha256": "06b535590c7664a11604aa6c8dd3f896de355640d66952bab60bfac0c17576d4",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2576,
+      "output_path": "evidence/windows-2026-10-26/current/gui-initial-failure/summary.json",
+      "output_sha256": "55478104b41026f1c15a76dcc5798f104d1fbc21253657e45a73b8c37d558f46",
+      "source_bytes": 2576,
+      "source_path": ".local/evidence/release-20261026-curated/gui-initial-failure/summary.json",
+      "source_sha256": "55478104b41026f1c15a76dcc5798f104d1fbc21253657e45a73b8c37d558f46",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 5876,
+      "output_path": "evidence/windows-2026-10-26/current/remaining-checks/summary.json",
+      "output_sha256": "0808917744c929c4920a76dfe78a76b67ff8e7272a9c43adb59cf96160f559ff",
+      "source_bytes": 5876,
+      "source_path": ".local/evidence/release-20261026-curated/remaining-checks/summary.json",
+      "source_sha256": "0808917744c929c4920a76dfe78a76b67ff8e7272a9c43adb59cf96160f559ff",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 28581,
+      "output_path": "evidence/windows-2026-10-26/current/reproduction-scripts/summary.json",
+      "output_sha256": "bb3e5d2aa26484bbfc97c526820db2aa591c6269ec492cd069dc00cdfc4d1d4b",
+      "source_bytes": 28581,
+      "source_path": ".local/evidence/release-20261026-curated/reproduction-scripts/summary.json",
+      "source_sha256": "bb3e5d2aa26484bbfc97c526820db2aa591c6269ec492cd069dc00cdfc4d1d4b",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2487,
+      "output_path": "evidence/windows-2026-10-26/current/test-transcripts/summary.json",
+      "output_sha256": "9974ef5516184bc1c542a23f159010fdea7f75c922d8ab489ca185f3105988e6",
+      "source_bytes": 2487,
+      "source_path": ".local/evidence/release-20261026-curated/test-transcripts/summary.json",
+      "source_sha256": "9974ef5516184bc1c542a23f159010fdea7f75c922d8ab489ca185f3105988e6",
+      "status": "copied",
+      "truncated": false
+    },
+    {
+      "label": "current",
+      "output_bytes": 2784,
+      "output_path": "evidence/windows-2026-10-26/current/integrity-followup/summary.json",
+      "output_sha256": "2f71966acb3da529c0ad8bea073e7cf501fd801040c953b1f8aaf4d7680feeeb",
+      "source_bytes": 2784,
+      "source_path": ".local/evidence/release-20261026-curated/integrity-followup/summary.json",
+      "source_sha256": "2f71966acb3da529c0ad8bea073e7cf501fd801040c953b1f8aaf4d7680feeeb",
+      "status": "copied",
+      "truncated": false
+    }
+  ],
+  "updated_utc": "2026-10-26T07:05:14.683813+00:00"
+}

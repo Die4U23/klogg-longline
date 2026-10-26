@@ -1,0 +1,304 @@
+{
+  "empty-search-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "search_record_present": true,
+      "explicit_completion": true,
+      "result_not_truncated": true,
+      "active_budget_under_128mib": true,
+      "exact_oracle_lines": true,
+      "exact_oracle_offsets": true,
+      "exact_oracle_count": true
+    },
+    "measurements": {
+      "search_ms": 97.6116,
+      "peak_search_buffer_bytes": 0
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\empty-search-candidate",
+    "oracle": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\empty.oracle.jsonl"
+  },
+  "full-cancel-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "search_record_present": true,
+      "explicit_completion": true,
+      "result_not_truncated": true,
+      "active_budget_under_128mib": true,
+      "cancel_under_one_second": true
+    },
+    "measurements": {
+      "search_ms": 220.2599,
+      "peak_search_buffer_bytes": 3145899,
+      "cancel_ms": 107.8454
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\full-cancel-candidate",
+    "oracle": null
+  },
+  "full-search-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "search_record_present": true,
+      "explicit_completion": true,
+      "result_not_truncated": true,
+      "active_budget_under_128mib": true,
+      "exact_oracle_lines": true,
+      "exact_oracle_offsets": true,
+      "exact_oracle_count": true
+    },
+    "measurements": {
+      "search_ms": 61648.3848,
+      "peak_search_buffer_bytes": 3145843
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\full-search-candidate",
+    "oracle": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\full-hit-b.oracle.jsonl"
+  },
+  "gui-16mib-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": true
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 23.0078
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\gui-16mib-offscreen",
+    "oracle": null
+  },
+  "gui-1mib-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": true
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 37.8427
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\gui-1mib-offscreen",
+    "oracle": null
+  },
+  "gui-5gib-verification": {
+    "passed": false,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": false,
+      "real_anchor_stage_completed": true
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 862.0026,
+      "anchor_detail": {
+        "absolute_anchor_byte": "5368708973",
+        "cached_window": {
+          "absolute_line_begin": 0,
+          "byte_begin": 5368708941,
+          "byte_end": 5368709120,
+          "error": "",
+          "ready": true,
+          "text_utf16_units": 179,
+          "total_bytes": 5368709120,
+          "truncated": true
+        }
+      }
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\gui-5gib-windows",
+    "oracle": null
+  },
+  "gui-64mib-verification": {
+    "passed": true,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": true
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 20.0219
+    },
+    "evidence_directory": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-accepted\\gui-64mib-offscreen",
+    "oracle": null
+  },
+  "compressed-span-index": {
+    "actual_first_byte": 10,
+    "assertion": "exactly one byte, equal to expected-byte",
+    "evidence_kind": "diagnostic_actual_klogg_code",
+    "expected_byte": 10,
+    "file": "E:/codex/klogg/.local/fixtures/full/compressed_span_5gib.log",
+    "file_size_bytes": "5368709120",
+    "hash_verified_by_probe": false,
+    "index_elapsed_ns": "14854628400",
+    "indexed_lines": "128",
+    "line_endpoints_count": 1,
+    "line_zero_based": "127",
+    "memory_after_result_release": {
+      "peak_working_set_bytes": "38289408",
+      "private_bytes": "32387072",
+      "process_handle_count": 463,
+      "status": "measured",
+      "working_set_bytes": "33341440"
+    },
+    "memory_before": {
+      "peak_working_set_bytes": "38289408",
+      "private_bytes": "32190464",
+      "process_handle_count": 463,
+      "status": "measured",
+      "working_set_bytes": "33288192"
+    },
+    "memory_while_result_alive": {
+      "peak_working_set_bytes": "38289408",
+      "private_bytes": "32387072",
+      "process_handle_count": 463,
+      "status": "measured",
+      "working_set_bytes": "33341440"
+    },
+    "mode": "file-index",
+    "operation_elapsed_ns": "227200",
+    "raw_buffer_capacity_bytes": "1",
+    "raw_buffer_size_bytes": "1",
+    "source_metadata_unchanged": true,
+    "status": "passed"
+  },
+  "small-search-comparisons": [
+    {
+      "file": "chunk_boundary_targets.log",
+      "pattern": "KLOGG_FIXTURE_HIT_A",
+      "oracle_summary": {
+        "type": "summary",
+        "file_bytes": 52,
+        "matching_lines": 2,
+        "pattern_bytes": 19
+      },
+      "runner_exit_code": 0,
+      "runner_status": "completed",
+      "runner_summary": "6fd0a06c189a\\summary.json",
+      "oracle_jsonl": "6fd0a06c189a.oracle.jsonl",
+      "native_matching_lines": 2,
+      "compared_lines": 2,
+      "first_mismatch": null,
+      "status": "matched",
+      "comparison_scope": "line_set_and_terminal_state",
+      "terminal_state_validation": "complete",
+      "first_hit_offset_validation": "unsupported_by_legacy_path",
+      "search_path": "legacy"
+    },
+    {
+      "file": "utf8_split_boundary.log",
+      "pattern": "🙂雪",
+      "oracle_summary": {
+        "type": "summary",
+        "file_bytes": 15,
+        "matching_lines": 1,
+        "pattern_bytes": 7
+      },
+      "runner_exit_code": 0,
+      "runner_status": "completed",
+      "runner_summary": "44578830d779\\summary.json",
+      "oracle_jsonl": "44578830d779.oracle.jsonl",
+      "native_matching_lines": 1,
+      "compared_lines": 1,
+      "first_mismatch": null,
+      "status": "matched",
+      "comparison_scope": "line_set_and_terminal_state",
+      "terminal_state_validation": "complete",
+      "first_hit_offset_validation": "unsupported_by_legacy_path",
+      "search_path": "legacy"
+    },
+    {
+      "status": "skipped",
+      "file": "invalid_utf8_byte_oracle.log",
+      "reason": "invalid_utf8_outside_production_contract"
+    },
+    {
+      "file": "pattern_longer_than_chunk.log",
+      "pattern": "PATTERN_LONGER_THAN_CHUNK",
+      "oracle_summary": {
+        "type": "summary",
+        "file_bytes": 39,
+        "matching_lines": 1,
+        "pattern_bytes": 25
+      },
+      "runner_exit_code": 0,
+      "runner_status": "completed",
+      "runner_summary": "67b274b3b1b7\\summary.json",
+      "oracle_jsonl": "67b274b3b1b7.oracle.jsonl",
+      "native_matching_lines": 1,
+      "compared_lines": 1,
+      "first_mismatch": null,
+      "status": "matched",
+      "comparison_scope": "line_set_and_terminal_state",
+      "terminal_state_validation": "complete",
+      "first_hit_offset_validation": "unsupported_by_legacy_path",
+      "search_path": "legacy"
+    },
+    {
+      "status": "skipped",
+      "file": "empty_file.log",
+      "reason": "fixture_has_no_manifest_search_pattern"
+    },
+    {
+      "file": "empty_lines_and_final_line.log",
+      "pattern": "KLOGG_FIXTURE_HIT_B",
+      "oracle_summary": {
+        "type": "summary",
+        "file_bytes": 26,
+        "matching_lines": 1,
+        "pattern_bytes": 19
+      },
+      "runner_exit_code": 0,
+      "runner_status": "completed",
+      "runner_summary": "9f4c7e2b5134\\summary.json",
+      "oracle_jsonl": "9f4c7e2b5134.oracle.jsonl",
+      "native_matching_lines": 1,
+      "compared_lines": 1,
+      "first_mismatch": null,
+      "status": "matched",
+      "comparison_scope": "line_set_and_terminal_state",
+      "terminal_state_validation": "complete",
+      "first_hit_offset_validation": "unsupported_by_legacy_path",
+      "search_path": "legacy"
+    },
+    {
+      "file": "crlf_split_boundary.log",
+      "pattern": "KLOGG_FIXTURE_HIT_B",
+      "oracle_summary": {
+        "type": "summary",
+        "file_bytes": 30,
+        "matching_lines": 1,
+        "pattern_bytes": 19
+      },
+      "runner_exit_code": 0,
+      "runner_status": "completed",
+      "runner_summary": "a29b3aa7071b\\summary.json",
+      "oracle_jsonl": "a29b3aa7071b.oracle.jsonl",
+      "native_matching_lines": 1,
+      "compared_lines": 1,
+      "first_mismatch": null,
+      "status": "matched",
+      "comparison_scope": "line_set_and_terminal_state",
+      "terminal_state_validation": "complete",
+      "first_hit_offset_validation": "unsupported_by_legacy_path",
+      "search_path": "legacy"
+    }
+  ]
+}

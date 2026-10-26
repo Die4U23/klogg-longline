@@ -184,7 +184,7 @@ int fileProbe(const QString& mode, const QString& fileName, quint64 line, int ex
                   {"loading_status", static_cast<int>(status)}});
         return 1;
     }
-    if (line >= logData.getNbLine().get()) {
+    if (mode != "search" && line >= logData.getNbLine().get()) {
         emitJson({{"status", "failed"}, {"reason", "requested line out of range"},
                   {"indexed_lines", decimal(logData.getNbLine().get())}});
         return 1;
@@ -255,7 +255,11 @@ int fileProbe(const QString& mode, const QString& fileName, quint64 line, int ex
         result.insert("line_list_truncated", filtered->getNbMatches().get() > boundedCount);
         result.insert("memory_while_result_alive", memorySnapshot());
         result.insert("scope", "real literal search; completion signal is observed, output must be compared to independent oracle; event loop heartbeat excludes widget painting");
-        passed = searchDone;
+        passed = searchDone && (logData.getNbLine().get() != 0 || filtered->getNbMatches().get() == 0);
+#ifdef KLOGG_LONG_LINE_CANDIDATE
+        if (logData.getNbLine().get() == 0)
+            passed = passed && filtered->searchCompletion() == SearchCompletion::Complete;
+#endif
     } else if (mode == "preview") {
         const auto lines = logData.getLines(LineNumber(line), 1_lcount);
         result.insert("operation_elapsed_ns", QString::number(timer.nsecsElapsed()));

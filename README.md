@@ -1,5 +1,7 @@
 # klogg-longline
 
+2026-10-26 交付复核：已更新可追溯 Windows 本地包，修复源码补丁的行尾重建校验与测试配置污染；九项 CTest、49 项 Python 测试、5 GiB 搜索/取消及普通日志性能对照通过。**原生 Windows 首次建窗仍出现超过 500 ms 的心跳间隔，完整 GUI 验收未通过**，见 [本轮报告](docs/validation-report-2026-10-26.md) 和 [问题 #9](https://github.com/Die4U23/klogg-longline/issues/9)。下列 2026-10-17 数据保留为历史记录。
+
 2026-10-18 生命周期复查：定位并修复索引任务退出死锁，以及[窗口关闭后的排队回调](docs/ui-callback-lifecycle-fix.md)，见[索引任务生命周期报告](docs/worker-lifecycle-fix.md)。
 
 2026-10-18 后续修复：首版合并后的 CI 暴露了 Windows 文件监控取消时的释放后写入；独立复现、修补与回归边界见 [IOCP 生命周期修复](docs/windows-iocp-fix.md)。下列 2026-10-17 性能数据仍归属历史源码。
@@ -32,7 +34,7 @@
 
 本机 Windows x64、MSVC 19.44、Qt 6.7.3、Qt 正则后端。已完成基线与候选构建、真实 5 GiB 文件索引及末尾命中核验、基础搜索/预览回归和索引组件 ASan 检查。完整验收明细、性能数据与已知限制见 [验证报告](docs/validation-report.md)；当前进度见 [项目状态](docs/STATUS.md)。
 
-最终候选通过 42 个原生测试用例和 33 项 Python 测试；固定普通日志 5 对测量的总耗时中位数变化约 +0.05%。5 GiB 搜索取消反馈约 17.6 ms，原生 Windows 预览最大心跳间隔约 270 ms。这些是本机固定样例结果。
+2026-10-17 历史候选通过 42 个原生测试用例和 33 项 Python 测试；固定普通日志 5 对测量的总耗时中位数变化约 +0.05%。当时的 5 GiB 搜索取消反馈约 17.6 ms，原生 Windows 预览最大心跳间隔约 270 ms。这些是历史源码的本机固定样例结果，当前复核以 2026-10-26 报告为准。
 
 新增长行搜索支持非空、区分大小写、无预过滤的 UTF-8 字面串。超长行正则、布尔、反向匹配及不支持的编码会明确拒绝。整条超长行复制、快速查找和旧式导出也不会冒充完整操作；预览窗口不是完整行。
 
@@ -63,7 +65,7 @@ flowchart LR
     preview --> view[Qt 视图绘制与窗口内选择]
 ```
 
-生产改动集中在 `upstream/klogg/src/logdata` 和 `upstream/klogg/src/ui`；`tests/native` 调用真实应用组件，`tools/fixtures.py` 提供独立参考程序。可审查补丁在 [patches/](patches/long-line-reliability.patch)，逐文件哈希随补丁记录保存。
+生产改动集中在 `upstream/klogg/src/logdata` 和 `upstream/klogg/src/ui`；`tests/native` 调用真实应用组件，`tools/fixtures.py` 提供独立参考程序。[首版历史补丁](patches/long-line-reliability.patch) 不包含后续生命周期修复；当前完整补丁由 `tools/export_patch.py` 导出，并随运行包保存，实际应用后按文件集合和原始字节哈希验证重建。
 
 ## 持续集成
 

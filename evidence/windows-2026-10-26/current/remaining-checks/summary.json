@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "root": "E:\\codex\\klogg",
+  "output": "E:\\codex\\klogg\\.local\\evidence\\release-20261026-remaining",
+  "commands": [
+    {
+      "name": "ordinary-performance-benchmark",
+      "argv": [
+        "C:\\Program Files\\Python312\\python.exe",
+        "E:\\codex\\klogg\\tools\\benchmark_search.py",
+        "--baseline-probe-dir",
+        "E:\\codex\\klogg\\.local\\build-baseline\\reliability-probe",
+        "--candidate-probe-dir",
+        "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe",
+        "--manifest",
+        "E:\\codex\\klogg\\.local\\fixtures\\benchmark\\manifest.json",
+        "--output",
+        "E:\\codex\\klogg\\.local\\evidence\\release-20261026-remaining\\ordinary-performance-5-pairs",
+        "--backend",
+        "qt",
+        "--rounds",
+        "5",
+        "--timeout",
+        "600",
+        "--max-private-mib",
+        "512",
+        "--regression-threshold-percent",
+        "10",
+        "--qt-root",
+        "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64",
+        "--dll-dir",
+        "E:\\codex\\klogg\\.local\\build-baseline\\output",
+        "--dll-dir",
+        "E:\\codex\\klogg\\.local\\build-candidate\\output"
+      ],
+      "cwd": "E:\\codex\\klogg",
+      "started_utc": "2026-10-26T06:28:08.501273+00:00",
+      "stdout_file": "commands/01-ordinary-performance-benchmark.stdout.txt",
+      "stderr_file": "commands/01-ordinary-performance-benchmark.stderr.txt",
+      "exit_code": 0,
+      "elapsed_seconds": 16.609,
+      "finished_utc": "2026-10-26T06:28:25.122812+00:00"
+    },
+    {
+      "name": "python-unittest",
+      "argv": [
+        "C:\\Program Files\\Python312\\python.exe",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "E:\\codex\\klogg\\tests",
+        "-p",
+        "test_*.py"
+      ],
+      "cwd": "E:\\codex\\klogg",
+      "started_utc": "2026-10-26T06:28:25.123819+00:00",
+      "stdout_file": "commands/02-python-unittest.stdout.txt",
+      "stderr_file": "commands/02-python-unittest.stderr.txt",
+      "exit_code": 0,
+      "elapsed_seconds": 11.875,
+      "finished_utc": "2026-10-26T06:28:37.006581+00:00"
+    },
+    {
+      "name": "repository-integrity",
+      "argv": [
+        "C:\\Program Files\\Python312\\python.exe",
+        "E:\\codex\\klogg\\tools\\verify_repository.py"
+      ],
+      "cwd": "E:\\codex\\klogg",
+      "started_utc": "2026-10-26T06:28:37.008054+00:00",
+      "stdout_file": "commands/03-repository-integrity.stdout.txt",
+      "stderr_file": "commands/03-repository-integrity.stderr.txt",
+      "exit_code": 0,
+      "elapsed_seconds": 1.953,
+      "finished_utc": "2026-10-26T06:28:38.956003+00:00"
+    }
+  ],
+  "updated_utc": "2026-10-26T06:28:38.956510+00:00",
+  "prior_run": ".local/evidence/release-20261026-accepted",
+  "prior_status": "failed",
+  "scope": "Remaining independent checks only; GUI startup failure is not overridden.",
+  "environment": {
+    "expected_head": "61755fcdc239e830e3b1368125478e83fe212703",
+    "python": {
+      "executable": "C:\\Program Files\\Python312\\python.exe",
+      "version": "3.12.6 (tags/v3.12.6:a4a2d2b, Sep  6 2024, 20:11:23) [MSC v.1940 64 bit (AMD64)]"
+    },
+    "machine": {
+      "platform": "Windows-11-10.0.26200-SP0",
+      "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+      "architecture": "64bit"
+    },
+    "qt": {
+      "root": "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64",
+      "version_from_configured_path": "6.7.3",
+      "kit": "win64_msvc2019_64"
+    },
+    "compiler": "MSVC 19.44.35211 (Visual Studio 2022 Preview; build must be current HEAD)",
+    "binary_sha256": {
+      "baseline_probe": "ec3aed3f7532d093799f8ece58500a24f90a0a5e9797ffef8c4e7b8aebccd8e3",
+      "candidate_probe": "8d8c0b8d388dddd2966f663f8aeb350a4597232f672871657976b65c3f0ca5bd",
+      "candidate_gui_probe": "6baf4aac124dcc697e187b09bab412d321bddadf18eaddf6067e4b5bb94e66bb",
+      "candidate_app": "60bd71ed360623195210802cb333a6fff55a75574c8fffc2473efa6b86075ed2"
+    },
+    "fixture_identity_from_manifests": {
+      "full_search": {
+        "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\full_5gib.log",
+        "sha256": "93ef93929545c35396d2b3c9d58860a68dd2ad59243e99d5182318384d64d35a",
+        "size_bytes": 5368709120
+      },
+      "compressed_span": {
+        "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\compressed_span_5gib.log",
+        "sha256": "8d86b95b1ca98ef5832330f7bab9dc0c950ec5167d5c56d16582176fbf686a0f",
+        "size_bytes": 5368709120
+      }
+    },
+    "manifest_sha256": {
+      ".local\\fixtures\\full\\manifest.json": "f1e6a928f458d630dda6fa88f91bfca79d38b3f9aece50ac8685d6752f8b6b40",
+      ".local\\fixtures\\boundaries\\manifest.json": "0bab07fa48103c860d7f07443d867bf57096e44b42dde8295b433191ae8d69fa",
+      ".local\\fixtures\\benchmark\\manifest.json": "119c67e39972f1ed67503c9bee1e79ed0bb00b228ed51a1fb13d9f2145af3d02"
+    },
+    "performance_gate": "5 interleaved paired rounds; candidate total median regression <= 10%",
+    "duration_estimate": "未知；受本机存储吞吐、缓存和 GUI 调度影响，不能从旧记录外推为保证。",
+    "baseline_reuse": {
+      "probe": ".local\\build-baseline\\reliability-probe\\klogg_reliability_probe.exe",
+      "sha256": "ec3aed3f7532d093799f8ece58500a24f90a0a5e9797ffef8c4e7b8aebccd8e3",
+      "matches_historical_clean_baseline": true,
+      "historical_evidence": "evidence/windows-2026-10-17/reproducibility/summary.json"
+    },
+    "production_source_fingerprint_sha256": "edc078385d25e9863a266b9af61037926fb1ac30d787f5baf7453724b24df478"
+  },
+  "acceptance": "Only the remaining checks listed here passed; original GUI heartbeat failure remains separate."
+}

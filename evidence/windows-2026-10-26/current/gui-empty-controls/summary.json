@@ -1,0 +1,231 @@
+{
+  "empty-scroll-area-windows": {
+    "cross_show_heartbeat_gap_ns": "280582200",
+    "drain_finished_ns": "473090600",
+    "heartbeat_interval_ms": 10,
+    "heartbeat_ticks_monotonic_ns": [
+      "48379900",
+      "58475200",
+      "68683600",
+      "78263800",
+      "89657300",
+      "370239500",
+      "385330600",
+      "388878300",
+      "398531900",
+      "408635100",
+      "418199600",
+      "431122900",
+      "438525600",
+      "448372100",
+      "458588600",
+      "468091600"
+    ],
+    "max_heartbeat_gap_ns": "280582200",
+    "mode": "scroll_area",
+    "platform": "windows",
+    "post_show_event_drain_ms": 100,
+    "pre_show_event_drain_ms": 50,
+    "qapplication_construct_ns": "38053300",
+    "qt_version": "6.7.3",
+    "qwidget_construct_resize_ns": "437400",
+    "scope": "empty Qt widget show timing only; process-local diagnostic, no product data or logging",
+    "show_sync_ns": "280387500",
+    "widget_class": "QAbstractScrollArea",
+    "window_size": "1000x600"
+  },
+  "empty-window-offscreen": {
+    "cross_show_heartbeat_gap_ns": "8793700",
+    "drain_finished_ns": "193828400",
+    "heartbeat_interval_ms": 10,
+    "heartbeat_ticks_monotonic_ns": [
+      "54261500",
+      "62586500",
+      "72133900",
+      "84113000",
+      "93476400",
+      "102270100",
+      "112271200",
+      "123337000",
+      "133162400",
+      "143026600",
+      "152840900",
+      "162207700",
+      "172639300",
+      "182874100",
+      "192255200"
+    ],
+    "max_heartbeat_gap_ns": "11979100",
+    "platform": "offscreen",
+    "post_show_event_drain_ms": 100,
+    "pre_show_event_drain_ms": 50,
+    "qapplication_construct_ns": "42023800",
+    "qt_version": "6.7.3",
+    "qwidget_construct_resize_ns": "123900",
+    "scope": "empty QWidget show timing only; process-local diagnostic, no product data or logging",
+    "show_sync_ns": "573900",
+    "window_size": "1000x600"
+  },
+  "empty-window-windows": {
+    "cross_show_heartbeat_gap_ns": "246976300",
+    "drain_finished_ns": "448172900",
+    "heartbeat_interval_ms": 10,
+    "heartbeat_ticks_monotonic_ns": [
+      "61258300",
+      "71166600",
+      "79758900",
+      "89862500",
+      "100500700",
+      "347477000",
+      "351279400",
+      "360788300",
+      "371075400",
+      "379961700",
+      "391494100",
+      "400206900",
+      "415927100",
+      "419953500",
+      "430793200",
+      "439837900"
+    ],
+    "max_heartbeat_gap_ns": "246976300",
+    "platform": "windows",
+    "post_show_event_drain_ms": 100,
+    "pre_show_event_drain_ms": 50,
+    "qapplication_construct_ns": "50307900",
+    "qt_version": "6.7.3",
+    "qwidget_construct_resize_ns": "83800",
+    "scope": "empty QWidget show timing only; process-local diagnostic, no product data or logging",
+    "show_sync_ns": "246465100",
+    "window_size": "1000x600"
+  },
+  "source": "#include <QApplication>\n#include <QAbstractScrollArea>\n#include <QElapsedTimer>\n#include <QEventLoop>\n#include <QJsonArray>\n#include <QJsonDocument>\n#include <QJsonObject>\n#include <QTimer>\n#include <QWidget>\n\n#include <algorithm>\n#include <memory>\n#include <vector>\n\nnamespace {\nvoid drainEvents(int milliseconds)\n{\n    QEventLoop loop;\n    QTimer::singleShot(milliseconds, &loop, &QEventLoop::quit);\n    loop.exec();\n}\n\nqint64 maxGap(const std::vector<qint64>& ticks)\n{\n    qint64 result = 0;\n    for (size_t i = 1; i < ticks.size(); ++i)\n        result = std::max(result, ticks[i] - ticks[i - 1]);\n    return result;\n}\n} // namespace\n\nint main(int argc, char** argv)\n{\n    bool useScrollArea = false;\n    for (int i = 1; i < argc; ++i) {\n        if (QString::fromLocal8Bit(argv[i]) == \"--scroll-area\") {\n            useScrollArea = true;\n            for (int j = i; j + 1 < argc; ++j)\n                argv[j] = argv[j + 1];\n            --argc;\n            break;\n        }\n    }\n\n    QElapsedTimer clock;\n    clock.start();\n    const qint64 appStart = clock.nsecsElapsed();\n    QApplication app(argc, argv);\n    const qint64 appEnd = clock.nsecsElapsed();\n\n    std::vector<qint64> ticks;\n    QTimer heartbeat;\n    heartbeat.setTimerType(Qt::PreciseTimer);\n    QObject::connect(&heartbeat, &QTimer::timeout, [&] { ticks.push_back(clock.nsecsElapsed()); });\n    heartbeat.start(10);\n\n    const qint64 widgetStart = clock.nsecsElapsed();\n    std::unique_ptr<QWidget> window;\n    if (useScrollArea)\n        window = std::make_unique<QAbstractScrollArea>();\n    else\n        window = std::make_unique<QWidget>();\n    window->resize(1000, 600);\n    const qint64 widgetEnd = clock.nsecsElapsed();\n\n    drainEvents(50);\n    const qint64 showStart = clock.nsecsElapsed();\n    window->show();\n    const qint64 showEnd = clock.nsecsElapsed();\n    drainEvents(100);\n    const qint64 drainEnd = clock.nsecsElapsed();\n\n    qint64 crossShowGap = 0;\n    for (size_t i = 1; i < ticks.size(); ++i) {\n        if (ticks[i - 1] <= showStart && ticks[i] >= showEnd) {\n            crossShowGap = ticks[i] - ticks[i - 1];\n            break;\n        }\n    }\n\n    QJsonArray rawTicks;\n    for (const auto tick : ticks)\n        rawTicks.append(QString::number(tick));\n    const QJsonObject result{\n        {\"qt_version\", qVersion()},\n        {\"platform\", QGuiApplication::platformName()},\n        {\"mode\", useScrollArea ? \"scroll_area\" : \"widget\"},\n        {\"widget_class\", window->metaObject()->className()},\n        {\"window_size\", \"1000x600\"},\n        {\"heartbeat_interval_ms\", 10},\n        {\"qapplication_construct_ns\", QString::number(appEnd - appStart)},\n        {\"qwidget_construct_resize_ns\", QString::number(widgetEnd - widgetStart)},\n        {\"pre_show_event_drain_ms\", 50},\n        {\"show_sync_ns\", QString::number(showEnd - showStart)},\n        {\"post_show_event_drain_ms\", 100},\n        {\"max_heartbeat_gap_ns\", QString::number(maxGap(ticks))},\n        {\"cross_show_heartbeat_gap_ns\", QString::number(crossShowGap)},\n        {\"drain_finished_ns\", QString::number(drainEnd)},\n        {\"heartbeat_ticks_monotonic_ns\", rawTicks},\n        {\"scope\", \"empty Qt widget show timing only; process-local diagnostic, no product data or logging\"}};\n    const auto bytes = QJsonDocument(result).toJson(QJsonDocument::Compact);\n    fwrite(bytes.constData(), 1, static_cast<size_t>(bytes.size()), stdout);\n    fputc('\\n', stdout);\n    return 0;\n}\n",
+  "cmake": "cmake_minimum_required(VERSION 3.21)\nproject(qt_window_control LANGUAGES CXX)\n\nset(CMAKE_CXX_STANDARD 17)\nset(CMAKE_CXX_STANDARD_REQUIRED ON)\nset(CMAKE_CXX_EXTENSIONS OFF)\n\nfind_package(Qt6 6.7.3 REQUIRED COMPONENTS Widgets)\n\nadd_executable(qt_window_control main.cpp)\ntarget_link_libraries(qt_window_control PRIVATE Qt6::Widgets)\n",
+  "wpr_result": "GeneralProfile start failed 0xc5585011; no recording started; no settings changed",
+  "baseline_verification": {
+    "passed": false,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": false
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 563.1172
+    },
+    "evidence_directory": ".local\\evidence\\release-20261026-gui-baseline-1mib",
+    "oracle": null
+  },
+  "final_trace_verification": {
+    "passed": false,
+    "checks": {
+      "child_exit_zero": true,
+      "runner_completed": true,
+      "source_hash_unchanged": true,
+      "gui_completed": true,
+      "view_destroyed": true,
+      "gui_heartbeat_under_500ms": false,
+      "real_anchor_stage_completed": true
+    },
+    "measurements": {
+      "max_gui_heartbeat_ms": 575.6139,
+      "anchor_detail": {
+        "absolute_anchor_byte": "5368708973",
+        "cached_window": {
+          "absolute_line_begin": 0,
+          "byte_begin": 5368708941,
+          "byte_end": 5368709120,
+          "error": "",
+          "ready": true,
+          "text_utf16_units": 179,
+          "total_bytes": 5368709120,
+          "truncated": true
+        }
+      }
+    },
+    "evidence_directory": ".local\\evidence\\release-20261026-gui-final-trace",
+    "oracle": null
+  },
+  "invalid_relative_argument_diagnostic": {
+    "arguments": [
+      "--file",
+      ".local/fixtures/full/long_1mib.log",
+      "--action",
+      "wrap",
+      "--label",
+      "diagnostic",
+      "--trace-events",
+      "--timeout-ms",
+      "20000"
+    ],
+    "artifacts": {
+      "samples": "samples.jsonl",
+      "stderr": "stderr.txt",
+      "stdout": "stdout.txt"
+    },
+    "command": [
+      "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe\\klogg_gui_probe.exe",
+      "--file",
+      ".local/fixtures/full/long_1mib.log",
+      "--action",
+      "wrap",
+      "--label",
+      "diagnostic",
+      "--trace-events",
+      "--timeout-ms",
+      "20000"
+    ],
+    "compiler": null,
+    "elapsed_seconds": 0.203,
+    "ended_utc": "2026-10-26T06:31:34.437730+00:00",
+    "environment": {
+      "PATH_prepend": [
+        "E:\\codex\\klogg\\.local\\Qt\\6.7.3\\msvc2019_64\\bin",
+        "E:\\codex\\klogg\\.local\\build-candidate\\output",
+        "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe"
+      ],
+      "QT_QPA_PLATFORM": "windows"
+    },
+    "executable": "E:\\codex\\klogg\\.local\\build-candidate\\reliability-probe\\klogg_gui_probe.exe",
+    "executable_sha256": "a11673aca59c5b6af21de9ae049f7b5d96cbefa712f1b3ef8c80b032e7562d5e",
+    "executable_size_bytes": 11555840,
+    "exit_code": 2,
+    "input": {
+      "changed": false,
+      "path": "E:\\codex\\klogg\\.local\\fixtures\\full\\long_1mib.log",
+      "sha256_after": "07d9101368d34ecb49cd9cb6c61ae38270320ec36a01ad87978446ccea3d818f",
+      "sha256_before": "07d9101368d34ecb49cd9cb6c61ae38270320ec36a01ad87978446ccea3d818f",
+      "size_bytes_after": 1048576,
+      "size_bytes_before": 1048576
+    },
+    "monitor_init_error": null,
+    "peak_observed_bytes": {
+      "peak_wset_bytes": 23896064,
+      "private_bytes": 7344128,
+      "rss_bytes": 23896064,
+      "vms_bytes": 7344128
+    },
+    "process_cleanup": null,
+    "qpa": "windows",
+    "resource_limit": {
+      "exceeded": false,
+      "max_private_mib": 512,
+      "measured_private_bytes_at_termination": 7344128,
+      "runner_terminated_child": false,
+      "threshold_bytes": 536870912,
+      "unavailable": false
+    },
+    "runner_exit_code": 2,
+    "runner_status": "child_failed",
+    "sample_count": 6,
+    "sample_interval_seconds": 0.02,
+    "schema": "klogg-process-probe-runner-v1",
+    "started_utc": "2026-10-26T06:31:34.239312+00:00",
+    "termination_error": null,
+    "timed_out": false,
+    "timeout_seconds": 30.0
+  },
+  "acceptance": "First-window heartbeat remains failed. Issue #9 stays open."
+}
